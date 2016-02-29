@@ -2,7 +2,10 @@ package filesystem
 
 import (
 	"os"
-	"io/ioutil"
+)
+
+const (
+	FileMode = 0777
 )
 
 func FileExists(p string) bool {
@@ -11,28 +14,6 @@ func FileExists(p string) bool {
 		return false
 	}
 	return true
-}
-
-func ForAllFiles(path string, predicate func(os.FileInfo, string)) error {
-	list, err := ioutil.ReadDir(path)
-	if err != nil {
-		return err
-	}
-
-	for _, dir := range list {
-		if dir.Name() == "." || dir.Name() == ".." {
-			continue
-		}
-
-		newPath := path + "/" + dir.Name()
-		if dir.IsDir() {
-			ForAllFiles(newPath, predicate)
-		} else {
-			predicate(dir, newPath)
-		}
-	}
-
-	return nil
 }
 
 func IsDir(path string) bool {
