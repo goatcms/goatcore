@@ -20,7 +20,7 @@ type RendererData struct {
 	Root     map[string]string `json:"data"`
 }
 
-func NewRenderer(basePath string) (*Renderer, error) {
+func NewRenderer(basePath string, delimiters Delimiters) (*Renderer, error) {
 	r := &Renderer{
 		BasePath: basePath,
 		Data: RendererData{
@@ -34,12 +34,7 @@ func NewRenderer(basePath string) (*Renderer, error) {
 		basePath += "/"
 	}
 
-	config, err := readConfig(basePath + ConfigPath)
-	if err!=nil {
-		return nil, err
-	}
-
-	r.Init(config.Delimiters)
+	r.Init(delimiters)
 	return r, nil
 }
 

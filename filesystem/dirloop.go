@@ -1,7 +1,6 @@
 package filesystem
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -27,8 +26,6 @@ func dirLoopRun(basePath, subPath string, ctx *DirLoop) error {
 	}
 
 	for _, dir := range list {
-		fmt.Println("LoopDir e: %s", dir.Name())
-
 		if dir.Name() == "." || dir.Name() == ".." {
 			continue
 		}
@@ -44,7 +41,10 @@ func dirLoopRun(basePath, subPath string, ctx *DirLoop) error {
 					return err
 				}
 			}
-			return dirLoopRun(basePath, newSubPath+"/", ctx)
+			err = dirLoopRun(basePath, newSubPath+"/", ctx)
+			if err != nil {
+				return err
+			}
 		} else {
 			err = ctx.OnFile(dir, newSubPath)
 			if err != nil {
