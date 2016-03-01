@@ -24,17 +24,10 @@ func IsDir(path string) bool {
 	return stat.IsDir()
 }
 
-/*
-func CopyFile(dst, src string) (int64, os.Error) {
-	sf, err := os.Open(src)
+func IsFile(path string) bool {
+	stat, err := os.Stat(path)
 	if err != nil {
-		return 0, err
+		return false
 	}
-	defer sf.Close()
-	df, err := os.Create(dst)
-	if err != nil {
-		return 0, err
-	}
-	defer df.Close()
-	return io.Copy(df, sf)
-}*/
+	return !stat.IsDir()
+}

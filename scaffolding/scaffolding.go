@@ -34,7 +34,52 @@ func NewScaffolding(url string) (*Scaffolding, error) {
 	return s, nil
 }
 
-func (s *Scaffolding) Build(dest string) error {
+func (s *Scaffolding) BuildProject(dest string) error {
+	if !strings.HasSuffix(s.Src, "/") {
+		s.Src = s.Src + "/"
+	}
+	if !strings.HasSuffix(dest, "/") {
+		dest = dest + "/"
+	}
+
+	srcSecretsPath := s.Src + GenerateSecretsPath
+	secretsGenerator := NewGenerator()
+	if err := secretsGenerator.LoadDefinitions(srcSecretsPath); err != nil {
+		return err
+	}
+	secretsGenerator.LoadValues(srcSecretsPath)
+	secretsGenerator.GenerateValues()
+
+	srcValuesPath := s.Src + GenerateValuesPath
+	valuesGenerator := NewGenerator()
+	if err := valuesGenerator.LoadDefinitions(srcValuesPath); err != nil {
+		return err
+	}
+	valuesGenerator.LoadValues(srcValuesPath)
+	valuesGenerator.GenerateValues()
+
+	rendererData := RendererData{
+		Secrets: secretsGenerator.Values,
+		Values:  valuesGenerator.Values,
+	}
+
+	//build main module
+	s.BuildModule(dest, &rendererData)
+
+	destSecretsPath := dest + GenerateSecretsPath
+	if err := secretsGenerator.SaveValues(destSecretsPath); err != nil {
+		return err
+	}
+
+	destValuesPath := dest + GenerateValuesPath
+	if err := valuesGenerator.SaveValues(destValuesPath); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Scaffolding) BuildModule(dest string, rendererData *RendererData) error {
 	if !strings.HasSuffix(s.Src, "/") {
 		s.Src = s.Src + "/"
 	}
@@ -47,30 +92,15 @@ func (s *Scaffolding) Build(dest string) error {
 		return err
 	}
 
-	srcSecretsPath := s.Src + GenerateSecretsPath
-	destSecretsPath := dest + GenerateSecretsPath
-	secretsGenerator := NewGenerator()
-	if err = secretsGenerator.LoadDefinitions(srcSecretsPath); err != nil {
-		return err
-	}
-	secretsGenerator.LoadValues(srcSecretsPath)
-	secretsGenerator.GenerateValues()
-
-	srcValuesPath := s.Src + GenerateValuesPath
-	destValuesPath := dest + GenerateValuesPath
-	valuesGenerator := NewGenerator()
-	if err = valuesGenerator.LoadDefinitions(srcValuesPath); err != nil {
-		return err
-	}
-	valuesGenerator.LoadValues(srcValuesPath)
-	valuesGenerator.GenerateValues()
-
-	rendererData := RendererData{
-		Secrets: secretsGenerator.Values,
-		Values:  valuesGenerator.Values,
+	//for static module (without scaffolding file)
+	scaffoldingFile := s.Src+ConfigPath
+	if filesystem.IsFile(scaffoldingFile) {
+		if err = filesystem.Copy(scaffoldingFile, dest+ConfigPath); err != nil {
+			return err
+		}
 	}
 
-	renderer, err := NewRenderer(s.Src, s.Config.Delimiters, &rendererData)
+	renderer, err := NewRenderer(s.Src, s.Config.Delimiters, rendererData)
 	if err != nil {
 		return err
 	}
@@ -86,18 +116,15 @@ func (s *Scaffolding) Build(dest string) error {
 		return err
 	}
 
-	if filesystem.FileExists(s.Src + ScaffoldingDir) {
+	if filesystem.FileExists(s.Src+ScaffoldingDir) {
 		if err = filesystem.Copy(s.Src+ScaffoldingDir, dest+ScaffoldingDir); err != nil {
 			return err
 		}
 	}
 
-	if err = filesystem.Copy(s.Src+ConfigPath, dest+ConfigPath); err != nil {
+	if err = filesystem.Copy(scaffoldingFile, dest+ConfigPath); err != nil {
 		return err
 	}
-
-	secretsGenerator.SaveValues(destSecretsPath)
-	valuesGenerator.SaveValues(destValuesPath)
 
 	//load modules
 	for _, module := range s.Config.Modules {
@@ -105,7 +132,7 @@ func (s *Scaffolding) Build(dest string) error {
 		if err != nil {
 			return err
 		}
-		moduleScaffolding.Build(dest + module.Path)
+		moduleScaffolding.BuildModule(dest+module.Path, rendererData)
 	}
 
 	return nil
