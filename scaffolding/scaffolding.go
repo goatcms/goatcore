@@ -5,7 +5,6 @@ import (
 	"github.com/goatcms/goat-core/repos"
 	"os"
 	"strings"
-	"fmt"
 )
 
 type Scaffolding struct {
@@ -23,8 +22,8 @@ func NewScaffolding(url string) (*Scaffolding, error) {
 		repoPath = repoPath + "/"
 	}
 
-	config, err := readConfig(repoPath + ConfigPath)
-	if err != nil {
+	config := &Config{}
+	if err = config.Read(repoPath + ConfigPath); err != nil {
 		return nil, err
 	}
 
@@ -48,7 +47,30 @@ func (s *Scaffolding) Build(dest string) error {
 		return err
 	}
 
-	renderer, err := NewRenderer(s.Src, s.Config.Delimiters)
+	srcSecretsPath := s.Src + GenerateSecretsPath
+	destSecretsPath := dest + GenerateSecretsPath
+	secretsGenerator := NewGenerator()
+	if err = secretsGenerator.LoadDefinitions(srcSecretsPath); err != nil {
+		return err
+	}
+	secretsGenerator.LoadValues(srcSecretsPath)
+	secretsGenerator.GenerateValues()
+
+	srcValuesPath := s.Src + GenerateValuesPath
+	destValuesPath := dest + GenerateValuesPath
+	valuesGenerator := NewGenerator()
+	if err = valuesGenerator.LoadDefinitions(srcValuesPath); err != nil {
+		return err
+	}
+	valuesGenerator.LoadValues(srcValuesPath)
+	valuesGenerator.GenerateValues()
+
+	rendererData := RendererData{
+		Secrets: secretsGenerator.Values,
+		Values:  valuesGenerator.Values,
+	}
+
+	renderer, err := NewRenderer(s.Src, s.Config.Delimiters, &rendererData)
 	if err != nil {
 		return err
 	}
@@ -74,14 +96,16 @@ func (s *Scaffolding) Build(dest string) error {
 		return err
 	}
 
-	//load sub repositories
-	fmt.Printf("%v", s.Config)
-	for _, sub := range s.Config.Subs {
-		subScaffolding, err := NewScaffolding(sub.Url)
+	secretsGenerator.SaveValues(destSecretsPath)
+	valuesGenerator.SaveValues(destValuesPath)
+
+	//load modules
+	for _, module := range s.Config.Modules {
+		moduleScaffolding, err := NewScaffolding(module.Url)
 		if err != nil {
 			return err
 		}
-		subScaffolding.Build(dest + sub.Path)
+		moduleScaffolding.Build(dest + module.Path)
 	}
 
 	return nil

@@ -4,8 +4,8 @@ import (
 	"github.com/goatcms/goat-core/filesystem"
 	"io/ioutil"
 	"os"
-	"text/template"
 	"strings"
+	"text/template"
 )
 
 type Renderer struct {
@@ -15,19 +15,15 @@ type Renderer struct {
 }
 
 type RendererData struct {
-	Generate map[string]string `json:"generate"`
-	Secrets  map[string]string `json:"generate"`
-	Root     map[string]string `json:"data"`
+	Values  map[string]string `json:"values"`
+	Secrets map[string]string `json:"secrets"`
+	Root    interface{}       `json:"data"`
 }
 
-func NewRenderer(basePath string, delimiters Delimiters) (*Renderer, error) {
+func NewRenderer(basePath string, delimiters Delimiters, data *RendererData) (*Renderer, error) {
 	r := &Renderer{
 		BasePath: basePath,
-		Data: RendererData{
-			Generate: map[string]string{},
-			Secrets:  map[string]string{},
-			Root:     map[string]string{},
-		},
+		Data:     *data,
 	}
 
 	if !strings.HasSuffix(basePath, "/") {

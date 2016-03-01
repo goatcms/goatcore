@@ -10,27 +10,26 @@ type Delimiters struct {
 	Right string `json:"right"`
 }
 
-type Sub struct {
+type Module struct {
 	Path string `json:"path"`
 	Url  string `json:"url"`
 }
 
 type Config struct {
-	Ignore     []string          `json:"ignore"`
-	Generate   map[string]string `json:"generate"`
-	Delimiters Delimiters        `json:"delimiters"`
-	Subs       []Sub             `json:"subs"`
+	//Ignore     []string          `json:"ignore"`
+	//Generate   map[string]string `json:"generate"`
+	Delimiters Delimiters `json:"delimiters"`
+	Modules    []Module   `json:"modules"`
 }
 
-func readConfig(src string) (*Config, error) {
-	c := &Config{}
+func (c Config) Read(src string) error {
 	file, err := os.Open(src)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	jsonParser := json.NewDecoder(file)
 	if err = jsonParser.Decode(&c); err != nil {
-		return nil, err
+		return err
 	}
-	return c, nil
+	return nil
 }
