@@ -34,7 +34,7 @@ func NewScaffolding(url string) (*Scaffolding, error) {
 	return s, nil
 }
 
-func (s *Scaffolding) BuildProject(dest string) error {
+func (s *Scaffolding) BuildSource(dest string) error {
 	if !strings.HasSuffix(s.Src, "/") {
 		s.Src = s.Src + "/"
 	}
@@ -62,8 +62,7 @@ func (s *Scaffolding) BuildProject(dest string) error {
 		Secrets: secretsGenerator.Values,
 		Values:  valuesGenerator.Values,
 	}
-
-	//build main module
+	
 	s.BuildModule(dest, &rendererData)
 
 	destSecretsPath := dest + GenerateSecretsPath
