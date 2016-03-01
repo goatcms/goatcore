@@ -62,7 +62,7 @@ func (s *Scaffolding) BuildSource(dest string) error {
 		Secrets: secretsGenerator.Values,
 		Values:  valuesGenerator.Values,
 	}
-	
+
 	s.BuildModule(dest, &rendererData)
 
 	destSecretsPath := dest + GenerateSecretsPath
