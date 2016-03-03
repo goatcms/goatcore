@@ -13,6 +13,7 @@ type Scaffolding struct {
 }
 
 func NewScaffolding(url string) (*Scaffolding, error) {
+	repo := NewRepository(url)
 	repoPath, err := repos.Load(url)
 	if err != nil {
 		return nil, err

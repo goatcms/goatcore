@@ -1,5 +1,5 @@
 package repos
-
+/*
 import (
 	"fmt"
 	"github.com/goatcms/goat-core/filesystem"
@@ -17,10 +17,8 @@ func Load(url string) (string, error) {
     return repoPath, nil
   }
 
-  _, err = system.RunCommand("git clone", url, repoPath)
-	if err != nil {
-		return "", err
-	}
+	repo := NewGitRepository(repoPath)
+	repo.Clone(url)
 
   return repoPath, nil
 }
@@ -39,4 +37,4 @@ func GetRepoPath(url string) (string, error) {
 		return "", err
 	}
 	return path + "/src/" + url, nil
-}
+}*/

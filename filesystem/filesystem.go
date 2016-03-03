@@ -8,7 +8,7 @@ const (
 	FileMode = 0777
 )
 
-func FileExists(p string) bool {
+func IsExist(p string) bool {
 	_, err := os.Stat(p)
 	if err != nil && os.IsNotExist(err) {
 		return false
