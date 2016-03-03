@@ -8,12 +8,12 @@ import (
 
 func Copy(src, dest string) error {
 	if IsDir(src){
-		return CopyDirectory(src, dest)
+		return CopyDirectory(src, dest, nil)
 	}
 	return cp(src, dest)
 }
 
-func CopyDirectory(src, dest string) error {
+func CopyDirectory(src, dest string, filter func(os.FileInfo, string) bool) error {
 	if !strings.HasSuffix(src, "/") {
 		src = src + "/"
 	}
@@ -23,7 +23,7 @@ func CopyDirectory(src, dest string) error {
 	loop := DirLoop{
 		OnFile: copyFileFactory(src, dest),
 		OnDir:  copyDirFactory(dest),
-		Filter: nil,
+		Filter: filter,
 	}
 	if err := loop.Run(src); err != nil {
 		return err

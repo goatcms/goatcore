@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"fmt"
 )
 
 type GitRepository struct {
@@ -26,8 +27,8 @@ func (r *GitRepository) Clone(url string) error {
 	}
 
 	cmd := exec.Command("git", "clone", "http://"+url, r.path)
-	if _, err := cmd.CombinedOutput(); err != nil {
-		return err
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf(string(out), err)
 	}
 
 	return nil
