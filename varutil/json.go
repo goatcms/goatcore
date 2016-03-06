@@ -31,7 +31,7 @@ func WriteJson(path string, object interface{}) error {
 	if err!=nil {
 		return err
 	}
-	b, err := json.Marshal(object)
+	b, err := json.MarshalIndent(object, "", "  ")
 	if err != nil {
 		return err
 	}

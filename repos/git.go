@@ -1,11 +1,11 @@
 package repos
 
 import (
+	"fmt"
 	"github.com/goatcms/goat-core/filesystem"
+	"github.com/goatcms/goat-core/varutil"
 	"os"
 	"os/exec"
-	"strings"
-	"fmt"
 )
 
 type GitRepository struct {
@@ -13,12 +13,14 @@ type GitRepository struct {
 }
 
 func NewGitRepository(path string) Repository {
-	if strings.HasSuffix(path, "/") {
-		path = path + "/"
-	}
-	return &GitRepository{
-		path: path,
-	}
+	r := &GitRepository{}
+	r.Init(path)
+	return r
+}
+
+func (r *GitRepository) Init(path string) {
+	varutil.FixDirPath(&path)
+	r.path = path
 }
 
 func (r *GitRepository) Clone(url string) error {
@@ -26,11 +28,30 @@ func (r *GitRepository) Clone(url string) error {
 		os.MkdirAll(r.path, 0777)
 	}
 
-	cmd := exec.Command("git", "clone", "http://"+url, r.path)
+	cmd := exec.Command("git", "clone", url, r.path)
+	cmd.Dir = r.path
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf(string(out), err)
 	}
 
+	return nil
+}
+
+func (r *GitRepository) Checkout(rev string) error {
+	cmd := exec.Command("git", "checkout", rev)
+	cmd.Dir = r.path
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf(string(out), err)
+	}
+	return nil
+}
+
+func (r *GitRepository) Pull() error {
+	cmd := exec.Command("git", "pull")
+	cmd.Dir = r.path
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf(string(out), err)
+	}
 	return nil
 }
 

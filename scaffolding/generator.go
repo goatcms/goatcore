@@ -9,26 +9,13 @@ import (
 	"strings"
 )
 
-const (
-	generatorDefSuffix = ".def.json" // use for data definition
-	generatorGenSuffix = ".gen.json" // use to save generated data
-	generatorDocSuffix = ".doc.json" // use for module documentation
-)
-
 type Generator struct {
-	Definitions map[string]GeneratorDefinition
-	Values      map[string]string `json:"values"`
-}
-
-type GeneratorDefinition struct {
-	Type   string `json:"type"`
-	Length int    `json:"length"`
+	Definitions Definitions
 }
 
 func NewGenerator() *Generator {
 	g := &Generator{
-		Definitions: map[string]GeneratorDefinition{},
-		Values:      map[string]string{},
+		Definitions: Definitions{},
 	}
 	return g
 }
@@ -91,7 +78,7 @@ func (g *Generator) SaveValues(path string) error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(path+generatorGenSuffix, b, 0644)
+	err = ioutil.WriteFile(path+generatorGenSuffix, b, 0777)
 	if err != nil {
 		return err
 	}

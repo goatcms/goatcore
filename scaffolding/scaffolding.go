@@ -3,13 +3,15 @@ package scaffolding
 import (
 	"github.com/goatcms/goat-core/filesystem"
 	"github.com/goatcms/goat-core/repos"
+	"github.com/goatcms/goat-core/workspace"
 	"os"
 	"strings"
 )
 
 type Scaffolding struct {
-	Src    string
-	Config Config
+	workspace Workspace
+	Src       string
+	Config    Config
 }
 
 func NewScaffolding(url string) (*Scaffolding, error) {
@@ -93,7 +95,7 @@ func (s *Scaffolding) BuildModule(dest string, rendererData *RendererData) error
 	}
 
 	//for static module (without scaffolding file)
-	scaffoldingFile := s.Src+ConfigPath
+	scaffoldingFile := s.Src + ConfigPath
 	if filesystem.IsFile(scaffoldingFile) {
 		if err = filesystem.Copy(scaffoldingFile, dest+ConfigPath); err != nil {
 			return err
@@ -116,7 +118,7 @@ func (s *Scaffolding) BuildModule(dest string, rendererData *RendererData) error
 		return err
 	}
 
-	if filesystem.FileExists(s.Src+ScaffoldingDir) {
+	if filesystem.FileExists(s.Src + ScaffoldingDir) {
 		if err = filesystem.Copy(s.Src+ScaffoldingDir, dest+ScaffoldingDir); err != nil {
 			return err
 		}
