@@ -51,7 +51,7 @@ func (p *PackageManager) Get(localPath string) (string, error) {
 	fullPath := p.path + localPath
 	record, exists := p.Repositories[localPath]
 	if !exists {
-		return "", fmt.Errorf("Record for \"" + localPath + "\" path not exist")
+		return "", fmt.Errorf("Record for \"" + localPath + "\" path not exist %v", p.Repositories)
 	}
 	if !filesystem.IsExist(fullPath) {
 		if err := p.load(fullPath, record.Url, record.Rev); err != nil {
@@ -61,22 +61,37 @@ func (p *PackageManager) Get(localPath string) (string, error) {
 	return fullPath, nil
 }
 
-func (p *PackageManager) Update() error {
+func (p *PackageManager) UpdateAll() error {
 	for localPath, record := range p.Repositories {
-		fullPath := p.path + localPath
-		if !filesystem.IsExist(fullPath) {
-			if err := p.load(fullPath, record.Url, record.Rev); err != nil {
+		if err := p.update(localPath, record); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (p *PackageManager) UpdateRepo(localPath string) error {
+	record, exists := p.Repositories[localPath]
+	if exists {
+		return fmt.Errorf("Package " + localPath + " no found")
+	}
+	return p.update(localPath, record)
+}
+
+func (p *PackageManager) update(localPath string, record RepositoryPackage) error {
+	fullPath := p.path + localPath
+	if !filesystem.IsExist(fullPath) {
+		if err := p.load(fullPath, record.Url, record.Rev); err != nil {
+			return err
+		}
+	} else {
+		repo := NewRepository(fullPath)
+		if err := repo.Pull(); err != nil {
+			return err
+		}
+		if record.Rev != "" {
+			if err := repo.Checkout(record.Rev); err != nil {
 				return err
-			}
-		} else {
-			repo := NewRepository(fullPath)
-			if err := repo.Pull(); err != nil {
-				return err
-			}
-			if record.Rev != "" {
-				if err := repo.Checkout(record.Rev); err != nil {
-					return err
-				}
 			}
 		}
 	}
@@ -108,6 +123,6 @@ func (p *PackageManager) decodeDepStr(url string) (string, string, string) {
 	if rev != "" {
 		rev = rev[1:]
 	}
-	url = "http://" + url
+	url = "http://" + localPath
 	return localPath, url, rev
 }

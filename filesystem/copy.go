@@ -10,7 +10,7 @@ func Copy(src, dest string) error {
 	if IsDir(src){
 		return CopyDirectory(src, dest, nil)
 	}
-	return cp(src, dest)
+	return CopyFile(src, dest)
 }
 
 func CopyDirectory(src, dest string, filter func(os.FileInfo, string) bool) error {
@@ -31,19 +31,7 @@ func CopyDirectory(src, dest string, filter func(os.FileInfo, string) bool) erro
 	return nil
 }
 
-func copyFileFactory(src, dest string) func(os.FileInfo, string) error {
-	return func(file os.FileInfo, path string) error {
-		return cp(src+path, dest+path)
-	}
-}
-
-func copyDirFactory(dest string) func(os.FileInfo, string) error {
-	return func(file os.FileInfo, path string) error {
-		return os.MkdirAll(dest+path, FileMode)
-	}
-}
-
-func cp(src, dst string) error {
+func CopyFile(src, dst string) error {
 	s, err := os.Open(src)
 	if err != nil {
 		return err
@@ -60,4 +48,16 @@ func cp(src, dst string) error {
 		return err
 	}
 	return d.Close()
+}
+
+func copyFileFactory(src, dest string) func(os.FileInfo, string) error {
+	return func(file os.FileInfo, path string) error {
+		return CopyFile(src+path, dest+path)
+	}
+}
+
+func copyDirFactory(dest string) func(os.FileInfo, string) error {
+	return func(file os.FileInfo, path string) error {
+		return os.MkdirAll(dest+path, FileMode)
+	}
 }

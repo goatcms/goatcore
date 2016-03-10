@@ -4,57 +4,41 @@ import (
 	"github.com/goatcms/goat-core/filesystem"
 	"io/ioutil"
 	"os"
-	"strings"
 	"text/template"
 )
 
-type Renderer struct {
-	BasePath string
-	Data     RendererData
+type FileRenderer struct {
 	Template *template.Template
+	Data     interface{}
 }
 
-type RendererData struct {
-	Values  map[string]string `json:"values"`
-	Secrets map[string]string `json:"secrets"`
-	Root    interface{}       `json:"data"`
-}
-
-func NewRenderer(basePath string, delimiters Delimiters, data *RendererData) (*Renderer, error) {
-	r := &Renderer{
-		BasePath: basePath,
-		Data:     *data,
+func NewFileRenderer(d Delimiters) (*FileRenderer, error) {
+	r := &FileRenderer{}
+	if err := r.Init(d); err != nil {
+		return nil, err
 	}
-
-	if !strings.HasSuffix(basePath, "/") {
-		basePath += "/"
-	}
-
-	r.Init(delimiters)
 	return r, nil
 }
 
-func (r *Renderer) Init(d Delimiters) error {
-	var err error
+func (r *FileRenderer) Init(d Delimiters) error {
 	r.Template = template.New("main")
-	if err != nil {
-		return err
-	}
 	r.Template.Delims(d.Left, d.Right)
+	return nil
+}
 
+func (r *FileRenderer) LoadTemplates(p string) error {
 	loop := filesystem.DirLoop{
 		OnFile: parseTemplateFactory(r.Template),
 		OnDir:  nil,
 		Filter: nil,
 	}
-	if err = loop.Run(r.BasePath + TemplatesDir); err != nil {
+	if err := loop.Run(p); err != nil {
 		return err
 	}
-
 	return nil
 }
 
-func (r *Renderer) Render(src, dest string) error {
+func (r *FileRenderer) Render(src, dest string) error {
 	b, err := ioutil.ReadFile(src)
 	if err != nil {
 		return err
@@ -63,18 +47,15 @@ func (r *Renderer) Render(src, dest string) error {
 	if err != nil {
 		return err
 	}
-
-	file, err := os.OpenFile(dest, os.O_WRONLY|os.O_CREATE, CreateMode)
+	file, err := os.Create(dest)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
-
 	err = tmpl.Execute(file, r.Data)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 

@@ -1,175 +1,198 @@
 package scaffolding
 
 import (
+	"fmt"
 	"github.com/goatcms/goat-core/filesystem"
-	"github.com/goatcms/goat-core/repos"
+	"github.com/goatcms/goat-core/varutil"
 	"github.com/goatcms/goat-core/workspace"
-	"os"
-	"strings"
 )
 
-type Scaffolding struct {
-	workspace Workspace
-	Src       string
-	Config    Config
+const (
+	templatesPath   = ".goat/templates"
+	scaffoldingPath = "scaffolding.goat.json"
+)
+
+type Delimiters struct {
+	Left  string `json:"left"`
+	Right string `json:"right"`
 }
 
-func NewScaffolding(url string) (*Scaffolding, error) {
-	repo := NewRepository(url)
-	repoPath, err := repos.Load(url)
-	if err != nil {
+type Module struct {
+	Package string `json:"packag"`
+	Dest    string `json:"dest"`
+}
+
+type Template struct {
+	Repository string `json:"path,omitempty"`
+	Src        string `json:"src,omitempty"`
+	Dest       string `json:"dest"`
+}
+
+type Scaffolding struct {
+	workspace  *workspace.Workspace
+	path       string
+	Delimiters Delimiters            `json:"delimiters"`
+	Modules    []Module              `json:"modules"`
+	Suffixes   []string              `json:"suffixes"`
+	On         map[string][]Template `json:"on"`
+}
+
+func NewScaffolding(w *workspace.Workspace, p string) (*Scaffolding, error) {
+	s := &Scaffolding{}
+	if err := s.Init(w, p); err != nil {
 		return nil, err
-	}
-
-	if !strings.HasSuffix(repoPath, "/") {
-		repoPath = repoPath + "/"
-	}
-
-	config := &Config{}
-	if err = config.Read(repoPath + ConfigPath); err != nil {
-		return nil, err
-	}
-
-	s := &Scaffolding{
-		Src:    repoPath,
-		Config: *config,
 	}
 	return s, nil
 }
 
-func (s *Scaffolding) BuildSource(dest string) error {
-	if !strings.HasSuffix(s.Src, "/") {
-		s.Src = s.Src + "/"
+func ReadScaffolding(w *workspace.Workspace, p string) (*Scaffolding, error) {
+	s := &Scaffolding{}
+	if err := s.Init(w, p); err != nil {
+		return nil, err
 	}
-	if !strings.HasSuffix(dest, "/") {
-		dest = dest + "/"
+	if err := s.Read(); err != nil {
+		return nil, err
 	}
+	return s, nil
+}
 
-	srcSecretsPath := s.Src + GenerateSecretsPath
-	secretsGenerator := NewGenerator()
-	if err := secretsGenerator.LoadDefinitions(srcSecretsPath); err != nil {
+func (s *Scaffolding) Init(w *workspace.Workspace, p string) error {
+	varutil.FixDirPath(&p)
+	s.workspace = w
+	s.path = p
+	s.Delimiters.Left = "<<<"
+	s.Delimiters.Right = ">>>"
+	s.Suffixes = []string{".css", ".sass", ".scss", ".html", ".xhtml", ".htm",
+		".js", ".jsx", ".php", ".py", ".go", ".c", ".cpp", ".h", ".hpp", ".rb",
+		".mk", ".md"}
+	return nil
+}
+
+func (s *Scaffolding) Read() error {
+	return varutil.ReadJson(s.path+scaffoldingPath, s)
+}
+
+func (s *Scaffolding) IsScaffolding() bool {
+	return filesystem.IsFile(s.path + scaffoldingPath)
+}
+
+func (s *Scaffolding) Write() error {
+	return varutil.WriteJson(s.path+scaffoldingPath, s)
+}
+
+func (s *Scaffolding) AddModule(packageId, dest string) (Module, error) {
+	m := Module{
+		Package: packageId,
+		Dest:    dest,
+	}
+	s.Modules = append(s.Modules, m)
+	return m, nil
+}
+
+func (s *Scaffolding) BuildModule(src string) error {
+	varutil.FixDirPath(&src)
+	varutil.FixDirPath(&s.path)
+	if filesystem.IsExist(s.path) {
+		return fmt.Errorf("A directory '" + s.path + "' exists")
+	}
+	builder := Builder{
+		Src:          src,
+		Suffixes:     s.Suffixes,
+		FileRenderer: FileRenderer{},
+	}
+	if err := builder.FileRenderer.Init(s.Delimiters); err != nil {
 		return err
 	}
-	secretsGenerator.LoadValues(srcSecretsPath)
-	secretsGenerator.GenerateValues()
-
-	srcValuesPath := s.Src + GenerateValuesPath
-	valuesGenerator := NewGenerator()
-	if err := valuesGenerator.LoadDefinitions(srcValuesPath); err != nil {
-		return err
-	}
-	valuesGenerator.LoadValues(srcValuesPath)
-	valuesGenerator.GenerateValues()
-
-	rendererData := RendererData{
-		Secrets: secretsGenerator.Values,
-		Values:  valuesGenerator.Values,
-	}
-
-	s.BuildModule(dest, &rendererData)
-
-	destSecretsPath := dest + GenerateSecretsPath
-	if err := secretsGenerator.SaveValues(destSecretsPath); err != nil {
+	if err := builder.Build(s.path); err != nil {
 		return err
 	}
 
-	destValuesPath := dest + GenerateValuesPath
-	if err := valuesGenerator.SaveValues(destValuesPath); err != nil {
+	if !s.IsScaffolding() {
+		//no process static templates
+		//scaffolding.goat.json is not required
+		return nil
+	}
+
+	if err := s.Read(); err != nil {
+		return err
+	}
+
+	for _, module := range s.Modules {
+		if err := s.BuildSubModule(module); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *Scaffolding) BuildSubModule(module Module) error {
+	varutil.FixDirPath(&s.path)
+	dest := s.path + module.Dest
+	src, err := s.workspace.Packages.Get(module.Package)
+	if err != nil {
+		return err
+	}
+
+	subScaffolding, err := NewScaffolding(s.workspace, dest)
+	if err != nil {
+		return err
+	}
+	if err := subScaffolding.BuildModule(src); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *Scaffolding) BuildModule(dest string, rendererData *RendererData) error {
-	if !strings.HasSuffix(s.Src, "/") {
-		s.Src = s.Src + "/"
-	}
-	if !strings.HasSuffix(dest, "/") {
-		dest = dest + "/"
-	}
-
-	err := os.MkdirAll(dest, CreateDirMode)
-	if err != nil {
-		return err
-	}
-
-	//for static module (without scaffolding file)
-	scaffoldingFile := s.Src + ConfigPath
-	if filesystem.IsFile(scaffoldingFile) {
-		if err = filesystem.Copy(scaffoldingFile, dest+ConfigPath); err != nil {
-			return err
-		}
-	}
-
-	renderer, err := NewRenderer(s.Src, s.Config.Delimiters, rendererData)
-	if err != nil {
-		return err
-	}
-
-	loop := filesystem.DirLoop{
-		OnFile: execFileFactory(s.Src, dest, renderer),
-		OnDir:  execDirFactory(dest),
-		Filter: filterFactory([]string{
-			".git",
-		}),
-	}
-	if err = loop.Run(s.Src); err != nil {
-		return err
-	}
-
-	if filesystem.FileExists(s.Src + ScaffoldingDir) {
-		if err = filesystem.Copy(s.Src+ScaffoldingDir, dest+ScaffoldingDir); err != nil {
-			return err
-		}
-	}
-
-	if err = filesystem.Copy(scaffoldingFile, dest+ConfigPath); err != nil {
-		return err
-	}
-
-	//load modules
-	for _, module := range s.Config.Modules {
-		moduleScaffolding, err := NewScaffolding(module.Url)
-		if err != nil {
-			return err
-		}
-		moduleScaffolding.BuildModule(dest+module.Path, rendererData)
-	}
-
-	return nil
-}
-
-func execFileFactory(src, dest string, renderer *Renderer) func(os.FileInfo, string) error {
-	return func(file os.FileInfo, path string) error {
-		err := renderer.Render(src+path, dest+path)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-}
-
-func execDirFactory(dest string) func(os.FileInfo, string) error {
-	return func(file os.FileInfo, path string) error {
-		err := os.MkdirAll(dest+path, CreateDirMode)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-}
-
-func filterFactory(exclude []string) func(os.FileInfo, string) bool {
-	return func(file os.FileInfo, path string) bool {
-		if path == ".git" || path == ConfigPath || path == ScaffoldingDir {
-			return false
-		}
-		for _, element := range exclude {
-			if path == element {
-				return false
+func (s *Scaffolding) BuildResource(r Resource) error {
+	varutil.FixDirPath(&s.path)
+	if templates, exist := s.On[r.Type]; exist {
+		for _, template := range templates {
+			if err := s.renderTemplate(r, template); err != nil {
+				return err
 			}
 		}
-		return true
 	}
+	for _, module := range s.Modules {
+		subModuleScaffolding, err := NewScaffolding(s.workspace, module.Dest)
+		if err != nil {
+			return err
+		}
+		subModuleScaffolding.BuildResource(r)
+	}
+	return nil
+}
+
+func (s *Scaffolding) renderTemplate(r Resource, t Template) error {
+	if t.Repository == "" && (t.Src == "") {
+		return fmt.Errorf("You must defined source Repository or file/directory")
+	}
+	if t.Repository == "" && (t.Src == "." || t.Src == "/") {
+		return fmt.Errorf("Source file/directory has illegal value")
+	}
+	basePath := s.path
+	if t.Repository != "" {
+		var err error
+		basePath, err = s.workspace.Packages.Get(t.Repository)
+		if err != nil {
+			return err
+		}
+	}
+	varutil.FixDirPath(&basePath)
+	basePath = basePath + t.Src
+	builder := Builder{
+		Src:      basePath,
+		Suffixes: s.Suffixes,
+		FileRenderer: FileRenderer{
+			Data: r,
+		},
+	}
+	if err := builder.FileRenderer.Init(s.Delimiters); err != nil {
+		return err
+	}
+	if err := builder.Build(s.path); err != nil {
+		return err
+	}
+	return nil
 }
