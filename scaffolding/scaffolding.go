@@ -160,6 +160,20 @@ func (s *Scaffolding) AddResource(r Resource) error {
 	return nil
 }
 
+func (s *Scaffolding) BuildHistory() error {
+	for _, point := range s.workspace.History.Timeline {
+		r := Resource{
+			Type: point.Type,
+			Name: point.Name,
+			Data: point.Data,
+		}
+		if err := s.BuildResource(r); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s *Scaffolding) BuildResource(r Resource) error {
 	varutil.FixDirPath(&s.path)
 	if templates, exist := s.On[r.Type]; exist {

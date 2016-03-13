@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/goatcms/goat-core/filesystem"
 	"github.com/goatcms/goat-core/varutil"
-	"io/ioutil"
 	"os"
 	"sort"
 	"strings"
@@ -31,6 +30,7 @@ func (a Timeline) Less(i, j int) bool { return a[i].Time < a[j].Time }
 
 func NewHistory(path string) *History {
 	varutil.FixDirPath(&path)
+	filesystem.MkdirAll(path)
 	h := &History{
 		path:     path,
 		Timeline: []Record{},
@@ -61,17 +61,10 @@ func (h *History) Read() error {
 }
 
 func (h *History) Add(r *Record) error {
-	b, err := json.Marshal(r)
-	if err != nil {
-		return err
-	}
-
 	path := h.path + r.Name + "." + r.Type + ".json"
-	err = ioutil.WriteFile(path, b, 0644)
-	if err != nil {
+	if err := varutil.WriteJson(path, r); err != nil {
 		return err
 	}
-
 	h.Timeline = append(h.Timeline, *r)
 	return nil
 }
