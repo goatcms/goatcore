@@ -3,6 +3,7 @@ package workspace
 import (
 	"github.com/goatcms/goat-core/filesystem"
 	"github.com/goatcms/goat-core/generator"
+	"github.com/goatcms/goat-core/history"
 	"github.com/goatcms/goat-core/repos"
 	"github.com/goatcms/goat-core/varutil"
 	"os"
@@ -16,6 +17,7 @@ const (
 	goatDataPath        = "/.goat/"
 	secretDataPath      = goatDataPath + "secrets"
 	valuesDataPath      = goatDataPath + "values"
+	historyPath         = goatDataPath + "history"
 	defaultSrcPath      = "src/"
 	mainFile            = "workspace.goat.json"
 )
@@ -27,6 +29,7 @@ type Workspace struct {
 	Repository repos.Repository             `json:"-"`
 	Secrets    *generator.GeneratedResource `json:"-"`
 	Values     *generator.GeneratedResource `json:"-"`
+	History    *history.History             `json:"-"`
 }
 
 func NewWorkspace(path string) (*Workspace, error) {
@@ -54,9 +57,10 @@ func (w *Workspace) Init(path string) error {
 	if err != nil {
 		return err
 	}
-	//sub objects
-	err = w.InitGenerators()
-	if err != nil {
+	if err = w.initGenerators(); err != nil {
+		return err
+	}
+	if err = w.initHistory(); err != nil {
 		return err
 	}
 	//default values
@@ -68,7 +72,7 @@ func (w *Workspace) Init(path string) error {
 	return nil
 }
 
-func (w *Workspace) InitGenerators() error {
+func (w *Workspace) initGenerators() error {
 	var err error
 	w.Secrets, err = generator.NewGeneratedResource(w.path + secretDataPath)
 	if err != nil {
@@ -81,28 +85,47 @@ func (w *Workspace) InitGenerators() error {
 	return nil
 }
 
+func (w *Workspace) initHistory() error {
+	w.History = history.NewHistory(w.path + historyPath)
+	if err := w.History.Read(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (w *Workspace) FixPaths() {
 	varutil.FixDirPath(&w.Src)
 }
 
-func (w *Workspace) Create() error {
-	basePath, err := w.getWorkspaceSrcPath()
+func (w *Workspace) CreateFromCache() error {
+	cachePath, err := w.getWorkspaceCachePath()
 	if err != nil {
 		return err
 	}
-
 	if !filesystem.IsExist(w.path) {
 		if err := os.MkdirAll(w.path, 0777); err != nil {
 			return err
 		}
 	}
-	filesystem.CopyDirectory(basePath, w.path, filterGit)
+	filesystem.CopyDirectory(cachePath, w.path, filterGit)
+	return w.afterCrete()
+}
 
-	err = w.InitGenerators()
-	if err != nil {
+func (w *Workspace) CreateFromRepo(url string) error {
+	if err := varutil.FixUrl(&url); err != nil {
 		return err
 	}
+	repo := repos.NewRepository(w.path)
+	if err := repo.Clone(url); err != nil {
+		return err
+	}
+	return w.afterCrete()
+}
 
+func (w *Workspace) afterCrete() error {
+	if err := w.initGenerators(); err != nil {
+		return err
+	}
 	return w.Write()
 }
 
@@ -110,7 +133,7 @@ func (w *Workspace) GetAbsPath() string {
 	return w.path
 }
 
-func (w *Workspace) getWorkspaceSrcPath() (string, error) {
+func (w *Workspace) getWorkspaceCachePath() (string, error) {
 	usr, err := user.Current()
 	if err != nil {
 		return "", err

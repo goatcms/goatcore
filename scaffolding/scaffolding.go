@@ -3,6 +3,7 @@ package scaffolding
 import (
 	"fmt"
 	"github.com/goatcms/goat-core/filesystem"
+	"github.com/goatcms/goat-core/history"
 	"github.com/goatcms/goat-core/varutil"
 	"github.com/goatcms/goat-core/workspace"
 )
@@ -72,10 +73,6 @@ func (s *Scaffolding) Read() error {
 	return varutil.ReadJson(s.path+scaffoldingPath, s)
 }
 
-func (s *Scaffolding) IsScaffolding() bool {
-	return filesystem.IsFile(s.path + scaffoldingPath)
-}
-
 func (s *Scaffolding) Write() error {
 	return varutil.WriteJson(s.path+scaffoldingPath, s)
 }
@@ -107,7 +104,7 @@ func (s *Scaffolding) BuildModule(src string) error {
 		return err
 	}
 
-	if !s.IsScaffolding() {
+	if !IsScaffoldingDir(s.path) {
 		//no process static templates
 		//scaffolding.goat.json is not required
 		return nil
@@ -117,12 +114,19 @@ func (s *Scaffolding) BuildModule(src string) error {
 		return err
 	}
 
+	if err := s.BuildAllSubModules(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Scaffolding) BuildAllSubModules() error {
 	for _, module := range s.Modules {
 		if err := s.BuildSubModule(module); err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
@@ -142,6 +146,17 @@ func (s *Scaffolding) BuildSubModule(module Module) error {
 		return err
 	}
 
+	return nil
+}
+
+func (s *Scaffolding) AddResource(r Resource) error {
+	if err := s.BuildResource(r); err != nil {
+		return err
+	}
+	hRecord := history.NewRecord(r.Type, r.Name, r.Data)
+	if err := s.workspace.History.Add(hRecord); err != nil {
+		return err
+	}
 	return nil
 }
 

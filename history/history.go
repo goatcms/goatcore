@@ -3,55 +3,51 @@ package history
 import (
 	"encoding/json"
 	"github.com/goatcms/goat-core/filesystem"
+	"github.com/goatcms/goat-core/varutil"
 	"io/ioutil"
 	"os"
-	"path"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 )
 
 type History struct {
 	path     string
-	Timeline HistoryTimeline `json:"timeline"`
+	Timeline Timeline `json:"timeline"`
 }
 
-type HistoryRecord struct {
-	Time string      `json:"time"`
+type Record struct {
+	Time int64       `json:"time"`
+	Type string      `json:"type"`
 	Name string      `json:"name"`
 	Data interface{} `json:"data"`
 }
 
-type HistoryTimeline []HistoryRecord
+type Timeline []Record
 
-func (a HistoryTimeline) Len() int           { return len(a) }
-func (a HistoryTimeline) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a HistoryTimeline) Less(i, j int) bool { return a[i].Time < a[j].Time }
+func (a Timeline) Len() int           { return len(a) }
+func (a Timeline) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a Timeline) Less(i, j int) bool { return a[i].Time < a[j].Time }
 
 func NewHistory(path string) *History {
+	varutil.FixDirPath(&path)
 	h := &History{
 		path:     path,
-		Timeline: []HistoryRecord{},
+		Timeline: []Record{},
 	}
-
-	if !strings.HasSuffix(h.path, "/") {
-		h.path = h.path + "/"
-	}
-
 	return h
 }
 
-func NewHistoryRecord(name string, data *interface{}) *HistoryRecord {
-	r := &HistoryRecord{
-		Time: strconv.FormatInt(time.Now().Unix(), 10),
+func NewRecord(recordType, name string, data interface{}) *Record {
+	return &Record{
+		Time: time.Now().Unix(),
+		Type: recordType,
 		Name: name,
-		Data: *data,
+		Data: data,
 	}
-	return r
 }
 
-func (h *History) Load() error {
+func (h *History) Read() error {
 	loop := filesystem.DirLoop{
 		OnFile: h.loadFileFactory(),
 		OnDir:  nil,
@@ -60,17 +56,17 @@ func (h *History) Load() error {
 	if err := loop.Run(h.path); err != nil {
 		return err
 	}
-	sort.Sort(HistoryTimeline(h.Timeline))
+	sort.Sort(h.Timeline)
 	return nil
 }
 
-func (h *History) Add(r *HistoryRecord) error {
+func (h *History) Add(r *Record) error {
 	b, err := json.Marshal(r)
 	if err != nil {
 		return err
 	}
 
-	path := h.path + r.Time + "." + r.Name + ".json"
+	path := h.path + r.Name + "." + r.Type + ".json"
 	err = ioutil.WriteFile(path, b, 0644)
 	if err != nil {
 		return err
@@ -82,16 +78,7 @@ func (h *History) Add(r *HistoryRecord) error {
 
 func (h *History) loadFileFactory() func(os.FileInfo, string) error {
 	return func(f os.FileInfo, p string) error {
-		record := HistoryRecord{}
-		elements := strings.Split(path.Base(p), ".")
-		if len(elements) < 3 {
-			record.Time = "0"
-			record.Name = elements[0]
-		} else {
-			record.Time = elements[0]
-			record.Name = elements[1]
-		}
-
+		record := Record{}
 		file, err := os.Open(h.path + p)
 		if err != nil {
 			return err
@@ -99,7 +86,7 @@ func (h *History) loadFileFactory() func(os.FileInfo, string) error {
 		defer file.Close()
 
 		jsonParser := json.NewDecoder(file)
-		if err = jsonParser.Decode(&record.Data); err != nil {
+		if err = jsonParser.Decode(&record); err != nil {
 			return err
 		}
 
