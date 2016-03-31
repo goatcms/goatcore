@@ -5,7 +5,8 @@ import (
 )
 
 const (
-	MyDepName = "MyDep"
+	MyDepName       = "MyDep"
+	MyCircleDepName = "MyCircleDep"
 )
 
 type MyDepInterface interface {
@@ -18,6 +19,13 @@ type MyDep struct {
 	value int
 }
 
+type MyCircleDepInterface interface {
+}
+
+type MyCircleDep struct {
+	instance MyCircleDepInterface
+}
+
 func (d *MyDep) IsItOk() bool {
 	return true
 }
@@ -26,12 +34,22 @@ func (d *MyDep) Get() int {
 	return d.value
 }
 
-func (d *MyDep) Set(v int)  {
+func (d *MyDep) Set(v int) {
 	d.value = v
 }
 
-func MyDepFactory() (dependency.Instance, error) {
+func MyDepFactory(dp dependency.Provider) (dependency.Instance, error) {
 	return &MyDep{}, nil
+}
+
+func MyCircleDepFactory(dp dependency.Provider) (dependency.Instance, error) {
+	instance, err := dp.Get(MyCircleDepName)
+	if err != nil {
+		return nil, err
+	}
+	return &MyCircleDep{
+		instance: instance,
+	}, nil
 }
 
 type SimpleObject struct {

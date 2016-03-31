@@ -7,13 +7,13 @@ import (
 )
 
 func Copy(src, dest string) error {
-	if IsDir(src){
+	if IsDir(src) {
 		return CopyDirectory(src, dest, nil)
 	}
 	return CopyFile(src, dest)
 }
 
-func CopyDirectory(src, dest string, filter func(os.FileInfo, string) bool) error {
+func CopyDirectory(src, dest string, filter LoopFilter) error {
 	if !strings.HasSuffix(src, "/") {
 		src = src + "/"
 	}

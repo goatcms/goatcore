@@ -6,12 +6,13 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"bytes"
 )
 
 func ReadJson(src string, object interface{}) error {
 	var err error
 	src, err = filepath.Abs(src)
-	if err!=nil {
+	if err != nil {
 		return err
 	}
 	file, err := os.Open(src)
@@ -28,10 +29,10 @@ func ReadJson(src string, object interface{}) error {
 func WriteJson(path string, object interface{}) error {
 	var err error
 	path, err = filepath.Abs(path)
-	if err!=nil {
+	if err != nil {
 		return err
 	}
-	b, err := json.MarshalIndent(object, "", "  ")
+	b, err := JSONMarshal(object, true)
 	if err != nil {
 		return err
 	}
@@ -46,4 +47,14 @@ func WriteJson(path string, object interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func JSONMarshal(v interface{}, unescape bool) ([]byte, error) {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if unescape {
+		b = bytes.Replace(b, []byte("\\u003c"), []byte("<"), -1)
+		b = bytes.Replace(b, []byte("\\u003e"), []byte(">"), -1)
+		b = bytes.Replace(b, []byte("\\u0026"), []byte("&"), -1)
+	}
+	return b, err
 }

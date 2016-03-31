@@ -6,10 +6,13 @@ import (
 	"strings"
 )
 
+type LoopOn func(os.FileInfo, string) error
+type LoopFilter func(os.FileInfo, string) bool
+
 type DirLoop struct {
-	OnFile func(os.FileInfo, string) error
-	OnDir  func(os.FileInfo, string) error
-	Filter func(os.FileInfo, string) bool
+	OnFile LoopOn
+	OnDir  LoopOn
+	Filter LoopFilter
 }
 
 func (ctx *DirLoop) Run(path string) error {

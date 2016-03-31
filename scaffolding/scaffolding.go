@@ -63,14 +63,28 @@ func (s *Scaffolding) Init(w *workspace.Workspace, p string) error {
 	s.path = p
 	s.Delimiters.Left = "<<<"
 	s.Delimiters.Right = ">>>"
-	s.Suffixes = []string{".css", ".sass", ".scss", ".html", ".xhtml", ".htm",
-		".js", ".jsx", ".php", ".py", ".go", ".c", ".cpp", ".h", ".hpp", ".rb",
-		".mk", ".md"}
+	s.correctValues()
 	return nil
 }
 
+func (s *Scaffolding) correctValues() {
+	varutil.FixDirPath(&s.path)
+	if s.Suffixes == nil {
+		s.Suffixes = []string{".css", ".sass", ".scss", ".html", ".xhtml", ".htm",
+			".js", ".jsx", ".php", ".py", ".go", ".c", ".cpp", ".h", ".hpp", ".rb",
+			".mk", ".md"}
+	}
+	if s.On == nil {
+		s.On = map[string][]Template{}
+	}
+}
+
 func (s *Scaffolding) Read() error {
-	return varutil.ReadJson(s.path+scaffoldingPath, s)
+	if err := varutil.ReadJson(s.path+scaffoldingPath, s); err != nil {
+		return err
+	}
+	s.correctValues()
+	return nil
 }
 
 func (s *Scaffolding) Write() error {

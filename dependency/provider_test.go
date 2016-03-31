@@ -52,7 +52,6 @@ func TestServiceStory(t *testing.T) {
 	}
 }
 
-
 func TestFactoryStory(t *testing.T) {
 	dp := dependency.NewProvider()
 	if err := dp.AddFactory(MyDepName, MyDepFactory); err != nil {
@@ -90,5 +89,57 @@ func TestFactoryStory(t *testing.T) {
 	o2.Instance.Set(2)
 	if o1.Instance.Get() != 1 || o2.Instance.Get() != 2 {
 		t.Error("object1 and object2 should have the same vaues")
+	}
+}
+
+func TestCircleStory(t *testing.T) {
+	dp := dependency.NewProvider()
+	if err := dp.AddFactory(MyCircleDepName, MyCircleDepFactory); err != nil {
+		t.Error("Add service fail", err)
+		return
+	}
+	_, err := dp.Get(MyCircleDepName)
+	if err == nil {
+		t.Error("should return error when dependencies are circled:", err)
+	}
+}
+
+func TestOverwriteDefaultServiceStory(t *testing.T) {
+	dp := dependency.NewProvider()
+	if err := dp.AddDefaultService(MyDepName, MyDepFactory); err != nil {
+		t.Error("Add default service fail", err)
+		return
+	}
+	if err := dp.AddDefaultService(MyDepName, MyDepFactory); err == nil {
+		t.Error("Set default service twice should return error", err)
+		return
+	}
+	if err := dp.AddService(MyDepName, MyDepFactory); err != nil {
+		t.Error("Add default service fail", err)
+		return
+	}
+	if err := dp.AddService(MyDepName, MyDepFactory); err == nil {
+		t.Error("Set service twice should return error", err)
+		return
+	}
+}
+
+func TestOverwriteDefaultFacotryStory(t *testing.T) {
+	dp := dependency.NewProvider()
+	if err := dp.AddDefaultFactory(MyDepName, MyDepFactory); err != nil {
+		t.Error("Add default factory fail", err)
+		return
+	}
+	if err := dp.AddDefaultFactory(MyDepName, MyDepFactory); err == nil {
+		t.Error("Set default factory twice should return error", err)
+		return
+	}
+	if err := dp.AddFactory(MyDepName, MyDepFactory); err != nil {
+		t.Error("Add default factory fail", err)
+		return
+	}
+	if err := dp.AddFactory(MyDepName, MyDepFactory); err == nil {
+		t.Error("Set factory twice should return error", err)
+		return
 	}
 }
