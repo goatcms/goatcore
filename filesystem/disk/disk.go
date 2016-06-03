@@ -1,15 +1,11 @@
-package filesystem
+package disk
 
 import (
 	"os"
 )
 
-const (
-	FileMode = 0777
-)
-
-func IsExist(p string) bool {
-	_, err := os.Stat(p)
+func IsExist(path string) bool {
+	_, err := os.Stat(path)
 	if err != nil && os.IsNotExist(err) {
 		return false
 	}
@@ -30,4 +26,8 @@ func IsFile(path string) bool {
 		return false
 	}
 	return !stat.IsDir()
+}
+
+func MkdirAll(dest string) error  {
+	return os.MkdirAll(dest, DefaultMode)
 }

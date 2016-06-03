@@ -1,5 +1,5 @@
 package generator
-/*
+
 import (
 	"github.com/goatcms/goat-core/varutil"
 )
@@ -13,4 +13,3 @@ func (v *Values) Read(path string) error {
 func (v *Values) Write(path string) error {
 	return varutil.WriteJson(path, v)
 }
-*/

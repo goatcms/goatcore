@@ -2,51 +2,21 @@ package varutil
 
 import (
 	"encoding/json"
-	"github.com/goatcms/goat-core/filesystem"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"bytes"
+	"strings"
 )
 
-func ReadJson(src string, object interface{}) error {
-	var err error
-	src, err = filepath.Abs(src)
-	if err != nil {
-		return err
-	}
-	file, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	jsonParser := json.NewDecoder(file)
-	if err = jsonParser.Decode(object); err != nil {
+func ObjectFromJson(object interface{}, data string) error {
+	jsonParser := json.NewDecoder(strings.NewReader(data))
+	if err := jsonParser.Decode(object); err != nil {
 		return err
 	}
 	return nil
 }
 
-func WriteJson(path string, object interface{}) error {
-	var err error
-	path, err = filepath.Abs(path)
-	if err != nil {
-		return err
-	}
-	b, err := JSONMarshal(object, true)
-	if err != nil {
-		return err
-	}
-	dir := filepath.Dir(path)
-	if !filesystem.IsDir(dir) {
-		if err := os.MkdirAll(dir, 0777); err != nil {
-			return err
-		}
-	}
-	err = ioutil.WriteFile(path, b, 0777)
-	if err != nil {
-		return err
-	}
-	return nil
+func ObjectToJson(object interface{}) (string, error) {
+	bytes, err := JSONMarshal(object, true)
+	return string(bytes), err
 }
 
 func JSONMarshal(v interface{}, unescape bool) ([]byte, error) {

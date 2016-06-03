@@ -1,6 +1,6 @@
 package generator
 
-/*import (
+import (
 	"github.com/goatcms/goat-core/filesystem"
 )
 
@@ -44,4 +44,4 @@ func NewGeneratedResource(p string) (*GeneratedResource, error) {
 		}
 	}
 	return r, nil
-}*/
+}
