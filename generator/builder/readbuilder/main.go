@@ -1,45 +1,124 @@
 package readbuilder
 
 import (
-	"github.com/goatcms/goat-core/generator"
-	"github.com/goatcms/goat-core/varutil/r"
+	generator "github.com/goatcms/goat-core/generator"
+	r "github.com/goatcms/goat-core/varutil/r"
 	"reflect"
 	"strings"
 )
 
 type Builder struct {
 	nodeDef generator.NodeDef
-	data 		interfce{}
+	data    interface{}
 }
 
-func NewBuilder(nodeDef generator.NodeDef, facotry generator.DataFactory, data interfce{}) (*Builder, error) {
+func NewBuilder(nodeDef generator.NodeDef, facotry generator.DataFactory, data interface{}) (*Builder, error) {
 	return &Builder{
 		nodeDef: nodeDef,
-		data: data,
+		data:    data,
 		facotry: factory,
 	}, nil
 }
 
 func (b *Builder) Run() (interface{}, error) {
 	tn := b.nodeDef.Type().TypeName()
-	dv := r.UnpackValue(reflect.ValueOf(b.data))
-	dtn := dv.Type().Name()
+	value := reflect.ValueOf(b.data)
+	uValue := r.UnpackValue(value)
+	dtn := uValue.Type().String()
 	if b.data != nil && tn != dtn {
-		return nil, fmt.Errorf("Incompatible data "+dt+" and definition type "+tn)
+		return nil, fmt.Errorf("Incompatible data " + uValue + " and definition type " + tn)
 	}
-	switch(dtn) {
+	switch dtn {
 	case "string":
-		return runString()
+		return runString(value)
+	case "int":
+		return runInt(value)
+	case "[]interface {}":
+		return runArray(value)
+	case "map[string]interface {}":
+		return runMap(value)
 	default:
-		return nil, fmt.Errorf("Unknow type "+dtn)
+		return nil, fmt.Errorf("Unknow type " + uValue)
 	}
 }
 
-func (b *Builder) runString(data interface{}, nodeDef generator.NodeDef) (interface{}, error) {
-	if data != nil &&  {
-		// generate
+func (b *Builder) runString(rvalue reflect.Value, nodeDef generator.NodeDef) (interface{}, error) {
+	var (
+		value interface{}
+		scan  string
+		err   error
+	)
+	if !data.IsNil() {
+		value = r.UnpackValue(rvalue).Interface()
+	} else {
+		value, err = b.facotry.BuildString(nodeDef.Type())
+		if err != nil {
+			return nil, err
+		}
 	}
-	return data, nil
+	fmt.Print("[", value, "]:")
+	fmt.Scanf(scan)
+	if scan != "" {
+		value = interface{}(scan)
+	}
+	return value, nil
+}
+
+func (b *Builder) runInt(rvalue reflect.Value, nodeDef generator.NodeDef) (interface{}, error) {
+	var (
+		value interface{}
+		ival  int
+		scan  string
+		err   error
+	)
+	if !data.IsNil() {
+		value = r.UnpackValue(rvalue).Interface()
+	} else {
+		value, err = b.facotry.BuildInt(nodeDef.Type())
+		if err != nil {
+			return nil, err
+		}
+	}
+	for {
+		fmt.Print("[", value, "]:")
+		fmt.Scanf(scan)
+		if scan == "" {
+			break
+		}
+		if ival, err = strconv.Atoi(scan); err != nil {
+			fmt.Printf("Incorrect number.\n")
+			continue
+		}
+		value = interface{}(ival)
+	}
+	return value, nil
+}
+
+func (b *Builder) runArray(rvalue reflect.Value, nodeDef generator.NodeDef) (interface{}, error) {
+	var (
+		value []interface{}
+		scan  string
+		err   error
+	)
+	if !data.IsNil() {
+		value = r.UnpackValue(rvalue).Interface().([]interface{})
+	} else {
+		value = []interface{}{}
+	}
+	for {
+		fmt.Println("your array: ", value)
+		fmt.Print("[", value, "]:")
+		fmt.Scanf(scan)
+		if scan == "" {
+			break
+		}
+		if ival, err = strconv.Atoi(scan); err != nil {
+			fmt.Printf("Incorrect number.\n")
+			continue
+		}
+		value = interface{}(ival)
+	}
+	return value, nil
 }
 
 /*

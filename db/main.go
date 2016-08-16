@@ -1,5 +1,19 @@
 package db
 
+import "github.com/jmoiron/sqlx"
+
+// DAO is simple orm data access object
+type DAO interface {
+	FindAll() (*sqlx.Rows, error)
+	FindByID(id int64) *sqlx.Row
+	Insert(entity interface{}) (int64, error)
+	Update(entity interface{}) error
+	Delete(id int64) error
+	CreateTable() error
+}
+
+/*package db
+
 import (
 	"database/sql"
 	"fmt"
@@ -40,4 +54,4 @@ func CreatePgsql(dbConfig *config.Database) (dependency.Instance, error) {
 
 func CreateSqlite(dbConfig *config.Database) (dependency.Instance, error) {
 	return sql.Open("sqlite3", config.Source)
-}
+}*/

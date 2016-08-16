@@ -1,9 +1,8 @@
 package disk
 
-import (
-	"os"
-)
+import "os"
 
+// IsExist return true if file or directory exists
 func IsExist(path string) bool {
 	_, err := os.Stat(path)
 	if err != nil && os.IsNotExist(err) {
@@ -12,6 +11,7 @@ func IsExist(path string) bool {
 	return true
 }
 
+// IsDir return true if directory exists
 func IsDir(path string) bool {
 	stat, err := os.Stat(path)
 	if err != nil {
@@ -20,6 +20,7 @@ func IsDir(path string) bool {
 	return stat.IsDir()
 }
 
+// IsFile return true if file exists
 func IsFile(path string) bool {
 	stat, err := os.Stat(path)
 	if err != nil {
@@ -28,6 +29,7 @@ func IsFile(path string) bool {
 	return !stat.IsDir()
 }
 
-func MkdirAll(dest string) error  {
-	return os.MkdirAll(dest, DefaultMode)
+// MkdirAll create all path nodes
+func MkdirAll(dest string, filemode os.FileMode) error {
+	return os.MkdirAll(dest, filemode)
 }

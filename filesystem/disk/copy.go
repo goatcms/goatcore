@@ -3,41 +3,39 @@ package disk
 import (
 	"io"
 	"os"
-	"strings"
+	"path/filepath"
+
+	"github.com/goatcms/goat-core/filesystem"
 )
 
+// Copy duplicate a file or a directory
 func Copy(src, dest string) error {
 	if IsDir(src) {
-		return CopyDirectory(src, dest, nil)
+		return CopyDirectory(src, dest)
 	}
 	return CopyFile(src, dest)
 }
 
-func CopyDirectory(src, dest string, filter LoopFilter) error {
-	if !strings.HasSuffix(src, "/") {
-		src = src + "/"
-	}
-	if !strings.HasSuffix(dest, "/") {
-		dest = dest + "/"
-	}
-	loop := DirLoop{
-		OnFile: copyFileFactory(src, dest),
-		OnDir:  copyDirFactory(dest),
-		Filter: filter,
-	}
-	if err := loop.Run(src); err != nil {
-		return err
-	}
-	return nil
+// CopyDirectory copy a directory and sub-direcotories and files on local files system.
+func CopyDirectory(src, dest string) error {
+	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		subPath := path + "/" + info.Name()
+		if info.IsDir() {
+			if err := MkdirAll(subPath, filesystem.DefaultUnixDirMode); err != nil {
+				return err
+			}
+			return nil
+		}
+		return CopyFile(src+subPath, dest+subPath)
+	})
 }
 
+// CopyFile copy a single file on local files system.
 func CopyFile(src, dst string) error {
 	s, err := os.Open(src)
 	if err != nil {
 		return err
 	}
-	// no need to check errors on read only file, we already got everything
-	// we need from the filesystem, so nothing can go wrong now.
 	defer s.Close()
 	d, err := os.Create(dst)
 	if err != nil {
@@ -48,16 +46,4 @@ func CopyFile(src, dst string) error {
 		return err
 	}
 	return d.Close()
-}
-
-func copyFileFactory(src, dest string) func(os.FileInfo, string) error {
-	return func(file os.FileInfo, path string) error {
-		return CopyFile(src+path, dest+path)
-	}
-}
-
-func copyDirFactory(dest string) func(os.FileInfo, string) error {
-	return func(file os.FileInfo, path string) error {
-		return os.MkdirAll(dest+path, FileMode)
-	}
 }

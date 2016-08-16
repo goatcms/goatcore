@@ -4,16 +4,19 @@ import (
 	"fmt"
 )
 
+// DefaultProvider is default dependency distributor
 type DefaultProvider struct {
 	pool map[string]*Builder
 }
 
+// NewProvider create new instance of a depenedency provider
 func NewProvider() Provider {
 	return &DefaultProvider{
 		pool: map[string]*Builder{},
 	}
 }
 
+// Get return instance by name
 func (d *DefaultProvider) Get(faceName string) (Instance, error) {
 	if row, exist := d.pool[faceName]; exist {
 		instance, err := row.Get(d)
@@ -22,7 +25,12 @@ func (d *DefaultProvider) Get(faceName string) (Instance, error) {
 		}
 		return instance, nil
 	}
-	return nil, fmt.Errorf("implementation of interface ", faceName, " not exist")
+	return nil, fmt.Errorf("implementation of interface %v not exist", faceName)
+}
+
+// Return a map of all dependency builders
+func (d *DefaultProvider) GetAll() map[string]*Builder {
+	return d.pool
 }
 
 func (d *DefaultProvider) AddService(name string, factory Factory) error {
@@ -51,14 +59,14 @@ func (d *DefaultProvider) addDefault(name string, factory Factory, static bool) 
 func (d *DefaultProvider) add(name string, factory Factory, static, isDefault bool) error {
 	if current, exist := d.pool[name]; exist {
 		if !current.isDefault {
-			return fmt.Errorf("interface ", name, " exist")
+			return fmt.Errorf("interface %v exist", name)
 		}
 	}
 	d.pool[name] = &Builder{
 		Static:    static,
 		Factory:   factory,
 		Instance:  nil,
-		isCalled:    false,
+		isCalled:  false,
 		isDefault: isDefault,
 	}
 	return nil

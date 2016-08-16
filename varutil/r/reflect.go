@@ -5,6 +5,7 @@ import (
 	"reflect"
 )
 
+// UnpackValue skip pointers, interfaces etc and return a finish structure or a simple value
 func UnpackValue(v reflect.Value) (reflect.Value, error) {
 	if v.IsNil() {
 		return v, nil
@@ -13,14 +14,14 @@ func UnpackValue(v reflect.Value) (reflect.Value, error) {
 	if k == reflect.Map {
 		return v, nil
 	} else if k == reflect.Ptr {
-		return unpackValue(v.Elem())
+		return UnpackValue(v.Elem())
 	} else if k == reflect.Interface {
-		return unpackValue(v.Elem())
-	} else {
-		return v, fmt.Errorf("Unsupported type")
+		return UnpackValue(v.Elem())
 	}
+	return v, fmt.Errorf("Unsupported type")
 }
 
+/*
 func IsNilable(v reflect.Value) bool {
 	if v.IsNil() {
 		return true
@@ -35,4 +36,4 @@ func IsNilable(v reflect.Value) bool {
 	} else {
 		return v, fmt.Errorf("Unsupported type")
 	}
-}
+}*/
