@@ -1,6 +1,7 @@
 package filesystem
 
 import (
+	"io"
 	"os"
 )
 
@@ -12,6 +13,16 @@ const (
 	// DefaultUnixDirMode is a default dir mode for unix base filesystems
 	DefaultUnixDirMode = 0644
 )
+
+type Writer interface {
+	io.Writer
+	Close() error
+}
+
+type Reader interface {
+	io.Reader
+	Close() error
+}
 
 // Filespace is a abstract filesystem interface
 type Filespace interface {
@@ -26,6 +37,8 @@ type Filespace interface {
 	ReadFile(subPath string) ([]byte, error)
 	WriteFile(subPath string, data []byte, perm os.FileMode) error
 	Filespace(subPath string) (Filespace, error)
+	Reader(subPath string) (Reader, error)
+	Writer(subPath string) (Writer, error)
 }
 
 // LoopOn is a callback type trigged on a file or directory

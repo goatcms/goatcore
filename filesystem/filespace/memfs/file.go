@@ -50,6 +50,10 @@ func (f *File) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
+func (f *File) Close() error {
+	return nil
+}
+
 func (f *File) Read(p []byte) (int, error) {
 	n := copy(p, f.data[f.pointer:])
 	f.pointer += n

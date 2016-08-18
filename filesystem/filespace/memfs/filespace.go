@@ -2,7 +2,6 @@ package memfs
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path"
 
@@ -135,7 +134,7 @@ func (fs *Filespace) MkdirAll(subPath string, filemode os.FileMode) error {
 	return fs.root.MkdirAll(subPath, filemode)
 }
 
-func (fs *Filespace) Writer(subPath string) (io.Writer, error) {
+func (fs *Filespace) Writer(subPath string) (filesystem.Writer, error) {
 	if err := fs.root.WriteFile(subPath, []byte{}, filesystem.DefaultUnixFileMode); err != nil {
 		return nil, err
 	}
@@ -146,10 +145,10 @@ func (fs *Filespace) Writer(subPath string) (io.Writer, error) {
 	if node.IsDir() {
 		return nil, fmt.Errorf("node is a dir %v", node)
 	}
-	return node.(io.Writer), nil
+	return node.(filesystem.Writer), nil
 }
 
-func (fs *Filespace) Reader(subPath string) (io.Reader, error) {
+func (fs *Filespace) Reader(subPath string) (filesystem.Reader, error) {
 	node, err := fs.root.GetByPath(subPath)
 	if err != nil {
 		return nil, err
@@ -159,7 +158,7 @@ func (fs *Filespace) Reader(subPath string) (io.Reader, error) {
 	}
 	file := node.(*File)
 	file.ResetPointer()
-	return io.Reader(file), nil
+	return filesystem.Reader(file), nil
 }
 
 func (fs *Filespace) ReadFile(subPath string) ([]byte, error) {

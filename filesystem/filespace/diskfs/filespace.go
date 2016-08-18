@@ -2,7 +2,6 @@ package diskfs
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 
@@ -57,11 +56,11 @@ func (fs *Filespace) MkdirAll(subPath string, filemode os.FileMode) error {
 	return disk.MkdirAll(fs.path+subPath, filemode)
 }
 
-func (fs *Filespace) Writer(subPath string) (io.Writer, error) {
+func (fs *Filespace) Writer(subPath string) (filesystem.Writer, error) {
 	return os.OpenFile(fs.path+subPath, os.O_WRONLY|os.O_CREATE, filesystem.DefaultUnixFileMode)
 }
 
-func (fs *Filespace) Reader(subPath string) (io.Reader, error) {
+func (fs *Filespace) Reader(subPath string) (filesystem.Reader, error) {
 	return os.OpenFile(fs.path+subPath, os.O_RDONLY, filesystem.DefaultUnixFileMode)
 }
 

@@ -146,6 +146,11 @@ func TestWriteStreamAndRead(t *testing.T) {
 		t.Errorf("return length should be equal to data size %v %v", n, len(testData))
 		return
 	}
+	err = writer.Close()
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	readData, err := fs.ReadFile(path)
 	if err != nil {
 		t.Error(err)
@@ -178,6 +183,11 @@ func TestWriteAndReader(t *testing.T) {
 	}
 	buf := make([]byte, 222)
 	n, err := reader.Read(buf)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	err = reader.Close()
 	if err != nil {
 		t.Error(err)
 		return
