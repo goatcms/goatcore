@@ -2,9 +2,11 @@ package memfs
 
 import (
 	"fmt"
-	"github.com/goatcms/goat-core/filesystem"
+	"io"
 	"os"
 	"path"
+
+	"github.com/goatcms/goat-core/filesystem"
 )
 
 const (
@@ -29,13 +31,13 @@ func (fs *Filespace) Copy(src, dest string) error {
 		return err
 	}
 	if srcNode.IsDir() {
-		return fs.CopyDirectory(src, dest, nil)
+		return fs.CopyDirectory(src, dest)
 	} else {
 		return fs.CopyFile(src, dest)
 	}
 }
 
-func (fs *Filespace) CopyDirectory(src, dest string, filter filesystem.LoopFilter) error {
+func (fs *Filespace) CopyDirectory(src, dest string) error {
 	srcNode, err := fs.root.GetByPath(src)
 	if err != nil {
 		return err
@@ -131,6 +133,33 @@ func (fs *Filespace) IsDir(subPath string) bool {
 
 func (fs *Filespace) MkdirAll(subPath string, filemode os.FileMode) error {
 	return fs.root.MkdirAll(subPath, filemode)
+}
+
+func (fs *Filespace) Writer(subPath string) (io.Writer, error) {
+	if err := fs.root.WriteFile(subPath, []byte{}, filesystem.DefaultUnixFileMode); err != nil {
+		return nil, err
+	}
+	node, err := fs.root.GetByPath(subPath)
+	if err != nil {
+		return nil, err
+	}
+	if node.IsDir() {
+		return nil, fmt.Errorf("node is a dir %v", node)
+	}
+	return node.(io.Writer), nil
+}
+
+func (fs *Filespace) Reader(subPath string) (io.Reader, error) {
+	node, err := fs.root.GetByPath(subPath)
+	if err != nil {
+		return nil, err
+	}
+	if node.IsDir() {
+		return nil, fmt.Errorf("node is a dir %v", node)
+	}
+	file := node.(*File)
+	file.ResetPointer()
+	return io.Reader(file), nil
 }
 
 func (fs *Filespace) ReadFile(subPath string) ([]byte, error) {

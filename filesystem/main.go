@@ -26,7 +26,6 @@ type Filespace interface {
 	ReadFile(subPath string) ([]byte, error)
 	WriteFile(subPath string, data []byte, perm os.FileMode) error
 	Filespace(subPath string) (Filespace, error)
-	SendToFilespace(localPath string, remotePath string) error
 }
 
 // LoopOn is a callback type trigged on a file or directory

@@ -10,6 +10,7 @@ type File struct {
 	filemode os.FileMode
 	time     time.Time
 	data     []byte
+	pointer  int
 }
 
 func (f *File) Name() string {
@@ -42,6 +43,21 @@ func (f *File) GetData() []byte {
 
 func (f *File) SetData(data []byte) {
 	f.data = data
+}
+
+func (f *File) Write(p []byte) (n int, err error) {
+	f.data = append(f.data, p...)
+	return len(p), nil
+}
+
+func (f *File) Read(p []byte) (int, error) {
+	n := copy(p, f.data[f.pointer:])
+	f.pointer += n
+	return n, nil
+}
+
+func (f *File) ResetPointer() {
+	f.pointer = 0
 }
 
 func (f *File) Copy() (*File, error) {
