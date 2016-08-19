@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	exampleJson = `{
+	exampleJSON = `{
 		"value1": "v1",
 		"value2": "v2"
 	}`
@@ -17,17 +17,17 @@ type TestObject struct {
 }
 
 func TestObjectToJson(t *testing.T) {
-	var obj1 TestObject = TestObject{
+	var obj1 = TestObject{
 		Value1: "v1",
 		Value2: "v2",
 	}
-	json, err := ObjectToJson(obj1)
+	json, err := ObjectToJSON(obj1)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	var obj2 TestObject
-	if err := ObjectFromJson(&obj2, json); err != nil {
+	if err := ObjectFromJSON(&obj2, json); err != nil {
 		t.Error(err)
 		return
 	}
@@ -40,8 +40,8 @@ func TestObjectToJson(t *testing.T) {
 }
 
 func TestObjectFromJson(t *testing.T) {
-	var obj1 TestObject = TestObject{}
-	err := ObjectFromJson(&obj1, exampleJson)
+	var obj1 = TestObject{}
+	err := ObjectFromJSON(&obj1, exampleJSON)
 	if err != nil {
 		t.Error(err)
 		return

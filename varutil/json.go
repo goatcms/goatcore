@@ -1,12 +1,13 @@
 package varutil
 
 import (
-	"encoding/json"
 	"bytes"
+	"encoding/json"
 	"strings"
 )
 
-func ObjectFromJson(object interface{}, data string) error {
+// ObjectFromJSON decode json data to object
+func ObjectFromJSON(object interface{}, data string) error {
 	jsonParser := json.NewDecoder(strings.NewReader(data))
 	if err := jsonParser.Decode(object); err != nil {
 		return err
@@ -14,11 +15,13 @@ func ObjectFromJson(object interface{}, data string) error {
 	return nil
 }
 
-func ObjectToJson(object interface{}) (string, error) {
+// ObjectToJSON convert object to json
+func ObjectToJSON(object interface{}) (string, error) {
 	bytes, err := JSONMarshal(object, true)
 	return string(bytes), err
 }
 
+// JSONMarshal convert object to json (and prepare json to be more user friendly)
 func JSONMarshal(v interface{}, unescape bool) ([]byte, error) {
 	b, err := json.MarshalIndent(v, "", "  ")
 	if unescape {

@@ -6,10 +6,14 @@ import (
 )
 
 const (
-	NumericBytes      = "1234567890"
-	AlphaBytes        = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	// NumericBytes is set of numeric characters for RandString function
+	NumericBytes = "1234567890"
+	// AlphaBytes is set of alphabetic characters for RandString function
+	AlphaBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	// AlphaNumericBytes is set of numeric and alphabetic characters for RandString function
 	AlphaNumericBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-	StrongBytes       = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()`~<>?:[]{}-=_+|\\/,."
+	// StrongBytes is set of numeric, alphabetic and special characters for RandString function
+	StrongBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()`~<>?:[]{}-=_+|\\/,."
 
 	letterIdxBits = 6                    // 6 bits to represent a letter index
 	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
@@ -20,8 +24,7 @@ var (
 	src = rand.NewSource(time.Now().UnixNano())
 )
 
-// Solution & benchmark from
-// http://stackoverflow.com/questions/22892120/how-to-generate-a-random-string-of-a-fixed-length-in-golang
+// RandString create new random string
 func RandString(n int, pool string) string {
 	b := make([]byte, n)
 	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
