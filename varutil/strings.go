@@ -2,8 +2,8 @@ package varutil
 
 import (
 	"fmt"
-	"strings"
 	"regexp"
+	"strings"
 )
 
 func HasOneSuffix(str string, suffixes []string) bool {
@@ -35,7 +35,7 @@ func FixDirPath(path *string) {
 
 func FixUrl(url *string) error {
 	if *url == "" {
-		return fmt.Errorf("Incorrect url '", url, "'")
+		return fmt.Errorf("Incorrect url '%v'", url)
 	}
 	if strings.HasPrefix(*url, "http://") || strings.HasPrefix(*url, "https://") {
 		return nil
