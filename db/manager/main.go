@@ -1,5 +1,6 @@
 package db_manager
 
+/*
 import (
 	"database/sql"
 	"fmt"
@@ -41,3 +42,4 @@ func CreatePgsql(dbConfig *config.Database) (dependency.Instance, error) {
 func CreateSqlite(dbConfig *config.Database) (dependency.Instance, error) {
 	return sql.Open("sqlite3", config.Source)
 }
+*/

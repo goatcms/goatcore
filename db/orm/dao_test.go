@@ -8,7 +8,7 @@ func TestEmptyFindAll(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	rows, err := context.dao.FindAll()
+	rows, err := context.dao.FindAll(context.bdtx)
 	if err != nil {
 		t.Error(err)
 		return
@@ -31,7 +31,7 @@ func TestFixturesFindAll(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	rows, err := context.dao.FindAll()
+	rows, err := context.dao.FindAll(context.bdtx)
 	if err != nil {
 		t.Error(err)
 		return
@@ -58,7 +58,7 @@ func TestFindByID(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	row := context.dao.FindByID(10)
+	row := context.dao.FindByID(context.bdtx, 10)
 	if row.Err() != nil {
 		t.Error(row.Err())
 		return
@@ -84,12 +84,12 @@ func TestInsert(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if id, err = context.dao.Insert(insertEntity); err != nil {
+	if id, err = context.dao.Insert(context.bdtx, insertEntity); err != nil {
 		t.Error(err)
 		return
 	}
 	insertEntity.ID = id
-	row := context.dao.FindByID(id)
+	row := context.dao.FindByID(context.bdtx, id)
 	if row.Err() != nil {
 		t.Error(row.Err())
 		return
@@ -114,11 +114,11 @@ func TestInsertWithID(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if err = context.dao.InsertWithID(insertEntity); err != nil {
+	if err = context.dao.InsertWithID(context.bdtx, insertEntity); err != nil {
 		t.Error(err)
 		return
 	}
-	row := context.dao.FindByID(id)
+	row := context.dao.FindByID(context.bdtx, id)
 	if row.Err() != nil {
 		t.Error(row.Err())
 		return
@@ -144,11 +144,11 @@ func TestUpdate(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if err := context.dao.Update(expectEntity); err != nil {
+	if err := context.dao.Update(context.bdtx, expectEntity); err != nil {
 		t.Error(err)
 		return
 	}
-	row := context.dao.FindByID(10)
+	row := context.dao.FindByID(context.bdtx, 10)
 	if row.Err() != nil {
 		t.Error(row.Err())
 		return
@@ -171,11 +171,11 @@ func TestDelete(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if err := context.dao.Delete(10); err != nil {
+	if err := context.dao.Delete(context.bdtx, 10); err != nil {
 		t.Error(err)
 		return
 	}
-	rows, err := context.dao.FindAll()
+	rows, err := context.dao.FindAll(context.bdtx)
 	if err != nil {
 		t.Error(err)
 		return

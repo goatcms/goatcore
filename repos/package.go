@@ -2,10 +2,11 @@ package repos
 
 import (
 	"fmt"
-	"github.com/goatcms/goat-core/filesystem"
-	"github.com/goatcms/goat-core/varutil"
 	"path/filepath"
 	"strings"
+
+	"github.com/goatcms/goat-core/filesystem/disk"
+	"github.com/goatcms/goat-core/varutil"
 )
 
 type RepositoryPackage struct {
@@ -51,9 +52,9 @@ func (p *PackageManager) Get(localPath string) (string, error) {
 	fullPath := p.path + localPath
 	record, exists := p.Repositories[localPath]
 	if !exists {
-		return "", fmt.Errorf("Record for \"" + localPath + "\" path not exist %v", p.Repositories)
+		return "", fmt.Errorf("Record for \""+localPath+"\" path not exist %v", p.Repositories)
 	}
-	if !filesystem.IsExist(fullPath) {
+	if !disk.IsExist(fullPath) {
 		if err := p.load(fullPath, record.Url, record.Rev); err != nil {
 			return "", err
 		}
@@ -80,7 +81,7 @@ func (p *PackageManager) UpdateRepo(localPath string) error {
 
 func (p *PackageManager) update(localPath string, record RepositoryPackage) error {
 	fullPath := p.path + localPath
-	if !filesystem.IsExist(fullPath) {
+	if !disk.IsExist(fullPath) {
 		if err := p.load(fullPath, record.Url, record.Rev); err != nil {
 			return err
 		}
@@ -99,7 +100,7 @@ func (p *PackageManager) update(localPath string, record RepositoryPackage) erro
 }
 
 func (p *PackageManager) load(fullPath, url, rev string) error {
-	if filesystem.IsExist(fullPath) {
+	if disk.IsExist(fullPath) {
 		return fmt.Errorf("Directory " + fullPath + " exist")
 	}
 	repo := NewRepository(fullPath)

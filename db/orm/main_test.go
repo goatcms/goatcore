@@ -11,9 +11,9 @@ import (
 
 var (
 	tableTypes = map[string]types.CustomType{
-		"title":   simpletype.NewTitleType([]string{types.Required}),
-		"content": simpletype.ContentType,
-		"image":   simpletype.NewImageType([]string{types.Required}),
+		"title":   simpletype.NewTitleType(map[string]string{types.Required: "true"}),
+		"content": simpletype.NewContentType(map[string]string{}),
+		"image":   simpletype.NewImageType(map[string]string{types.Required: "true"}),
 	}
 )
 
@@ -40,8 +40,8 @@ func newTestScope() (*testScope, error) {
 		return nil, err
 	}
 	table := NewBaseTable(testTable, tableTypes)
-	dao := NewBaseDAO(table, bdtx)
-	dao.CreateTable()
+	dao := NewBaseDAO(table)
+	dao.CreateTable(bdtx)
 	if err != nil {
 		return nil, err
 	}
