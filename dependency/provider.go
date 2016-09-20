@@ -28,26 +28,28 @@ func (d *DefaultProvider) Get(faceName string) (Instance, error) {
 	return nil, fmt.Errorf("implementation of interface %v not exist", faceName)
 }
 
-// Return a map of all dependency builders
+// GetAll return a map of all dependency builders
 func (d *DefaultProvider) GetAll() map[string]*Builder {
 	return d.pool
 }
 
+// AddService add new named service
 func (d *DefaultProvider) AddService(name string, factory Factory) error {
 	return d.add(name, factory, true, false)
 }
 
-func (d *DefaultProvider) AddFactory(name string, factory Factory) error {
+/*func (d *DefaultProvider) AddFactory(name string, factory Factory) error {
 	return d.add(name, factory, false, false)
-}
+}*/
 
+// AddDefaultService add default service (it can be overwrite by AddService)
 func (d *DefaultProvider) AddDefaultService(name string, factory Factory) error {
 	return d.addDefault(name, factory, true)
 }
 
-func (d *DefaultProvider) AddDefaultFactory(name string, factory Factory) error {
+/*func (d *DefaultProvider) AddDefaultFactory(name string, factory Factory) error {
 	return d.addDefault(name, factory, false)
-}
+}*/
 
 func (d *DefaultProvider) addDefault(name string, factory Factory, static bool) error {
 	if _, exist := d.pool[name]; exist {

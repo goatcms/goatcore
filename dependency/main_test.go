@@ -1,8 +1,4 @@
-package dependency_test
-
-import (
-	"github.com/goatcms/goat-core/dependency"
-)
+package dependency
 
 const (
 	MyDepName       = "MyDep"
@@ -38,11 +34,11 @@ func (d *MyDep) Set(v int) {
 	d.value = v
 }
 
-func MyDepFactory(dp dependency.Provider) (dependency.Instance, error) {
+func MyDepFactory(dp Provider) (Instance, error) {
 	return &MyDep{}, nil
 }
 
-func MyCircleDepFactory(dp dependency.Provider) (dependency.Instance, error) {
+func MyCircleDepFactory(dp Provider) (Instance, error) {
 	instance, err := dp.Get(MyCircleDepName)
 	if err != nil {
 		return nil, err
@@ -56,7 +52,7 @@ type SimpleObject struct {
 	Instance *MyDep
 }
 
-func (o *SimpleObject) Load(dp *dependency.Provider) error {
+func (o *SimpleObject) Load(dp *Provider) error {
 	ins, err := (*dp).Get(MyDepName)
 	if err != nil {
 		return err

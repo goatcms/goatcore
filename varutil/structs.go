@@ -44,26 +44,32 @@ func FillStruct(s interface{}, m map[string]interface{}) error {
 // LoadStruct load structure data from map. Use name from tag or field name
 func LoadStruct(obj interface{}, m map[string]interface{}, tagname string, ignoreUndefined bool) error {
 	structValue := reflect.ValueOf(obj).Elem()
-
 	for i := 0; i < structValue.NumField(); i++ {
 		valueField := structValue.Field(i)
-		typeField := structValue.Type().Field(i)
-		dest := typeField.Tag.Get(tagname)
+		structField := structValue.Type().Field(i)
+
+		dest := structField.Tag.Get(tagname)
 		if dest == "" {
-			dest = typeField.Name
+			dest = structField.Name
 		}
 		if !valueField.IsValid() {
-			return fmt.Errorf("No such field: %s in obj", typeField.Name)
+			return fmt.Errorf("No such field: %s in obj", structField.Name)
 		}
 		if !valueField.CanSet() {
-			return fmt.Errorf("Cannot set %s field value", typeField.Name)
+			return fmt.Errorf("Cannot set %s field value", structField.Name)
 		}
-		keyValue, ok := m[dest]
+		importedValue, ok := m[dest]
 		if !ok && !ignoreUndefined {
 			return fmt.Errorf("input map[%v] is undefined", dest)
 		}
-		newValue := reflect.ValueOf(keyValue)
-		if valueField.Type() != newValue.Type() {
+		if importedValue == nil {
+			if ignoreUndefined {
+				continue
+			}
+			return fmt.Errorf("set value (named %v) can not be nil", dest)
+		}
+		newValue := reflect.ValueOf(importedValue)
+		if structField.Type != newValue.Type() {
 			invalidTypeError := errors.New("Provided value type didn't match obj field type")
 			return invalidTypeError
 		}

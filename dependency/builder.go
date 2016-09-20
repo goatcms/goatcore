@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// Builder is helper struct to build new instances
 type Builder struct {
 	Static    bool
 	Factory   Factory
@@ -12,6 +13,7 @@ type Builder struct {
 	isDefault bool
 }
 
+// Get build and return object instances
 func (d *Builder) Get(dp Provider) (Instance, error) {
 	var err error
 	if d.isCalled == true {
@@ -19,7 +21,8 @@ func (d *Builder) Get(dp Provider) (Instance, error) {
 	}
 	d.isCalled = true
 	if d.Static == false {
-		instance, err := d.factory(dp)
+		var instance Instance
+		instance, err = d.factory(dp)
 		if err != nil {
 			d.isCalled = false
 			return nil, err

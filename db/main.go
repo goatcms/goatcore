@@ -1,15 +1,27 @@
 package db
 
-import "github.com/jmoiron/sqlx"
+import (
+	"database/sql"
+
+	"github.com/jmoiron/sqlx"
+)
 
 // DAO is simple orm data access object
 type DAO interface {
-	FindAll() (*sqlx.Rows, error)
-	FindByID(id int64) *sqlx.Row
-	Insert(entity interface{}) (int64, error)
-	Update(entity interface{}) error
-	Delete(id int64) error
-	CreateTable() error
+	FindAll(TX) (*sqlx.Rows, error)
+	FindByID(TX, int64) *sqlx.Row
+	Insert(TX, interface{}) (int64, error)
+	Update(TX, interface{}) error
+	Delete(TX, int64) error
+	CreateTable(TX) error
+}
+
+// TX represent a database transaction accessor
+type TX interface {
+	Queryx(query string, args ...interface{}) (*sqlx.Rows, error)
+	QueryRowx(query string, args ...interface{}) *sqlx.Row
+	NamedExec(query string, arg interface{}) (sql.Result, error)
+	MustExec(query string, args ...interface{}) sql.Result
 }
 
 /*package db

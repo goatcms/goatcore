@@ -15,6 +15,15 @@ func ObjectFromJSON(object interface{}, data string) error {
 	return nil
 }
 
+// DataFromJSON decode json data to object
+/*func DataFromJSON(data []byte) (interface{}, error) {
+	var outdata interface{}
+	if err := json.Unmarshal(data, &outdata); err != nil {
+		return nil, err
+	}
+	return outdata, nil
+}*/
+
 // ObjectToJSON convert object to json
 func ObjectToJSON(object interface{}) (string, error) {
 	bytes, err := JSONMarshal(object, true)

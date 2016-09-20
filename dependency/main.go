@@ -11,9 +11,9 @@ type Provider interface {
 	Get(string) (Instance, error)
 	GetAll() map[string]*Builder
 	AddService(string, Factory) error
-	AddFactory(string, Factory) error
+	//AddFactory(string, Factory) error
 	AddDefaultService(string, Factory) error
-	AddDefaultFactory(string, Factory) error
+	//AddDefaultFactory(string, Factory) error
 }
 
 // Loadable represents loadable interface

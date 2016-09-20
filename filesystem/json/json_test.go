@@ -1,9 +1,10 @@
 package json_test
 
 import (
+	"testing"
+
 	"github.com/goatcms/goat-core/filesystem/filespace/memfs"
 	"github.com/goatcms/goat-core/filesystem/json"
-	"testing"
 )
 
 type TestObject struct {
@@ -25,8 +26,8 @@ func TestWriteAndRead(t *testing.T) {
 		Value2: "str2",
 	}
 	// write & read
-	json.WriteJson(fs, path, writeObject)
-	json.ReadJson(fs, path, &readObject)
+	json.WriteJSON(fs, path, writeObject)
+	json.ReadJSON(fs, path, &readObject)
 	// test node type
 	if !fs.IsFile(path) {
 		t.Error("filesystem not conatin file adter write")

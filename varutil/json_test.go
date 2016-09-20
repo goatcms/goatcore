@@ -16,7 +16,7 @@ type TestObject struct {
 	Value2 string `json:"value2"`
 }
 
-func TestObjectToJson(t *testing.T) {
+func TestObjectToJSON(t *testing.T) {
 	var obj1 = TestObject{
 		Value1: "v1",
 		Value2: "v2",
@@ -39,7 +39,7 @@ func TestObjectToJson(t *testing.T) {
 	}
 }
 
-func TestObjectFromJson(t *testing.T) {
+func TestObjectFromJSON(t *testing.T) {
 	var obj1 = TestObject{}
 	err := ObjectFromJSON(&obj1, exampleJSON)
 	if err != nil {

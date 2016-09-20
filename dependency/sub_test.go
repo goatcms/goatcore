@@ -1,18 +1,16 @@
 package dependency
 
-import (
-	"testing"
-)
+import "testing"
 
-func TestCreateDP(t *testing.T) {
-	dp := NewProvider()
+func TestCreateSubDP(t *testing.T) {
+	dp := NewSubProvider(NewProvider())
 	if dp == nil {
 		t.Error("Expected dependency.Provider object, got nil")
 	}
 }
 
-func TestServiceStory(t *testing.T) {
-	dp := NewProvider()
+func TestSubServiceStory(t *testing.T) {
+	dp := NewSubProvider(NewProvider())
 	if err := dp.AddService(MyDepName, MyDepFactory); err != nil {
 		t.Error("Add service fail", err)
 		return
@@ -51,48 +49,8 @@ func TestServiceStory(t *testing.T) {
 	}
 }
 
-/*func TestFactoryStory(t *testing.T) {
-	dp := dependency.NewProvider()
-	if err := dp.AddFactory(MyDepName, MyDepFactory); err != nil {
-		t.Error("Add service fail", err)
-		return
-	}
-	instance, err := dp.Get(MyDepName)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if instance == nil {
-		t.Error("instance can not be empty")
-		return
-	}
-
-	o1 := &SimpleObject{}
-	var loadable dependency.Loadable
-	loadable = o1
-	loadable.Load(&dp)
-	if o1.Instance == nil {
-		t.Error("object dependency instance can not be empty after Load")
-		return
-	}
-
-	o2 := &SimpleObject{}
-	o2.Load(&dp)
-	if o2.Instance == nil {
-		t.Error("object2 dependency instance can not be empty after Load")
-		return
-	}
-
-	//provided dep sould be the same
-	o1.Instance.Set(1)
-	o2.Instance.Set(2)
-	if o1.Instance.Get() != 1 || o2.Instance.Get() != 2 {
-		t.Error("object1 and object2 should have the same vaues")
-	}
-}*/
-
-func TestCircleStory(t *testing.T) {
-	dp := NewProvider()
+func TestSubCircleStory(t *testing.T) {
+	dp := NewSubProvider(NewProvider())
 	if err := dp.AddService(MyCircleDepName, MyCircleDepFactory); err != nil {
 		t.Error("Add service fail", err)
 		return
@@ -103,8 +61,8 @@ func TestCircleStory(t *testing.T) {
 	}
 }
 
-func TestOverwriteDefaultServiceStory(t *testing.T) {
-	dp := NewProvider()
+func TestSubOverwriteDefaultServiceStory(t *testing.T) {
+	dp := NewSubProvider(NewProvider())
 	if err := dp.AddDefaultService(MyDepName, MyDepFactory); err != nil {
 		t.Error("Add default service fail", err)
 		return
@@ -123,22 +81,20 @@ func TestOverwriteDefaultServiceStory(t *testing.T) {
 	}
 }
 
-/*func TestOverwriteDefaultFacotryStory(t *testing.T) {
-	dp := dependency.NewProvider()
-	if err := dp.AddDefaultFactory(MyDepName, MyDepFactory); err != nil {
-		t.Error("Add default factory fail", err)
+func TestSubGet(t *testing.T) {
+	parent := NewProvider()
+	dp := NewSubProvider(parent)
+	if err := parent.AddDefaultService(MyDepName, MyDepFactory); err != nil {
+		t.Error("Add default service to parent fail", err)
 		return
 	}
-	if err := dp.AddDefaultFactory(MyDepName, MyDepFactory); err == nil {
-		t.Error("Set default factory twice should return error", err)
+	instance, err := dp.Get(MyDepName)
+	if err != nil {
+		t.Error(err)
 		return
 	}
-	if err := dp.AddFactory(MyDepName, MyDepFactory); err != nil {
-		t.Error("Add default factory fail", err)
+	if instance == nil {
+		t.Error("instance can not be empty")
 		return
 	}
-	if err := dp.AddFactory(MyDepName, MyDepFactory); err == nil {
-		t.Error("Set factory twice should return error", err)
-		return
-	}
-}*/
+}

@@ -1,5 +1,7 @@
 package types
 
+import "mime/multipart"
+
 const (
 	// NoErr is default string for no error response
 	NoErr = ""
@@ -13,17 +15,60 @@ const (
 	Required = "required"
 )
 
+// FileHeader is multipart interface
+type FileHeader interface {
+	Open() (multipart.File, error)
+}
+
+// StructType represent map of CustomType values
+type StructType map[string]CustomType
+
 // ValidErrors represent a list of validation messages
-type ValidErrors []string
+/*type ValidErrors interface {
+	Error() string
+	ErrorMap() map[string]string
+	IsValid() bool
+}*/
 
-// CustomType represent a list of validation messages
-type CustomType interface {
-	SQLType() string
-	HTMLType() string
-	HasAttribute(name string) bool
+// MessageMap contains object errors
+type MessageMap interface {
+	Get(key string) MessageList
+	GetAll() map[string]MessageList
+	Add(key, msg string)
+}
 
-	IsValid(string) (ValidErrors, error)
+// MessageList represent list of field errors
+type MessageList interface {
+	GetAll() []string
+	Add(msgkey string)
 }
 
 // Validator represent a single validator
-type Validator func(string) (string, error)
+type Validator func(interface{}, string, MessageMap) error
+
+// CustomType represent type interface
+type CustomType interface {
+	MetaType
+	TypeConverter
+	TypeValidator
+}
+
+// MetaType represent type data
+type MetaType interface {
+	SQLType() string
+	HTMLType() string
+	HasAttribute(name string) bool
+	GetAttribute(name string) string
+}
+
+// TypeConverter convert type
+type TypeConverter interface {
+	FromString(string) (interface{}, error)
+	FromMultipart(fh FileHeader) (interface{}, error)
+	ToString(interface{}) (string, error)
+}
+
+// TypeValidator valid type data
+type TypeValidator interface {
+	Valid(interface{}, string, MessageMap) error
+}
