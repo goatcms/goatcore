@@ -1,6 +1,9 @@
 package abstracttype
 
-import "github.com/goatcms/goat-core/filesystem"
+import (
+	"github.com/goatcms/goat-core/filesystem"
+	"github.com/goatcms/goat-core/types"
+)
 
 // File represent dingle file
 type File struct {
@@ -9,7 +12,7 @@ type File struct {
 }
 
 // NewFile create new file record
-func NewFile(fs filesystem.Filespace, path string) *File {
+func NewFile(fs filesystem.Filespace, path string) types.File {
 	return &File{
 		fs:   fs,
 		path: path,
@@ -18,7 +21,7 @@ func NewFile(fs filesystem.Filespace, path string) *File {
 
 // Filespace return filespace of file
 func (f *File) Filespace() filesystem.Filespace {
-	return f.Filespace()
+	return f.fs
 }
 
 // Path return file path of filespace
