@@ -6,6 +6,11 @@ import (
 	"github.com/goatcms/goat-core/types"
 )
 
+const (
+	// MainElement is default name for eleemnt in tables with single field
+	MainElement = "id"
+)
+
 // MetaType is abstract for image types
 type MetaType struct {
 	SQLTypeName  string
@@ -15,9 +20,16 @@ type MetaType struct {
 	Attributes   map[string]string
 }
 
-// SQLType return a sql type name
-func (bt *MetaType) SQLType() string {
-	return bt.SQLTypeName
+// AddSQLType add types to sql types map
+func (bt *MetaType) AddSQLType(base string, m map[string]string) {
+	m[base] = bt.SQLTypeName
+}
+
+// GetSQLType return map of sql types for type
+func (bt *MetaType) GetSQLType() map[string]string {
+	m := map[string]string{}
+	m[MainElement] = bt.SQLTypeName
+	return m
 }
 
 // HTMLType return a HTML type name

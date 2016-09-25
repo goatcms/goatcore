@@ -8,6 +8,7 @@ import (
 
 const (
 	sqlType       = "char(300)"
+	sqlTypeKey    = "key"
 	htmlType      = "text"
 	maxlen        = "maxlength"
 	undefinedAttr = "undefinedAttr"
@@ -23,8 +24,15 @@ func TestBaseMetaType(t *testing.T) {
 		},
 	}
 
-	if bt.SQLType() != sqlType {
-		t.Errorf("sql type is wrong %v", bt.SQLType())
+	m := map[string]string{}
+	bt.AddSQLType(sqlTypeKey, m)
+	if m[sqlTypeKey] != sqlType {
+		t.Errorf("sql type is wrong %v != %v", m[sqlTypeKey], sqlType)
+	}
+
+	m = bt.GetSQLType()
+	if m[MainElement] != sqlType {
+		t.Errorf("bt.GetSQLType().MainElement is wrong %v != %v", m[sqlTypeKey], sqlType)
 	}
 
 	if bt.HTMLType() != htmlType {

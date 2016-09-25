@@ -10,8 +10,10 @@ import (
 )
 
 const (
-	TEST_FILE_PATH    = "path/to/file.ex"
-	TEST_FILE_CONTENT = "1234567890qwertyuiopasdfghjkl;'zxcvbnm,./!@#$%^&*()"
+	// TestFilePath is file path for filesystem test
+	TestFilePath = "path/to/file.ex"
+	// TestFileContent is a test file content
+	TestFileContent = "1234567890qwertyuiopasdfghjkl;'zxcvbnm,./!@#$%^&*()"
 )
 
 func TestFilespaceConverter_FromString(t *testing.T) {
@@ -21,7 +23,7 @@ func TestFilespaceConverter_FromString(t *testing.T) {
 		return
 	}
 	converter := NewFilespaceConverter(memFilespace)
-	iInterface, err := converter.FromString(TEST_FILE_PATH)
+	iInterface, err := converter.FromString(TestFilePath)
 	if err != nil {
 		t.Error(err)
 		return
@@ -31,8 +33,8 @@ func TestFilespaceConverter_FromString(t *testing.T) {
 		t.Errorf("converter.FromString result is not types.File instance %v", file)
 		return
 	}
-	if file.Path() != TEST_FILE_PATH {
-		t.Errorf("Path of file must be equels %v != %v", TEST_FILE_PATH, file.Path())
+	if file.Path() != TestFilePath {
+		t.Errorf("Path of file must be equels %v != %v", TestFilePath, file.Path())
 		return
 	}
 }
@@ -44,7 +46,7 @@ func TestFilespaceConverter_FromMultipart(t *testing.T) {
 		return
 	}
 	converter := NewFilespaceConverter(memFilespace)
-	fh := mockmultipart.NewFileHeader([]byte(TEST_FILE_CONTENT))
+	fh := mockmultipart.NewFileHeader([]byte(TestFileContent))
 	iInterface, err := converter.FromMultipart(fh)
 	if err != nil {
 		t.Error(err)
@@ -60,8 +62,8 @@ func TestFilespaceConverter_FromMultipart(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if !testbase.ByteArrayEq(fileContent, []byte(TEST_FILE_CONTENT)) {
-		t.Errorf("converter.FromString result is not types.File instance \n%v \n !=\n %v", string(fileContent), TEST_FILE_CONTENT)
+	if !testbase.ByteArrayEq(fileContent, []byte(TestFileContent)) {
+		t.Errorf("converter.FromString result is not types.File instance \n%v \n !=\n %v", string(fileContent), TestFileContent)
 		return
 	}
 }
@@ -72,14 +74,14 @@ func TestFilespaceConverter_ToString(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	file := NewFile(memFilespace, TEST_FILE_PATH)
+	file := NewFile(memFilespace, TestFilePath)
 	converter := NewFilespaceConverter(memFilespace)
 	str, err := converter.ToString(file)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if str != TEST_FILE_PATH {
+	if str != TestFilePath {
 		t.Errorf("converter.ToString result is incorrect: %v", str)
 		return
 	}

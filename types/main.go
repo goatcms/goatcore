@@ -55,7 +55,8 @@ type CustomType interface {
 
 // MetaType represent type data
 type MetaType interface {
-	SQLType() string
+	GetSQLType() map[string]string
+	AddSQLType(string, map[string]string)
 	HTMLType() string
 	HasAttribute(name string) bool
 	GetAttribute(name string) string
