@@ -18,7 +18,7 @@ type IDType struct {
 // NewIDType create new instance of id type
 func NewIDType(attrs map[string]string) types.CustomType {
 	var ptr *int64
-	return &abstracttype.SimpleCustomType{
+	return &abstracttype.CustomType{
 		SingleCustomType: &IDType{
 			MetaType: abstracttype.MetaType{
 				SQLTypeName:  "int primary key",

@@ -18,7 +18,7 @@ type ContentType struct {
 // NewContentType create new instance of content type with custom attributes
 func NewContentType(attrs map[string]string) types.CustomType {
 	var ptr *string
-	return &abstracttype.SimpleCustomType{
+	return &abstracttype.CustomType{
 		SingleCustomType: &ContentType{
 			MetaType: abstracttype.MetaType{
 				SQLTypeName:  "text",

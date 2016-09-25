@@ -18,7 +18,7 @@ type TitleType struct {
 // NewTitleType create new instance of a email type
 func NewTitleType(attrs map[string]string) types.CustomType {
 	var ptr *string
-	return &abstracttype.SimpleCustomType{
+	return &abstracttype.CustomType{
 		SingleCustomType: &TitleType{
 			MetaType: abstracttype.MetaType{
 				SQLTypeName:  "varchar(100)",

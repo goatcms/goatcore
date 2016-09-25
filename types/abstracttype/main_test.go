@@ -17,7 +17,7 @@ const (
 	testUndefinedAttr = "undefinedAttr"
 )
 
-type TestSimpleCustomType struct {
+type TestCustomType struct {
 	MetaType
 	StringConverter
 	validator.EmptyValidator
@@ -25,7 +25,7 @@ type TestSimpleCustomType struct {
 
 func NewTestSingleCustomType() types.SingleCustomType {
 	var ptr *string
-	return &TestSimpleCustomType{
+	return &TestCustomType{
 		MetaType: MetaType{
 			SQLTypeName:  "varchar(100)",
 			HTMLTypeName: "text",
@@ -35,8 +35,8 @@ func NewTestSingleCustomType() types.SingleCustomType {
 	}
 }
 
-func NewTestSimpleCustomType() types.CustomType {
-	return &SimpleCustomType{
+func NewTestCustomType() types.CustomType {
+	return &CustomType{
 		SingleCustomType: NewTestSingleCustomType(),
 	}
 }
@@ -45,8 +45,8 @@ func NewTestObjectCustomType() types.CustomType {
 	return &ObjectCustomType{
 		SingleCustomType: NewTestSingleCustomType(),
 		Types: map[string]types.CustomType{
-			testFieldOne: NewTestSimpleCustomType(),
-			testFieldTwo: NewTestSimpleCustomType(),
+			testFieldOne: NewTestCustomType(),
+			testFieldTwo: NewTestCustomType(),
 		},
 	}
 }

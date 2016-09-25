@@ -18,7 +18,7 @@ type FileType struct {
 // NewFileType create new instance of a file type
 func NewFileType(attrs map[string]string) types.CustomType {
 	var ptr *types.File
-	return &abstracttype.SimpleCustomType{
+	return &abstracttype.CustomType{
 		SingleCustomType: &FileType{
 			MetaType: abstracttype.MetaType{
 				SQLTypeName:  "varchar(500)",
