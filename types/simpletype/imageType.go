@@ -19,12 +19,14 @@ type ImageType struct {
 // NewImageType create new instance of a image file type
 func NewImageType(attrs map[string]string) types.CustomType {
 	var ptr *types.File
-	return &ImageType{
-		MetaType: abstracttype.MetaType{
-			SQLTypeName:  "varchar(500)",
-			HTMLTypeName: "file",
-			GoTypeRef:    reflect.TypeOf(ptr).Elem(),
-			Attributes:   attrs,
+	return &abstracttype.SimpleCustomType{
+		SingleCustomType: &ImageType{
+			MetaType: abstracttype.MetaType{
+				SQLTypeName:  "varchar(500)",
+				HTMLTypeName: "file",
+				GoTypeRef:    reflect.TypeOf(ptr).Elem(),
+				Attributes:   attrs,
+			},
 		},
 	}
 }

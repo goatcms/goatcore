@@ -18,12 +18,14 @@ type IDType struct {
 // NewIDType create new instance of id type
 func NewIDType(attrs map[string]string) types.CustomType {
 	var ptr *int64
-	return &IDType{
-		MetaType: abstracttype.MetaType{
-			SQLTypeName:  "int primary key",
-			HTMLTypeName: "number",
-			GoTypeRef:    reflect.TypeOf(ptr).Elem(),
-			Attributes:   attrs,
+	return &abstracttype.SimpleCustomType{
+		SingleCustomType: &IDType{
+			MetaType: abstracttype.MetaType{
+				SQLTypeName:  "int primary key",
+				HTMLTypeName: "number",
+				GoTypeRef:    reflect.TypeOf(ptr).Elem(),
+				Attributes:   attrs,
+			},
 		},
 	}
 }

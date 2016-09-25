@@ -13,6 +13,8 @@ const (
 	NotNull = "notnull"
 	// Required is not null and check length>0 attribute for sql
 	Required = "required"
+	// SQLSeparator represent separator for SQL
+	SQLSeparator = "_"
 )
 
 // FileHeader is multipart interface
@@ -48,6 +50,13 @@ type Validator func(interface{}, string, MessageMap) error
 
 // CustomType represent type interface
 type CustomType interface {
+	SingleCustomType
+	GetSubTypes() map[string]CustomType
+	AddSubTypes(string, map[string]CustomType)
+}
+
+// SingleCustomType represent one type interface
+type SingleCustomType interface {
 	MetaType
 	TypeConverter
 	TypeValidator
@@ -55,8 +64,7 @@ type CustomType interface {
 
 // MetaType represent type data
 type MetaType interface {
-	GetSQLType() map[string]string
-	AddSQLType(string, map[string]string)
+	SQLType() string
 	HTMLType() string
 	HasAttribute(name string) bool
 	GetAttribute(name string) string

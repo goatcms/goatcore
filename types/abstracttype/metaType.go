@@ -20,16 +20,9 @@ type MetaType struct {
 	Attributes   map[string]string
 }
 
-// AddSQLType add types to sql types map
-func (bt *MetaType) AddSQLType(base string, m map[string]string) {
-	m[base] = bt.SQLTypeName
-}
-
-// GetSQLType return map of sql types for type
-func (bt *MetaType) GetSQLType() map[string]string {
-	m := map[string]string{}
-	m[MainElement] = bt.SQLTypeName
-	return m
+// SQLType return a SQL type name
+func (bt *MetaType) SQLType() string {
+	return bt.SQLTypeName
 }
 
 // HTMLType return a HTML type name

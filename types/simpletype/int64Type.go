@@ -18,12 +18,14 @@ type Int64Type struct {
 // NewInt64Type create new instance of nt64 type with custom attributes
 func NewInt64Type(attrs map[string]string) types.CustomType {
 	var ptr *int64
-	return &Int64Type{
-		MetaType: abstracttype.MetaType{
-			SQLTypeName:  "int",
-			HTMLTypeName: "number",
-			GoTypeRef:    reflect.TypeOf(ptr).Elem(),
-			Attributes:   attrs,
+	return &abstracttype.SimpleCustomType{
+		SingleCustomType: &Int64Type{
+			MetaType: abstracttype.MetaType{
+				SQLTypeName:  "int",
+				HTMLTypeName: "number",
+				GoTypeRef:    reflect.TypeOf(ptr).Elem(),
+				Attributes:   attrs,
+			},
 		},
 	}
 }

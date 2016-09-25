@@ -6,50 +6,35 @@ import (
 	"github.com/goatcms/goat-core/types"
 )
 
-const (
-	sqlType       = "char(300)"
-	sqlTypeKey    = "key"
-	htmlType      = "text"
-	maxlen        = "maxlength"
-	undefinedAttr = "undefinedAttr"
-)
-
 func TestBaseMetaType(t *testing.T) {
 	bt := MetaType{
-		SQLTypeName:  sqlType,
-		HTMLTypeName: htmlType,
+		SQLTypeName:  testSQLType,
+		HTMLTypeName: testHTMLType,
 		Validators:   []types.Validator{},
 		Attributes: map[string]string{
-			maxlen: "10",
+			testMaxlen: "10",
 		},
 	}
 
-	m := map[string]string{}
-	bt.AddSQLType(sqlTypeKey, m)
-	if m[sqlTypeKey] != sqlType {
-		t.Errorf("sql type is wrong %v != %v", m[sqlTypeKey], sqlType)
+	if bt.SQLType() != testSQLType {
+		t.Errorf("SQLType() is wrong %v != %v", bt.SQLType(), testSQLType)
 	}
 
-	m = bt.GetSQLType()
-	if m[MainElement] != sqlType {
-		t.Errorf("bt.GetSQLType().MainElement is wrong %v != %v", m[sqlTypeKey], sqlType)
-	}
-
-	if bt.HTMLType() != htmlType {
+	if bt.HTMLType() != testHTMLType {
 		t.Errorf("html type is wrong %v", bt.HTMLType())
 	}
 
-	if !bt.HasAttribute(maxlen) {
+	if !bt.HasAttribute(testMaxlen) {
 		t.Errorf("maxlength should be defined %v", bt.Attributes)
 	}
-	if bt.GetAttribute(maxlen) != "10" {
+	if bt.GetAttribute(testMaxlen) != "10" {
 		t.Errorf("maxlength should be '10' (%v)", bt.Attributes)
 	}
 
-	if bt.HasAttribute(undefinedAttr) == true {
+	if bt.HasAttribute(testUndefinedAttr) == true {
 		t.Errorf("undefinedAttr should be undefined")
 	}
-	if bt.GetAttribute(undefinedAttr) != "" {
+	if bt.GetAttribute(testUndefinedAttr) != "" {
 		t.Errorf("undefinedAttr should be empty string")
 	}
 }
