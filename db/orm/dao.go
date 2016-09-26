@@ -10,24 +10,24 @@ import (
 
 // BaseDAO is default dao interface
 type BaseDAO struct {
-	table *BaseTable
+	Table *BaseTable
 }
 
 // NewBaseDAO create new base DAO
 func NewBaseDAO(bt *BaseTable) *BaseDAO {
 	return &BaseDAO{
-		table: bt,
+		Table: bt,
 	}
 }
 
 // FindAll obtain all articles from database
 func (dao *BaseDAO) FindAll(tx db.TX) (*sqlx.Rows, error) {
-	return tx.Queryx(dao.table.selectSQL)
+	return tx.Queryx(dao.Table.selectSQL)
 }
 
 // FindByID obtain article of given ID from database
 func (dao *BaseDAO) FindByID(tx db.TX, id int64) *sqlx.Row {
-	return tx.QueryRowx(dao.table.selectByIDSQL, id)
+	return tx.QueryRowx(dao.Table.selectByIDSQL, id)
 }
 
 // Insert store given articles to database
@@ -36,7 +36,7 @@ func (dao *BaseDAO) Insert(tx db.TX, entity interface{}) (int64, error) {
 		res sql.Result
 		err error
 	)
-	if res, err = tx.NamedExec(dao.table.insertSQL, entity); err != nil {
+	if res, err = tx.NamedExec(dao.Table.insertSQL, entity); err != nil {
 		return 0, err
 	}
 	return res.LastInsertId()
@@ -44,7 +44,7 @@ func (dao *BaseDAO) Insert(tx db.TX, entity interface{}) (int64, error) {
 
 // InsertWithID store given articles to database (It persist with id from entity)
 func (dao *BaseDAO) InsertWithID(tx db.TX, entity interface{}) error {
-	if _, err := tx.NamedExec(dao.table.insertWithIDSQL, entity); err != nil {
+	if _, err := tx.NamedExec(dao.Table.insertWithIDSQL, entity); err != nil {
 		return err
 	}
 	return nil
@@ -57,7 +57,7 @@ func (dao *BaseDAO) Update(tx db.TX, entity interface{}) error {
 		err   error
 		count int64
 	)
-	if res, err = tx.NamedExec(dao.table.updateByIDSQL, entity); err != nil {
+	if res, err = tx.NamedExec(dao.Table.updateByIDSQL, entity); err != nil {
 		return err
 	}
 	if count, err = res.RowsAffected(); err != nil {
@@ -76,7 +76,7 @@ func (dao *BaseDAO) Delete(tx db.TX, id int64) error {
 		err   error
 		count int64
 	)
-	if res, err = tx.NamedExec(dao.table.deleteByIDSQL, &IDContainer{id}); err != nil {
+	if res, err = tx.NamedExec(dao.Table.deleteByIDSQL, &IDContainer{id}); err != nil {
 		return err
 	}
 	if count, err = res.RowsAffected(); err != nil {
@@ -90,6 +90,6 @@ func (dao *BaseDAO) Delete(tx db.TX, id int64) error {
 
 // CreateTable add new table to a database
 func (dao *BaseDAO) CreateTable(tx db.TX) error {
-	tx.MustExec(dao.table.createSQL)
+	tx.MustExec(dao.Table.createSQL)
 	return nil
 }

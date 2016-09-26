@@ -3,6 +3,11 @@ package scope
 const (
 	// KillEvent is kill action for current event
 	KillEvent = 1
+	// ErrorEvent is action for a error
+	ErrorEvent = 1
+
+	// Error is key for error value
+	Error = "error"
 )
 
 // OnFunction is a roolback callback function
