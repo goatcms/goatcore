@@ -2,9 +2,13 @@ package scope
 
 const (
 	// KillEvent is kill action for current event
-	KillEvent = 1
+	KillEvent = iota
 	// ErrorEvent is action for a error
-	ErrorEvent = 1
+	ErrorEvent = iota
+	// CommitEvent is a action run when data is persist
+	CommitEvent = iota
+	// RollbackEvent is a action run when data is restore
+	RollbackEvent = iota
 
 	// Error is key for error value
 	Error = "error"
