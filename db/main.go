@@ -24,6 +24,13 @@ type TX interface {
 	MustExec(query string, args ...interface{}) sql.Result
 }
 
+// Rows represent a query response
+type Rows interface {
+	Close() error
+	Next() bool
+	StructScan(dest interface{}) error
+}
+
 /*package db
 
 import (

@@ -1,8 +1,8 @@
 package entityChan
 
 import (
+	"github.com/goatcms/goat-core/db"
 	"github.com/goatcms/goat-core/scope"
-	"github.com/jmoiron/sqlx"
 )
 
 // Factory create entity intance
@@ -13,7 +13,7 @@ type EntityChan chan interface{}
 
 // ChanCorverter is channel for entities
 type ChanCorverter struct {
-	Rows    *sqlx.Rows
+	Rows    db.Rows
 	Factory Factory
 	Chan    EntityChan
 	Scope   scope.Scope
@@ -21,10 +21,21 @@ type ChanCorverter struct {
 	kill    bool
 }
 
+// NewChanCorverter create new instance of ChanCorverter
+func NewChanCorverter(s scope.Scope, r db.Rows, f Factory) *ChanCorverter {
+	c := &ChanCorverter{
+		Rows:    r,
+		Factory: f,
+		Scope:   s,
+	}
+	c.Init()
+	return c
+}
+
 // Init prepare struct to run
-func (c *ChanCorverter) Init() error {
+func (c *ChanCorverter) Init() {
 	if c.inited {
-		return nil
+		return
 	}
 	if c.Scope != nil {
 		c.Scope.On(scope.KillEvent, c.Kill)
@@ -32,7 +43,6 @@ func (c *ChanCorverter) Init() error {
 	if c.Chan == nil {
 		c.Chan = make(EntityChan, 30)
 	}
-	return nil
 }
 
 // Go convert entities and add to channel

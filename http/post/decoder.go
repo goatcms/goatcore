@@ -10,11 +10,11 @@ import (
 
 // Decoder is global form decoder
 type Decoder struct {
-	structType types.StructType
+	structType types.CustomType
 }
 
 // NewDecoder create a form decder instance
-func NewDecoder(structType types.StructType) *Decoder {
+func NewDecoder(structType types.CustomType) *Decoder {
 	return &Decoder{structType}
 }
 
@@ -25,7 +25,7 @@ func (rd *Decoder) Decode(obj interface{}, req *http.Request) error {
 	if err := req.ParseForm(); err != nil {
 		return err
 	}
-	for key, customType := range rd.structType {
+	for key, customType := range rd.structType.GetSubTypes() {
 		val, ok := req.PostForm[key]
 		if !ok {
 			return fmt.Errorf("can not find %v key of request form", key)

@@ -12,11 +12,11 @@ const _24M = (1 << 20) * 24
 
 // Decoder is global form decoder
 type Decoder struct {
-	structType types.StructType
+	structType types.CustomType
 }
 
 // NewDecoder create a form decder instance
-func NewDecoder(structType types.StructType) *Decoder {
+func NewDecoder(structType types.CustomType) *Decoder {
 	return &Decoder{structType}
 }
 
@@ -30,7 +30,7 @@ func (rd *Decoder) Decode(obj interface{}, req *http.Request) error {
 	if err := req.ParseMultipartForm(0); err != nil {
 		return err
 	}
-	for key, customType := range rd.structType {
+	for key, customType := range rd.structType.GetSubTypes() {
 		val, ok := req.PostForm[key]
 		if ok {
 			data, err := customType.FromString(val[0])

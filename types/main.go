@@ -22,16 +22,6 @@ type FileHeader interface {
 	Open() (multipart.File, error)
 }
 
-// StructType represent map of CustomType values
-type StructType map[string]CustomType
-
-// ValidErrors represent a list of validation messages
-/*type ValidErrors interface {
-	Error() string
-	ErrorMap() map[string]string
-	IsValid() bool
-}*/
-
 // MessageMap contains object errors
 type MessageMap interface {
 	Get(key string) MessageList
