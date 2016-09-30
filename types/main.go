@@ -69,5 +69,6 @@ type TypeConverter interface {
 
 // TypeValidator valid type data
 type TypeValidator interface {
-	Valid(interface{}, string, MessageMap) error
+	AddValid(interface{}, string, MessageMap) error
+	Valid(interface{}) (MessageMap, error)
 }

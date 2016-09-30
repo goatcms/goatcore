@@ -6,6 +6,12 @@ import (
 	"reflect"
 )
 
+// GetField return a field value as interface
+func GetField(obj interface{}, name string) (interface{}, error) {
+	val := reflect.Indirect(reflect.ValueOf(obj))
+	return val.FieldByName(name).Interface(), nil
+}
+
 // SetField set a value of struct
 func SetField(obj interface{}, name string, value interface{}) error {
 	structValue := reflect.ValueOf(obj).Elem()
