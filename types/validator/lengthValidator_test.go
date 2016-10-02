@@ -2,9 +2,10 @@ package validator
 
 import "testing"
 
-func TestEmailValidator_Pass(t *testing.T) {
-	customType := NewTestEmailType()
-	result, err := customType.Valid("myown@email.address")
+func TestLengthValidator_Min_Pass(t *testing.T) {
+	customType := NewTestLengthType()
+	email := "12345"
+	result, err := customType.Valid(email)
 	if err != nil {
 		t.Error(err)
 		return
@@ -15,9 +16,10 @@ func TestEmailValidator_Pass(t *testing.T) {
 	}
 }
 
-func TestEmailValidator_Fail(t *testing.T) {
-	customType := NewTestEmailType()
-	result, err := customType.Valid("sdasdsadasd")
+func TestLengthValidator_Min_Fail(t *testing.T) {
+	customType := NewTestLengthType()
+	email := "1"
+	result, err := customType.Valid(email)
 	if err != nil {
 		t.Error(err)
 		return

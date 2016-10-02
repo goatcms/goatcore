@@ -2,12 +2,12 @@ package validator
 
 import "testing"
 
-func TestObjectValidator_Valid_Pass(t *testing.T) {
+func TestObjectValidator_Pass(t *testing.T) {
 	customType := NewTestObjectCustomType()
 	o := &TestObject{
-		fieldOne:   "one",
-		fieldTwo:   "two",
-		fieldEmail: "email@internet.pl",
+		FieldOne:   "one",
+		FieldTwo:   "two",
+		FieldEmail: "email@internet.pl",
 	}
 	result, err := customType.Valid(o)
 	if err != nil {
@@ -20,12 +20,12 @@ func TestObjectValidator_Valid_Pass(t *testing.T) {
 	}
 }
 
-func TestObjectValidator_Valid_Fail(t *testing.T) {
+func TestObjectValidator_Fail(t *testing.T) {
 	customType := NewTestObjectCustomType()
 	o := &TestObject{
-		fieldOne:   "one",
-		fieldTwo:   "two",
-		fieldEmail: "blablablabla",
+		FieldOne:   "one",
+		FieldTwo:   "two",
+		FieldEmail: "blablablabla",
 	}
 	result, err := customType.Valid(o)
 	if err != nil {

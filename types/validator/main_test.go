@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	testFieldOne      = "fieldOne"
-	testFieldTwo      = "fieldTwo"
-	testFieldEmail    = "fieldEmail"
+	testFieldOne      = "FieldOne"
+	testFieldTwo      = "FieldTwo"
+	testFieldEmail    = "FieldEmail"
 	testSQLType       = "char(300)"
 	testSQLTypeKey    = "key"
 	testHTMLType      = "text"
@@ -19,9 +19,9 @@ const (
 )
 
 type TestObject struct {
-	fieldOne   string
-	fieldTwo   string
-	fieldEmail string
+	FieldOne   string
+	FieldTwo   string
+	FieldEmail string
 }
 
 type TestCustomType struct {
@@ -34,6 +34,17 @@ type TestEmailType struct {
 	abstracttype.MetaType
 	abstracttype.StringConverter
 	EmailValidator
+}
+
+type TestLengthType struct {
+	abstracttype.MetaType
+	abstracttype.StringConverter
+	LengthValidator
+}
+
+type TestObjectType struct {
+	abstracttype.ObjectCustomType
+	ObjectValidator
 }
 
 func NewTestSingleCustomType() types.SingleCustomType {
@@ -50,13 +61,26 @@ func NewTestSingleCustomType() types.SingleCustomType {
 
 func NewTestSingleEmailType() types.SingleCustomType {
 	var ptr *string
-	return &TestCustomType{
+	return &TestEmailType{
 		MetaType: abstracttype.MetaType{
 			SQLTypeName:  "varchar(100)",
 			HTMLTypeName: "email",
 			GoTypeRef:    reflect.TypeOf(ptr).Elem(),
 			Attributes:   make(map[string]string),
 		},
+	}
+}
+
+func NewTestSingleLengthType() types.SingleCustomType {
+	var ptr *string
+	return &TestLengthType{
+		MetaType: abstracttype.MetaType{
+			SQLTypeName:  "varchar(100)",
+			HTMLTypeName: "email",
+			GoTypeRef:    reflect.TypeOf(ptr).Elem(),
+			Attributes:   make(map[string]string),
+		},
+		LengthValidator: NewLengthValidator(3, 7),
 	}
 }
 
@@ -72,13 +96,25 @@ func NewTestEmailType() types.CustomType {
 	}
 }
 
+func NewTestLengthType() types.CustomType {
+	return &abstracttype.CustomType{
+		SingleCustomType: NewTestSingleLengthType(),
+	}
+}
+
 func NewTestObjectCustomType() types.CustomType {
-	return &abstracttype.ObjectCustomType{
-		SingleCustomType: NewTestSingleCustomType(),
-		Types: map[string]types.CustomType{
-			testFieldOne:   NewTestCustomType(),
-			testFieldTwo:   NewTestCustomType(),
-			testFieldEmail: NewTestEmailType(),
+	types := map[string]types.CustomType{
+		testFieldOne:   NewTestCustomType(),
+		testFieldTwo:   NewTestCustomType(),
+		testFieldEmail: NewTestEmailType(),
+	}
+	return &TestObjectType{
+		ObjectCustomType: abstracttype.ObjectCustomType{
+			SingleCustomType: NewTestSingleCustomType(),
+			Types:            types,
+		},
+		ObjectValidator: ObjectValidator{
+			Types: types,
 		},
 	}
 }
