@@ -20,10 +20,10 @@ const (
 type TestCustomType struct {
 	MetaType
 	StringConverter
-	validator.EmptyValidator
 }
 
-func NewTestSingleCustomType() types.SingleCustomType {
+/*
+func NewTestSingleCustomType() types.CustomType {
 	var ptr *string
 	return &TestCustomType{
 		MetaType: MetaType{
@@ -33,20 +33,39 @@ func NewTestSingleCustomType() types.SingleCustomType {
 			Attributes:   make(map[string]string),
 		},
 	}
-}
+}*/
 
 func NewTestCustomType() types.CustomType {
-	return &CustomType{
-		SingleCustomType: NewTestSingleCustomType(),
+	var ptr *string
+	return &SimpleCustomType{
+		MetaType: &MetaType{
+			SQLTypeName:  "varchar(100)",
+			HTMLTypeName: "text",
+			GoTypeRef:    reflect.TypeOf(ptr).Elem(),
+			Attributes:   make(map[string]string),
+		},
+		TypeConverter: NewStringConverter(),
+		TypeValidator: validator.NewNoValidator(),
 	}
 }
 
 func NewTestObjectCustomType() types.CustomType {
+	var ptr *string
+	types := map[string]types.CustomType{
+		testFieldOne: NewTestCustomType(),
+		testFieldTwo: NewTestCustomType(),
+	}
 	return &ObjectCustomType{
-		SingleCustomType: NewTestSingleCustomType(),
-		Types: map[string]types.CustomType{
-			testFieldOne: NewTestCustomType(),
-			testFieldTwo: NewTestCustomType(),
+		MetaType: &MetaType{
+			SQLTypeName:  "varchar(100)",
+			HTMLTypeName: "text",
+			GoTypeRef:    reflect.TypeOf(ptr).Elem(),
+			Attributes:   make(map[string]string),
+		},
+		TypeConverter: NewStringConverter(),
+		Types:         types,
+		TypeValidator: validator.ObjectValidator{
+			Types: types,
 		},
 	}
 }

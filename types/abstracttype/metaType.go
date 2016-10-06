@@ -1,10 +1,6 @@
 package abstracttype
 
-import (
-	"reflect"
-
-	"github.com/goatcms/goat-core/types"
-)
+import "reflect"
 
 const (
 	// MainElement is default name for eleemnt in tables with single field
@@ -16,7 +12,6 @@ type MetaType struct {
 	SQLTypeName  string
 	HTMLTypeName string
 	GoTypeRef    reflect.Type
-	Validators   []types.Validator
 	Attributes   map[string]string
 }
 

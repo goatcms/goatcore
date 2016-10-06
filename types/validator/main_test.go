@@ -24,97 +24,65 @@ type TestObject struct {
 	FieldEmail string
 }
 
-type TestCustomType struct {
-	abstracttype.MetaType
-	abstracttype.StringConverter
-	EmptyValidator
-}
-
-type TestEmailType struct {
-	abstracttype.MetaType
-	abstracttype.StringConverter
-	EmailValidator
-}
-
-type TestLengthType struct {
-	abstracttype.MetaType
-	abstracttype.StringConverter
-	LengthValidator
-}
-
-type TestObjectType struct {
-	abstracttype.ObjectCustomType
-	ObjectValidator
-}
-
-func NewTestSingleCustomType() types.SingleCustomType {
+func NewTestCustomType() types.CustomType {
 	var ptr *string
-	return &TestCustomType{
-		MetaType: abstracttype.MetaType{
+	return &abstracttype.SimpleCustomType{
+		MetaType: &abstracttype.MetaType{
 			SQLTypeName:  "varchar(100)",
 			HTMLTypeName: "text",
 			GoTypeRef:    reflect.TypeOf(ptr).Elem(),
 			Attributes:   make(map[string]string),
 		},
-	}
-}
-
-func NewTestSingleEmailType() types.SingleCustomType {
-	var ptr *string
-	return &TestEmailType{
-		MetaType: abstracttype.MetaType{
-			SQLTypeName:  "varchar(100)",
-			HTMLTypeName: "email",
-			GoTypeRef:    reflect.TypeOf(ptr).Elem(),
-			Attributes:   make(map[string]string),
-		},
-	}
-}
-
-func NewTestSingleLengthType() types.SingleCustomType {
-	var ptr *string
-	return &TestLengthType{
-		MetaType: abstracttype.MetaType{
-			SQLTypeName:  "varchar(100)",
-			HTMLTypeName: "email",
-			GoTypeRef:    reflect.TypeOf(ptr).Elem(),
-			Attributes:   make(map[string]string),
-		},
-		LengthValidator: NewLengthValidator(3, 7),
-	}
-}
-
-func NewTestCustomType() types.CustomType {
-	return &abstracttype.CustomType{
-		SingleCustomType: NewTestSingleCustomType(),
+		TypeConverter: abstracttype.NewStringConverter(),
+		TypeValidator: NewNoValidator(),
 	}
 }
 
 func NewTestEmailType() types.CustomType {
-	return &abstracttype.CustomType{
-		SingleCustomType: NewTestSingleEmailType(),
+	var ptr *string
+	return &abstracttype.SimpleCustomType{
+		MetaType: &abstracttype.MetaType{
+			SQLTypeName:  "varchar(100)",
+			HTMLTypeName: "text",
+			GoTypeRef:    reflect.TypeOf(ptr).Elem(),
+			Attributes:   map[string]string{},
+		},
+		TypeConverter: abstracttype.NewStringConverter(),
+		TypeValidator: NewEmailValidator(),
 	}
 }
 
 func NewTestLengthType() types.CustomType {
-	return &abstracttype.CustomType{
-		SingleCustomType: NewTestSingleLengthType(),
+	var ptr *string
+	return &abstracttype.SimpleCustomType{
+		MetaType: &abstracttype.MetaType{
+			SQLTypeName:  "varchar(100)",
+			HTMLTypeName: "text",
+			GoTypeRef:    reflect.TypeOf(ptr).Elem(),
+			Attributes:   map[string]string{},
+		},
+		TypeConverter: abstracttype.NewStringConverter(),
+		TypeValidator: NewLengthValidator(3, 7),
 	}
 }
 
 func NewTestObjectCustomType() types.CustomType {
+	var ptr *TestObject
+	goTypeRef := reflect.TypeOf(ptr).Elem()
 	types := map[string]types.CustomType{
 		testFieldOne:   NewTestCustomType(),
 		testFieldTwo:   NewTestCustomType(),
 		testFieldEmail: NewTestEmailType(),
 	}
-	return &TestObjectType{
-		ObjectCustomType: abstracttype.ObjectCustomType{
-			SingleCustomType: NewTestSingleCustomType(),
-			Types:            types,
+	return &abstracttype.ObjectCustomType{
+		MetaType: &abstracttype.MetaType{
+			SQLTypeName:  "text",
+			HTMLTypeName: "text",
+			GoTypeRef:    goTypeRef,
+			Attributes:   map[string]string{},
 		},
-		ObjectValidator: ObjectValidator{
-			Types: types,
-		},
+		TypeConverter: abstracttype.NewObjectConverterFromType(goTypeRef),
+		TypeValidator: NewObjectValidator(types),
+		Types:         types,
 	}
 }

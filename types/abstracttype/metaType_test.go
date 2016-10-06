@@ -1,16 +1,11 @@
 package abstracttype
 
-import (
-	"testing"
-
-	"github.com/goatcms/goat-core/types"
-)
+import "testing"
 
 func TestBaseMetaType(t *testing.T) {
 	bt := MetaType{
 		SQLTypeName:  testSQLType,
 		HTMLTypeName: testHTMLType,
-		Validators:   []types.Validator{},
 		Attributes: map[string]string{
 			testMaxlen: "10",
 		},

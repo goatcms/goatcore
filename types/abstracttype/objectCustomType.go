@@ -4,7 +4,9 @@ import "github.com/goatcms/goat-core/types"
 
 // ObjectCustomType represent abstract to sub types iterate
 type ObjectCustomType struct {
-	types.SingleCustomType
+	types.MetaType
+	types.TypeConverter
+	types.TypeValidator
 	Types map[string]types.CustomType
 }
 

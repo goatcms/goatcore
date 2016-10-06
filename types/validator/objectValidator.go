@@ -11,6 +11,13 @@ type ObjectValidator struct {
 	Types map[string]types.CustomType
 }
 
+// NewObjectValidator create new instance of ObjectValidator
+func NewObjectValidator(types map[string]types.CustomType) ObjectValidator {
+	return ObjectValidator{
+		Types: types,
+	}
+}
+
 // AddValid add new valid result to a list
 func (v ObjectValidator) AddValid(ival interface{}, basekey string, mm types.MessageMap) error {
 	var (

@@ -36,20 +36,27 @@ type MessageList interface {
 }
 
 // Validator represent a single validator
-type Validator func(interface{}, string, MessageMap) error
+//type Validator func(interface{}, string, MessageMap) error
 
 // CustomType represent type interface
 type CustomType interface {
-	SingleCustomType
-	GetSubTypes() map[string]CustomType
-	AddSubTypes(string, map[string]CustomType)
-}
-
-// SingleCustomType represent one type interface
-type SingleCustomType interface {
 	MetaType
 	TypeConverter
 	TypeValidator
+	TypeIterable
+}
+
+// SingleCustomType represent one type interface
+/*type SingleCustomType interface {
+	MetaType
+	TypeConverter
+	TypeValidator
+}*/
+
+// TypeIterable provide interface
+type TypeIterable interface {
+	GetSubTypes() map[string]CustomType
+	AddSubTypes(string, map[string]CustomType)
 }
 
 // MetaType represent type data

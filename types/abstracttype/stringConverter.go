@@ -6,8 +6,20 @@ import (
 	"github.com/goatcms/goat-core/types"
 )
 
+var (
+	instance *StringConverter
+)
+
 // StringConverter is converter for strings
 type StringConverter struct{}
+
+// NewStringConverter return instance of string converter
+func NewStringConverter() *StringConverter {
+	if instance == nil {
+		instance = &StringConverter{}
+	}
+	return instance
+}
 
 // FromString decode string value
 func (s *StringConverter) FromString(value string) (interface{}, error) {

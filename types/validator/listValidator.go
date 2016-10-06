@@ -7,13 +7,13 @@ import (
 
 // ListValidator represent list of a validator for a field
 type ListValidator struct {
-	Validators []types.Validator
+	Validators []types.TypeValidator
 }
 
 // AddValid add new valid result to a list
 func (lv ListValidator) AddValid(ival interface{}, basekey string, mm types.MessageMap) error {
 	for _, validator := range lv.Validators {
-		if err := validator(ival, basekey, mm); err != nil {
+		if err := validator.AddValid(ival, basekey, mm); err != nil {
 			return err
 		}
 	}

@@ -8,24 +8,17 @@ import (
 	"github.com/goatcms/goat-core/types/validator"
 )
 
-// IDType represent id type
-type IDType struct {
-	abstracttype.MetaType
-	abstracttype.StringConverter
-	validator.EmptyValidator
-}
-
 // NewIDType create new instance of id type
 func NewIDType(attrs map[string]string) types.CustomType {
 	var ptr *int64
-	return &abstracttype.CustomType{
-		SingleCustomType: &IDType{
-			MetaType: abstracttype.MetaType{
-				SQLTypeName:  "int primary key",
-				HTMLTypeName: "number",
-				GoTypeRef:    reflect.TypeOf(ptr).Elem(),
-				Attributes:   attrs,
-			},
+	return &abstracttype.SimpleCustomType{
+		MetaType: &abstracttype.MetaType{
+			SQLTypeName:  "int primary key",
+			HTMLTypeName: "number",
+			GoTypeRef:    reflect.TypeOf(ptr).Elem(),
+			Attributes:   attrs,
 		},
+		TypeConverter: abstracttype.NewInt64Converter(),
+		TypeValidator: validator.NewNoValidator(),
 	}
 }
