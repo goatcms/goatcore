@@ -3,23 +3,25 @@ package orm
 import (
 	"testing"
 
+	"github.com/goatcms/goat-core/filesystem"
+	"github.com/goatcms/goat-core/filesystem/filespace/memfs"
 	"github.com/goatcms/goat-core/types"
 	"github.com/goatcms/goat-core/types/simpletype"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var (
-	tableTypes = map[string]types.CustomType{
-		"title":   simpletype.NewTitleType(map[string]string{types.Required: "true"}),
-		"content": simpletype.NewContentType(map[string]string{}),
-		"image":   simpletype.NewImageType(map[string]string{types.Required: "true"}),
-	}
-)
-
 const (
 	testTable = "testtable"
 )
+
+func NewTestTypes(fs filesystem.Filespace) map[string]types.CustomType {
+	return map[string]types.CustomType{
+		"title":   simpletype.NewTitleType(map[string]string{types.Required: "true"}),
+		"content": simpletype.NewContentType(map[string]string{}),
+		"image":   simpletype.NewImageType(map[string]string{types.Required: "true"}, fs),
+	}
+}
 
 type testScope struct {
 	bdtx  *sqlx.DB
@@ -39,7 +41,12 @@ func newTestScope() (*testScope, error) {
 	if err != nil {
 		return nil, err
 	}
-	table := NewBaseTable(testTable, tableTypes)
+	fs, err := memfs.NewFilespace()
+	if err != nil {
+		return nil, err
+	}
+	types := NewTestTypes(fs)
+	table := NewBaseTable(testTable, types)
 	dao := NewBaseDAO(table)
 	dao.CreateTable(bdtx)
 	if err != nil {
