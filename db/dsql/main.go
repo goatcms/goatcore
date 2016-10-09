@@ -82,9 +82,9 @@ func NewSQLType(t types.CustomType) string {
 
 // NewCreateSQL create new create table query
 func NewCreateSQL(table string, types map[string]types.CustomType) string {
-	var i = 0
+	var i = 1
 	sql := "CREATE TABLE " + table + " (\n"
-	sql += "id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+	sql += "id INTEGER PRIMARY KEY AUTOINCREMENT"
 	for name, customType := range types {
 		if i > 0 {
 			sql += ",\n"

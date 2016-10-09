@@ -27,7 +27,7 @@ func TestFixturesFindAll(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if err := lodaFixtures(context); err != nil {
+	if err = lodaFixtures(context); err != nil {
 		t.Error(err)
 		return
 	}
@@ -167,11 +167,11 @@ func TestDelete(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if err := lodaFixtures(context); err != nil {
+	if err = lodaFixtures(context); err != nil {
 		t.Error(err)
 		return
 	}
-	if err := context.dao.Delete(context.bdtx, 10); err != nil {
+	if err = context.dao.Delete(context.bdtx, 10); err != nil {
 		t.Error(err)
 		return
 	}
