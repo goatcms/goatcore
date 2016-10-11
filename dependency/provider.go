@@ -2,6 +2,7 @@ package dependency
 
 import (
 	"fmt"
+	"reflect"
 )
 
 // DefaultProvider is default dependency distributor
@@ -45,6 +46,36 @@ func (d *DefaultProvider) AddService(name string, factory Factory) error {
 // AddDefaultService add default service (it can be overwrite by AddService)
 func (d *DefaultProvider) AddDefaultService(name string, factory Factory) error {
 	return d.addDefault(name, factory, true)
+}
+
+// InjectTo inject dependencies to object
+func (d *DefaultProvider) InjectTo(obj interface{}) error {
+	structValue := reflect.ValueOf(obj).Elem()
+	for i := 0; i < structValue.NumField(); i++ {
+		valueField := structValue.Field(i)
+		structField := structValue.Type().Field(i)
+
+		depID := structField.Tag.Get(InjectTagName)
+		if depID == "" {
+			continue
+		}
+		if !valueField.IsValid() {
+			return fmt.Errorf("DependencyProvider.InjectTo: %s is not valid", structField.Name)
+		}
+		if !valueField.CanSet() {
+			return fmt.Errorf("DependencyProvider.InjectTo: Cannot set %s field value", structField.Name)
+		}
+		dep, err := d.Get(depID)
+		if err != nil {
+			return err
+		}
+		if dep == nil {
+			return fmt.Errorf("DependencyProvider.InjectTo: dependency instance can not be nil (%s)", depID)
+		}
+		depValue := reflect.ValueOf(dep)
+		valueField.Set(depValue)
+	}
+	return nil
 }
 
 /*func (d *DefaultProvider) AddDefaultFactory(name string, factory Factory) error {

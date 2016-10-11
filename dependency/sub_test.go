@@ -49,6 +49,20 @@ func TestSubServiceStory(t *testing.T) {
 	}
 }
 
+func TestSubInjectTo(t *testing.T) {
+	dp := NewProvider()
+	if err := dp.AddService(MyDepName, MyDepFactory); err != nil {
+		t.Error("Add service fail", err)
+		return
+	}
+	o1 := &SimpleObject{}
+	dp.InjectTo(o1)
+	if o1.Instance == nil {
+		t.Error("o1.Instance should contains loaded dependency")
+		return
+	}
+}
+
 func TestSubCircleStory(t *testing.T) {
 	dp := NewSubProvider(NewProvider())
 	if err := dp.AddService(MyCircleDepName, MyCircleDepFactory); err != nil {

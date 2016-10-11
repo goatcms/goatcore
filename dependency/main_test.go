@@ -49,7 +49,7 @@ func MyCircleDepFactory(dp Provider) (Instance, error) {
 }
 
 type SimpleObject struct {
-	Instance *MyDep
+	Instance *MyDep `inject:"MyDep"`
 }
 
 func (o *SimpleObject) Load(dp *Provider) error {

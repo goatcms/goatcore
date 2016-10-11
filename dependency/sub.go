@@ -2,6 +2,7 @@ package dependency
 
 import (
 	"fmt"
+	"reflect"
 )
 
 // SubProvider is default sub-dependency provider
@@ -28,6 +29,36 @@ func (d *SubProvider) Get(faceName string) (Instance, error) {
 		return instance, nil
 	}
 	return d.parent.Get(faceName)
+}
+
+// InjectTo inject dependencies to object
+func (d *SubProvider) InjectTo(obj interface{}) error {
+	structValue := reflect.ValueOf(obj).Elem()
+	for i := 0; i < structValue.NumField(); i++ {
+		valueField := structValue.Field(i)
+		structField := structValue.Type().Field(i)
+
+		depID := structField.Tag.Get(InjectTagName)
+		if depID == "" {
+			continue
+		}
+		if !valueField.IsValid() {
+			return fmt.Errorf("DependencyProvider.InjectTo: %s is not valid", structField.Name)
+		}
+		if !valueField.CanSet() {
+			return fmt.Errorf("DependencyProvider.InjectTo: Cannot set %s field value", structField.Name)
+		}
+		dep, err := d.Get(depID)
+		if err != nil {
+			return err
+		}
+		if dep == nil {
+			return fmt.Errorf("DependencyProvider.InjectTo: dependency instance can not be nil (%s)", depID)
+		}
+		depValue := reflect.ValueOf(dep)
+		valueField.Set(depValue)
+	}
+	return nil
 }
 
 // GetAll return a map of all dependency builders

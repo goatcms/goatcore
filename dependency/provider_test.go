@@ -51,6 +51,20 @@ func TestServiceStory(t *testing.T) {
 	}
 }
 
+func TestInjectTo(t *testing.T) {
+	dp := NewProvider()
+	if err := dp.AddService(MyDepName, MyDepFactory); err != nil {
+		t.Error("Add service fail", err)
+		return
+	}
+	o1 := &SimpleObject{}
+	dp.InjectTo(o1)
+	if o1.Instance == nil {
+		t.Error("o1.Instance should contains loaded dependency")
+		return
+	}
+}
+
 /*func TestFactoryStory(t *testing.T) {
 	dp := dependency.NewProvider()
 	if err := dp.AddFactory(MyDepName, MyDepFactory); err != nil {

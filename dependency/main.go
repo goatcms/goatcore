@@ -1,5 +1,12 @@
 package dependency
 
+const (
+	// InjectTagName is name use for extract dependency name from tag
+	InjectTagName = "inject"
+	// SelfName is name to inject itsself
+	SelfName = "provider"
+)
+
 // Instance represent instance of a service
 type Instance interface{}
 
@@ -14,6 +21,7 @@ type Provider interface {
 	//AddFactory(string, Factory) error
 	AddDefaultService(string, Factory) error
 	//AddDefaultFactory(string, Factory) error
+	InjectTo(obj interface{}) error
 }
 
 // Loadable represents loadable interface
