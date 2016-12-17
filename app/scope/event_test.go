@@ -1,25 +1,25 @@
-package corescope
+package scope
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/goatcms/goat-core/scope"
+	"github.com/goatcms/goat-core/app"
 )
 
-func TestSimpleStory(t *testing.T) {
+func TestEventStory(t *testing.T) {
 	var called1 = false
 	var called2 = false
-	c := NewScope(nil)
-	c.On(scope.KillEvent, func(s scope.Scope) error {
+	c := NewEventScope()
+	c.On(app.KillEvent, func() error {
 		called1 = true
 		return nil
 	})
-	c.On(scope.KillEvent, func(s scope.Scope) error {
+	c.On(app.KillEvent, func() error {
 		called2 = true
 		return nil
 	})
-	if err := c.Trigger(scope.KillEvent); err != nil {
+	if err := c.Trigger(app.KillEvent); err != nil {
 		t.Error(err)
 		return
 	}
@@ -29,11 +29,11 @@ func TestSimpleStory(t *testing.T) {
 }
 
 func TestErrorStory(t *testing.T) {
-	c := NewScope(nil)
-	c.On(scope.KillEvent, func(s scope.Scope) error {
+	c := NewEventScope()
+	c.On(app.KillEvent, func() error {
 		return fmt.Errorf("something is wrong")
 	})
-	if err := c.Trigger(scope.KillEvent); err == nil {
+	if err := c.Trigger(app.KillEvent); err == nil {
 		t.Errorf("Trigger should return error if a function is failed")
 	}
 }

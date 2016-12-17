@@ -1,8 +1,8 @@
 package entityChan
 
 import (
+	"github.com/goatcms/goat-core/app"
 	"github.com/goatcms/goat-core/db"
-	"github.com/goatcms/goat-core/scope"
 )
 
 // Factory create entity intance
@@ -16,13 +16,13 @@ type ChanCorverter struct {
 	Rows    db.Rows
 	Factory Factory
 	Chan    EntityChan
-	Scope   scope.Scope
+	Scope   app.Scope
 	inited  bool
 	kill    bool
 }
 
 // NewChanCorverter create new instance of ChanCorverter
-func NewChanCorverter(s scope.Scope, r db.Rows, f Factory) *ChanCorverter {
+func NewChanCorverter(s app.Scope, r db.Rows, f Factory) *ChanCorverter {
 	c := &ChanCorverter{
 		Rows:    r,
 		Factory: f,
@@ -38,7 +38,7 @@ func (c *ChanCorverter) Init() {
 		return
 	}
 	if c.Scope != nil {
-		c.Scope.On(scope.KillEvent, c.Kill)
+		c.Scope.On(app.KillEvent, c.Kill)
 	}
 	if c.Chan == nil {
 		c.Chan = make(EntityChan, 30)
@@ -52,9 +52,9 @@ func (c *ChanCorverter) Go() {
 	for c.Rows.Next() && !c.kill {
 		entity := c.Factory()
 		if err := c.Rows.StructScan(entity); err != nil {
-			c.Scope.Set(scope.Error, err)
-			c.Scope.Trigger(scope.ErrorEvent)
-			c.Scope.Trigger(scope.KillEvent)
+			c.Scope.Set(app.Error, err)
+			c.Scope.Trigger(app.ErrorEvent)
+			c.Scope.Trigger(app.KillEvent)
 			c.close()
 			return
 		}
@@ -73,7 +73,7 @@ func (c *ChanCorverter) close() error {
 }
 
 // Kill thread
-func (c *ChanCorverter) Kill(scope.Scope) error {
+func (c *ChanCorverter) Kill() error {
 	// select & case is fix to get element without deadlock
 	select {
 	case _, ok := <-c.Chan:

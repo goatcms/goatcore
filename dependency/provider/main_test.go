@@ -1,8 +1,11 @@
-package dependency
+package provider
+
+import "github.com/goatcms/goat-core/dependency"
 
 const (
 	MyDepName       = "MyDep"
 	MyCircleDepName = "MyCircleDep"
+	TagName         = "inject"
 )
 
 type MyDepInterface interface {
@@ -13,13 +16,6 @@ type MyDepInterface interface {
 
 type MyDep struct {
 	value int
-}
-
-type MyCircleDepInterface interface {
-}
-
-type MyCircleDep struct {
-	instance MyCircleDepInterface
 }
 
 func (d *MyDep) IsItOk() bool {
@@ -34,11 +30,18 @@ func (d *MyDep) Set(v int) {
 	d.value = v
 }
 
-func MyDepFactory(dp Provider) (Instance, error) {
+type MyCircleDepInterface interface {
+}
+
+type MyCircleDep struct {
+	instance MyCircleDepInterface
+}
+
+func MyDepFactory(dp dependency.Provider) (dependency.Instance, error) {
 	return &MyDep{}, nil
 }
 
-func MyCircleDepFactory(dp Provider) (Instance, error) {
+func MyCircleDepFactory(dp dependency.Provider) (dependency.Instance, error) {
 	instance, err := dp.Get(MyCircleDepName)
 	if err != nil {
 		return nil, err
@@ -50,13 +53,4 @@ func MyCircleDepFactory(dp Provider) (Instance, error) {
 
 type SimpleObject struct {
 	Instance *MyDep `inject:"MyDep"`
-}
-
-func (o *SimpleObject) Load(dp *Provider) error {
-	ins, err := (*dp).Get(MyDepName)
-	if err != nil {
-		return err
-	}
-	o.Instance = ins.(*MyDep)
-	return nil
 }
