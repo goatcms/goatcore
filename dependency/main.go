@@ -1,16 +1,17 @@
 package dependency
 
+// Instance represent instance of a service
 type Instance interface{}
+
+// Factory represent a builder of a dependency instance
 type Factory func(Provider) (Instance, error)
 
+// Provider distribute dependencies
 type Provider interface {
 	Get(string) (Instance, error)
-	AddService(string, Factory) error
+	Set(string, Instance) error
+	Keys() []string
 	AddFactory(string, Factory) error
-	AddDefaultService(string, Factory) error
 	AddDefaultFactory(string, Factory) error
-}
-
-type Loadable interface {
-	Load(*Provider) error
+	InjectTo(obj interface{}) error
 }

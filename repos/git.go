@@ -2,10 +2,11 @@ package repos
 
 import (
 	"fmt"
-	"github.com/goatcms/goat-core/filesystem"
-	"github.com/goatcms/goat-core/varutil"
 	"os"
 	"os/exec"
+
+	"github.com/goatcms/goat-core/filesystem/disk"
+	"github.com/goatcms/goat-core/varutil"
 )
 
 type GitRepository struct {
@@ -24,7 +25,7 @@ func (r *GitRepository) Init(path string) {
 }
 
 func (r *GitRepository) Clone(url string) error {
-	if !filesystem.IsDir(r.path) {
+	if !disk.IsDir(r.path) {
 		os.MkdirAll(r.path, 0777)
 	}
 
