@@ -4,7 +4,6 @@ import (
 	"github.com/goatcms/goat-core/app"
 	"github.com/goatcms/goat-core/app/scope"
 	"github.com/goatcms/goat-core/dependency"
-	"github.com/goatcms/goat-core/dependency/provider"
 )
 
 // DependencyScope represent dependency scope lvl
@@ -14,10 +13,10 @@ type DependencyScope struct {
 }
 
 // NewDependencyScope create new dependency scope
-func NewDependencyScope(tagname string) app.Scope {
+func NewDependencyScope(dp dependency.Provider) app.Scope {
 	return DependencyScope{
 		EventScope: scope.NewEventScope(),
-		DP:         provider.NewProvider(tagname),
+		DP:         dp,
 	}
 }
 

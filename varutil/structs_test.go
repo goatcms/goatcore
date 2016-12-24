@@ -1,10 +1,6 @@
 package varutil
 
-import (
-	"testing"
-
-	"github.com/stretchr/testify/assert"
-)
+import "testing"
 
 type MyStruct struct {
 	Name string
@@ -21,8 +17,14 @@ func TestFillStruct(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	assert.Equal(t, mapData["Name"], structData.Name, "mapData and structData Name must be equal (%v %v)", mapData, structData)
-	assert.Equal(t, mapData["Age"], structData.Age, "mapData and structData Age must be equal (%v %v)", mapData, structData)
+	if mapData["Name"] != structData.Name {
+		t.Errorf("mapData and structData Name must be equal (%v %v)", mapData["Name"], structData.Name)
+		return
+	}
+	if mapData["Age"] != structData.Age {
+		t.Errorf("mapData and structData Age must be equal (%v %v)", mapData["Age"], structData.Age)
+		return
+	}
 }
 
 func TestLoadStruct(t *testing.T) {
@@ -35,6 +37,12 @@ func TestLoadStruct(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	assert.Equal(t, mapData["Name"], structData.Name, "mapData and structData Name must be equal (%v %v)", mapData, structData)
-	assert.Equal(t, mapData["myage"], structData.Age, "mapData and structData Age must be equal (%v %v)", mapData, structData)
+	if mapData["Name"] != structData.Name {
+		t.Errorf("mapData and structData Name must be equal (%v %v)", mapData["Name"], structData.Name)
+		return
+	}
+	if mapData["Age"] != nil {
+		t.Errorf("mapData and structData Age must be equal (%v %v)", mapData["Age"], structData.Age)
+		return
+	}
 }

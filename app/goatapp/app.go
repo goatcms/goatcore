@@ -3,8 +3,9 @@ package goatapp
 import (
 	"github.com/goatcms/goat-core/app"
 	"github.com/goatcms/goat-core/app/args"
-	"github.com/goatcms/goat-core/app/injector"
 	"github.com/goatcms/goat-core/app/scope"
+	"github.com/goatcms/goat-core/dependency"
+	"github.com/goatcms/goat-core/dependency/provider"
 	"github.com/goatcms/goat-core/filesystem"
 	"github.com/goatcms/goat-core/filesystem/filespace/diskfs"
 	"github.com/goatcms/goat-core/filesystem/json"
@@ -26,6 +27,8 @@ type GoatApp struct {
 	dependencyScope app.Scope
 	appScope        app.Scope
 	commandScope    app.Scope
+
+	dp dependency.Provider
 }
 
 const (
@@ -62,23 +65,15 @@ func NewGoatApp(name, version, basePath string) (*GoatApp, error) {
 		return nil, err
 	}
 
-	dataScope := &scope.DataScope{
-		Data: make(map[string]interface{}),
-	}
-	gapp.globalScope = scope.Scope{
-		EventScope: scope.NewEventScope(),
-		DataScope:  dataScope,
-		Injector: injector.NewMultiInjector([]app.Injector{
-			gapp.commandScope,
-			gapp.appScope,
-			gapp.dependencyScope,
-			gapp.configScope,
-			gapp.filespaceScope,
-			gapp.argsScope,
-			gapp.engineScope,
-			dataScope.Injector(app.GlobalTagName),
-		}),
-	}
+	gapp.globalScope = NewGlobalScope(app.GlobalTagName, []app.Scope{
+		gapp.commandScope,
+		gapp.appScope,
+		gapp.dependencyScope,
+		gapp.configScope,
+		gapp.filespaceScope,
+		gapp.argsScope,
+		gapp.engineScope,
+	})
 
 	gapp.globalScope.Set(app.EngineScope, gapp.engineScope)
 	gapp.globalScope.Set(app.ArgsScope, gapp.argsScope)
@@ -87,6 +82,7 @@ func NewGoatApp(name, version, basePath string) (*GoatApp, error) {
 	gapp.globalScope.Set(app.DependencyScope, gapp.dependencyScope)
 	gapp.globalScope.Set(app.AppScope, gapp.appScope)
 	gapp.globalScope.Set(app.CommandScope, gapp.commandScope)
+	gapp.globalScope.Set(app.GlobalScope, gapp.globalScope)
 
 	return gapp, nil
 }
@@ -145,7 +141,8 @@ func (gapp *GoatApp) initCommandScope() error {
 }
 
 func (gapp *GoatApp) initDependencyScope() error {
-	gapp.dependencyScope = NewDependencyScope(app.DependencyTagName)
+	gapp.dp = provider.NewProvider(app.DependencyTagName)
+	gapp.dependencyScope = NewDependencyScope(gapp.dp)
 	return nil
 }
 
@@ -204,4 +201,9 @@ func (gapp *GoatApp) AppScope() app.Scope {
 // CommandScope return command scope
 func (gapp *GoatApp) CommandScope() app.Scope {
 	return gapp.commandScope
+}
+
+// DependencyProvider return dependency provider
+func (gapp *GoatApp) DependencyProvider() dependency.Provider {
+	return gapp.dp
 }

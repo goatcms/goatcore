@@ -53,8 +53,8 @@ func (c *ChanCorverter) Go() {
 		entity := c.Factory()
 		if err := c.Rows.StructScan(entity); err != nil {
 			c.Scope.Set(app.Error, err)
-			c.Scope.Trigger(app.ErrorEvent)
-			c.Scope.Trigger(app.KillEvent)
+			c.Scope.Trigger(app.ErrorEvent, nil)
+			c.Scope.Trigger(app.KillEvent, nil)
 			c.close()
 			return
 		}
@@ -73,7 +73,7 @@ func (c *ChanCorverter) close() error {
 }
 
 // Kill thread
-func (c *ChanCorverter) Kill() error {
+func (c *ChanCorverter) Kill(interface{}) error {
 	// select & case is fix to get element without deadlock
 	select {
 	case _, ok := <-c.Chan:

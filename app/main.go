@@ -1,6 +1,9 @@
 package app
 
-import "github.com/goatcms/goat-core/filesystem"
+import (
+	"github.com/goatcms/goat-core/dependency"
+	"github.com/goatcms/goat-core/filesystem"
+)
 
 const (
 	// KillEvent is kill action for current event
@@ -63,6 +66,8 @@ const (
 	AppScope = "AppScope"
 	// CommandScope is a command scope
 	CommandScope = "CommandScope"
+	// CommandScope is a command scope
+	GlobalScope = "GlobalScope"
 
 	//RootFilespace is key for root filesystem.Filespace
 	RootFilespace = "root"
@@ -85,6 +90,9 @@ const (
 	DefaultUInt64Value = 0
 )
 
+// EventCallback is a callback function with data
+type EventCallback func(interface{}) error
+
 // Callback is a callback function
 type Callback func() error
 
@@ -102,8 +110,8 @@ type DataScope interface {
 
 // EventScope provide event interface
 type EventScope interface {
-	Trigger(int) error
-	On(int, Callback)
+	Trigger(int, interface{}) error
+	On(int, EventCallback)
 }
 
 // Scope is global scope interface
@@ -129,11 +137,8 @@ type Bootstrap interface {
 
 // App represent a app
 type App interface {
-	// Metadata
 	Name() string
 	Version() string
-
-	// Scopes & Engine
 	RootFilespace() filesystem.Filespace
 	GlobalScope() Scope
 	EngineScope() Scope
@@ -143,4 +148,5 @@ type App interface {
 	DependencyScope() Scope
 	AppScope() Scope
 	CommandScope() Scope
+	DependencyProvider() dependency.Provider
 }
