@@ -42,13 +42,20 @@ func (m *Module) InitDependency(injector app.Injector) error {
 // Run is run event callback
 func (m *Module) Run() error {
 	deps := m.dependencies
+	keys, err := deps.CommandScope.Keys()
+	if err != nil {
+		return err
+	}
 
 	fmt.Println(deps.Name, " ", deps.Version)
 	fmt.Println(deps.Welcome)
 	fmt.Println()
 	fmt.Println("Commands:")
-	for _, key := range deps.CommandScope.Keys() {
-		helpStr := deps.CommandScope.Get(key)
+	for _, key := range keys {
+		helpStr, err := deps.CommandScope.Get(key)
+		if err != nil {
+			return err
+		}
 		if strings.HasPrefix(key, "help.") {
 			fmt.Println(" ", key[5:], ": ", helpStr)
 		}

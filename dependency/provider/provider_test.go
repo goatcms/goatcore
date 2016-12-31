@@ -25,7 +25,7 @@ func NewOne() TestInterface {
 	return One{}
 }
 
-func OneFactory(dp dependency.Provider) (dependency.Instance, error) {
+func OneFactory(dp dependency.Provider) (interface{}, error) {
 	return NewOne(), nil
 }
 
@@ -45,7 +45,7 @@ func NewTwo() TestInterface {
 	return &Two{}
 }
 
-func TwoFactory(dp dependency.Provider) (dependency.Instance, error) {
+func TwoFactory(dp dependency.Provider) (interface{}, error) {
 	two := NewTwo()
 	if err := dp.InjectTo(two); err != nil {
 		return nil, err
@@ -65,11 +65,11 @@ type ObjectWithUnrequired struct {
 	Some TestInterface `inject:"?dep"`
 }
 
-func NewCircle() dependency.Instance {
+func NewCircle() interface{} {
 	return &Circle{}
 }
 
-func CircleFactory(dp dependency.Provider) (dependency.Instance, error) {
+func CircleFactory(dp dependency.Provider) (interface{}, error) {
 	ins := NewCircle()
 	if err := dp.InjectTo(ins); err != nil {
 		return nil, err

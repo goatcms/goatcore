@@ -24,17 +24,17 @@ func (ds *DataScope) Set(key string, v interface{}) error {
 }
 
 // Get get value from context
-func (ds *DataScope) Get(key string) interface{} {
-	return ds.Data[key]
+func (ds *DataScope) Get(key string) (interface{}, error) {
+	return ds.Data[key], nil
 }
 
 // Keys get map data
-func (ds *DataScope) Keys() []string {
+func (ds *DataScope) Keys() ([]string, error) {
 	keys := make([]string, 0, len(ds.Data))
 	for k := range ds.Data {
 		keys = append(keys, k)
 	}
-	return keys
+	return keys, nil
 }
 
 // Injector create new injector for the data scope

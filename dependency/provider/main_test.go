@@ -37,11 +37,11 @@ type MyCircleDep struct {
 	instance MyCircleDepInterface
 }
 
-func MyDepFactory(dp dependency.Provider) (dependency.Instance, error) {
+func MyDepFactory(dp dependency.Provider) (interface{}, error) {
 	return &MyDep{}, nil
 }
 
-func MyCircleDepFactory(dp dependency.Provider) (dependency.Instance, error) {
+func MyCircleDepFactory(dp dependency.Provider) (interface{}, error) {
 	instance, err := dp.Get(MyCircleDepName)
 	if err != nil {
 		return nil, err

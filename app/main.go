@@ -14,6 +14,8 @@ const (
 	CommitEvent = iota
 	// RollbackEvent is a action run when data is restore
 	RollbackEvent = iota
+	// BeforeCloseEvent is a action run during application close
+	BeforeCloseEvent = iota
 
 	// Error is key for error value
 	Error = "error"
@@ -104,8 +106,8 @@ type Injector interface {
 // DataScope provide data provider
 type DataScope interface {
 	Set(string, interface{}) error
-	Get(string) interface{}
-	Keys() []string
+	Get(string) (interface{}, error)
+	Keys() ([]string, error)
 }
 
 // EventScope provide event interface
@@ -124,7 +126,7 @@ type Scope interface {
 // Module represent a app module
 type Module interface {
 	RegisterDependencies(App) error
-	InitDependencies(Injector) error
+	InitDependencies(App) error
 	Run() error
 }
 

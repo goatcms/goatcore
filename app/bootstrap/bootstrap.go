@@ -44,9 +44,8 @@ func (b Bootstrap) Init() error {
 			return err
 		}
 	}
-	engineScope := b.gapp.EngineScope()
 	for _, module := range b.modules {
-		if err := module.InitDependencies(engineScope); err != nil {
+		if err := module.InitDependencies(b.gapp); err != nil {
 			return err
 		}
 	}

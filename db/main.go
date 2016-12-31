@@ -47,7 +47,7 @@ const (
 	DbName = "db"
 )
 
-func DbFactory(dp dependency.Provider) (dependency.Instance, error) {
+func DbFactory(dp dependency.Provider) (interface{}, error) {
 	ins := dp.Get(config.ConfigName)
 	config := ins.(config.Config)
 	dbConfig := config.Database
@@ -63,14 +63,14 @@ func DbFactory(dp dependency.Provider) (dependency.Instance, error) {
 	}
 }
 
-func CreateMyslq(dbConfig *config.Database) (dependency.Instance, error) {
+func CreateMyslq(dbConfig *config.Database) (interface{}, error) {
 	return sql.Open("mysql", config.Source)
 }
 
-func CreatePgsql(dbConfig *config.Database) (dependency.Instance, error) {
+func CreatePgsql(dbConfig *config.Database) (interface{}, error) {
 	return sql.Open("postgres", config.Source)
 }
 
-func CreateSqlite(dbConfig *config.Database) (dependency.Instance, error) {
+func CreateSqlite(dbConfig *config.Database) (interface{}, error) {
 	return sql.Open("sqlite3", config.Source)
 }*/

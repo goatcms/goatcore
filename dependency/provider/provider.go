@@ -12,7 +12,7 @@ import (
 type Provider struct {
 	defaults  map[string]dependency.Factory
 	factories map[string]dependency.Factory
-	instances map[string]dependency.Instance
+	instances map[string]interface{}
 	callstack []string
 	keys      []string
 	blocked   bool
@@ -24,7 +24,7 @@ func NewProvider(tagname string) dependency.Provider {
 	return &Provider{
 		defaults:  map[string]dependency.Factory{},
 		factories: map[string]dependency.Factory{},
-		instances: map[string]dependency.Instance{},
+		instances: map[string]interface{}{},
 		callstack: []string{},
 		keys:      []string{},
 		blocked:   false,
@@ -32,9 +32,28 @@ func NewProvider(tagname string) dependency.Provider {
 	}
 }
 
+// NewStaticProvider create a dependency provider from Factories map. It is static (mean that it is pre-defined and blocked for modifications)
+func NewStaticProvider(tagname string, factories map[string]dependency.Factory) dependency.Provider {
+	keys := make([]string, len(factories))
+	i := 0
+	for key, _ := range factories {
+		keys[i] = key
+		i++
+	}
+	return &Provider{
+		defaults:  map[string]dependency.Factory{},
+		factories: map[string]dependency.Factory{},
+		instances: map[string]interface{}{},
+		callstack: []string{},
+		keys:      keys,
+		blocked:   true,
+		tagname:   tagname,
+	}
+}
+
 // Keys return list of all defined dependencies names
-func (d *Provider) Keys() []string {
-	return d.keys
+func (d *Provider) Keys() ([]string, error) {
+	return d.keys, nil
 }
 
 // Block prevent nev dependency definition
@@ -43,7 +62,7 @@ func (d *Provider) Block() {
 }
 
 // Get return instance by name
-func (d *Provider) Get(name string) (dependency.Instance, error) {
+func (d *Provider) Get(name string) (interface{}, error) {
 	d.blocked = true
 	if d.isCalled(name) {
 		return nil, fmt.Errorf("%s is cyclic dependency (dependency callstack: %v)", name, append(d.callstack, name))
@@ -83,7 +102,7 @@ func (d *Provider) Get(name string) (dependency.Instance, error) {
 }
 
 // Set define new instance
-func (d *Provider) Set(name string, instance dependency.Instance) error {
+func (d *Provider) Set(name string, instance interface{}) error {
 	if d.blocked {
 		return fmt.Errorf("goatcore/dependency/provider: can not add new instance after first get dependency (for %s)", name)
 	}
