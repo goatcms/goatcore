@@ -10,25 +10,27 @@ import (
 
 // Provider is default dependency distributor
 type Provider struct {
-	defaults  map[string]dependency.Factory
-	factories map[string]dependency.Factory
-	instances map[string]interface{}
-	callstack []string
-	keys      []string
-	blocked   bool
-	tagname   string
+	defaultFactories map[string]dependency.Factory
+	factories        map[string]dependency.Factory
+	defaultInstances map[string]interface{}
+	instances        map[string]interface{}
+	callstack        []string
+	keys             []string
+	blocked          bool
+	tagname          string
 }
 
 // NewProvider create new instance of a depenedency provider
 func NewProvider(tagname string) dependency.Provider {
 	return &Provider{
-		defaults:  map[string]dependency.Factory{},
-		factories: map[string]dependency.Factory{},
-		instances: map[string]interface{}{},
-		callstack: []string{},
-		keys:      []string{},
-		blocked:   false,
-		tagname:   tagname,
+		defaultFactories: map[string]dependency.Factory{},
+		factories:        map[string]dependency.Factory{},
+		defaultInstances: map[string]interface{}{},
+		instances:        map[string]interface{}{},
+		callstack:        []string{},
+		keys:             []string{},
+		blocked:          false,
+		tagname:          tagname,
 	}
 }
 
@@ -41,13 +43,14 @@ func NewStaticProvider(tagname string, factories map[string]dependency.Factory) 
 		i++
 	}
 	return &Provider{
-		defaults:  map[string]dependency.Factory{},
-		factories: map[string]dependency.Factory{},
-		instances: map[string]interface{}{},
-		callstack: []string{},
-		keys:      keys,
-		blocked:   true,
-		tagname:   tagname,
+		defaultFactories: map[string]dependency.Factory{},
+		factories:        map[string]dependency.Factory{},
+		defaultInstances: map[string]interface{}{},
+		instances:        map[string]interface{}{},
+		callstack:        []string{},
+		keys:             keys,
+		blocked:          true,
+		tagname:          tagname,
 	}
 }
 
@@ -58,12 +61,23 @@ func (d *Provider) Keys() ([]string, error) {
 
 // Block prevent nev dependency definition
 func (d *Provider) Block() {
+	if d.blocked == true {
+		return
+	}
+	for key, defaultVal := range d.defaultInstances {
+		if _, ok := d.instances[key]; !ok {
+			delete(d.defaultFactories, key)
+			delete(d.factories, key)
+			d.instances[key] = defaultVal
+		}
+	}
+	d.defaultInstances = nil
 	d.blocked = true
 }
 
 // Get return instance by name
 func (d *Provider) Get(name string) (interface{}, error) {
-	d.blocked = true
+	d.Block()
 	if d.isCalled(name) {
 		return nil, fmt.Errorf("%s is cyclic dependency (dependency callstack: %v)", name, append(d.callstack, name))
 	}
@@ -84,7 +98,7 @@ func (d *Provider) Get(name string) (interface{}, error) {
 		d.instances[name] = instance
 		return instance, nil
 	}
-	if factory, exist := d.defaults[name]; exist {
+	if factory, exist := d.defaultFactories[name]; exist {
 		d.callstack = append(d.callstack, name)
 		instance, err := factory(d)
 		if err != nil {
@@ -94,26 +108,41 @@ func (d *Provider) Get(name string) (interface{}, error) {
 			return nil, fmt.Errorf("default factory for %s return nil as instance", name)
 		}
 		d.callstack = d.callstack[:len(d.callstack)-1]
-		delete(d.defaults, name)
+		delete(d.defaultFactories, name)
 		d.instances[name] = instance
 		return instance, nil
 	}
 	return nil, fmt.Errorf("goatcore/dependency/provider: dependency %s doesn't exist", name)
 }
 
-// Set define new instance
+// Set instance
 func (d *Provider) Set(name string, instance interface{}) error {
 	if d.blocked {
-		return fmt.Errorf("goatcore/dependency/provider: can not add new instance after first get dependency (for %s)", name)
+		return fmt.Errorf("goatcore/dependency/provider.Set: can not add new instance after got dependency (for %s)", name)
 	}
 	if _, exist := d.instances[name]; exist {
-		return fmt.Errorf("goatcore/dependency/provider: dependency %s exist (and musn't be overwrited)", name)
+		return fmt.Errorf("goatcore/dependency/provider.Set: dependency %s exist (musn't be overwrited)", name)
 	}
 	if _, exist := d.factories[name]; exist {
-		return fmt.Errorf("goatcore/dependency/provider: dependency %s factory exist (and value musn't be overwrited)", name)
+		return fmt.Errorf("goatcore/dependency/provider.Set: dependency %s factory exists (value musn't be overwrited)", name)
 	}
-	d.keys = append(d.keys, name)
 	d.instances[name] = instance
+	d.addKey(name)
+	return nil
+}
+
+// Set defult instance
+func (d *Provider) SetDefault(name string, instance interface{}) error {
+	if d.blocked {
+		return fmt.Errorf("goatcore/dependency/provider.SetDefault: can not add default instance after got dependency (for %s)", name)
+	}
+	if _, exist := d.defaultInstances[name]; exist {
+		return fmt.Errorf("goatcore/dependency/provider.SetDefault: dependency %s exist (musn't be overwrited)", name)
+	}
+	if _, exist := d.defaultFactories[name]; exist {
+		return fmt.Errorf("goatcore/dependency/provider.SetDefault: dependency %s factory exists (musn't be overwrited)", name)
+	}
+	d.defaultInstances[name] = instance
 	d.addKey(name)
 	return nil
 }
@@ -137,14 +166,14 @@ func (d *Provider) AddDefaultFactory(name string, factory dependency.Factory) er
 	if d.blocked {
 		return fmt.Errorf("goatcore/dependency/provider: can not add factory after first get dependency (for %s)", name)
 	}
-	if _, exist := d.defaults[name]; exist {
+	if _, exist := d.defaultFactories[name]; exist {
 		return fmt.Errorf("goatcore/dependency/provider: default factory for '%s' double defined", name)
 	}
 	if _, exist := d.factories[name]; exist {
 		// when we have got defined factory for a field default factory wont be used
 		return nil
 	}
-	d.defaults[name] = factory
+	d.defaultFactories[name] = factory
 	d.addKey(name)
 	return nil
 }
@@ -192,8 +221,8 @@ func (d *Provider) clean(name string) {
 	if _, exist := d.factories[name]; exist {
 		delete(d.factories, name)
 	}
-	if _, exist := d.defaults[name]; exist {
-		delete(d.defaults, name)
+	if _, exist := d.defaultFactories[name]; exist {
+		delete(d.defaultFactories, name)
 	}
 }
 

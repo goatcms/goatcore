@@ -215,3 +215,46 @@ func TestUnrequiredSkipInjection(t *testing.T) {
 		t.Errorf("o.Some must be null for unrequired and undefined dependency")
 	}
 }
+
+func TestSet(t *testing.T) {
+	dp := NewProvider(TagName)
+	if err := dp.Set("dep", NewOne()); err != nil {
+		t.Error(err)
+		return
+	}
+	o := &ObjectWithRequired{
+		Some: nil,
+	}
+	if err := dp.InjectTo(o); err != nil {
+		t.Error(err)
+		return
+	}
+	if o.Some == nil {
+		t.Errorf("o.Some can not be null after dependency injection")
+	}
+}
+
+func TestSetDefault(t *testing.T) {
+	dp := NewProvider(TagName)
+	if err := dp.Set("dep", NewTwo()); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := dp.SetDefault("dep", NewOne()); err != nil {
+		t.Error(err)
+		return
+	}
+	o := &ObjectWithRequired{
+		Some: nil,
+	}
+	if err := dp.InjectTo(o); err != nil {
+		t.Error(err)
+		return
+	}
+	if o.Some == nil {
+		t.Errorf("o.Some can not be null after dependency injection")
+	}
+	if o.Some.Value() == 2 {
+		t.Errorf("o.Some.Value() should return 2 (for Two type)")
+	}
+}

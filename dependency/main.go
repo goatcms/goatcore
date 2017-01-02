@@ -7,6 +7,7 @@ type Factory func(Provider) (interface{}, error)
 type Provider interface {
 	Get(string) (interface{}, error)
 	Set(string, interface{}) error
+	SetDefault(string, interface{}) error
 	Keys() ([]string, error)
 	AddFactory(string, Factory) error
 	AddDefaultFactory(string, Factory) error
