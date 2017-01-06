@@ -1,45 +1,40 @@
 package orm
 
 import (
-	"github.com/goatcms/goat-core/db/dsql"
+	"github.com/goatcms/goat-core/db"
 	"github.com/goatcms/goat-core/types"
 )
 
-// BaseTable represent a database table
-type BaseTable struct {
-	table           string
-	fields          []string
-	types           map[string]types.CustomType
-	selectSQL       string
-	selectByIDSQL   string
-	insertSQL       string
-	insertWithIDSQL string
-	updateByIDSQL   string
-	deleteByIDSQL   string
-	createSQL       string
+// Table represent a database table
+type Table struct {
+	name   string
+	fields []string
+	types  map[string]types.CustomType
 }
 
-// NewBaseTable create new base database table accessor
-func NewBaseTable(table string, types map[string]types.CustomType) *BaseTable {
-	fieldsWithID := make([]string, len(types)+1)
-	fieldsWithID[0] = "id"
+func (t Table) Name() string {
+	return t.name
+}
+
+func (t Table) Fields() []string {
+	return t.fields
+}
+
+func (t Table) Types() map[string]types.CustomType {
+	return t.types
+}
+
+// NewTable create new base database table accessor
+func NewTable(name string, types map[string]types.CustomType) db.Table {
 	fields := make([]string, len(types))
 	i := 0
-	for name := range types {
+	for name, _ := range types {
 		fields[i] = name
-		fieldsWithID[i+1] = name
 		i++
 	}
-	return &BaseTable{
-		table:           table,
-		types:           types,
-		fields:          fields,
-		selectSQL:       dsql.NewSelectSQL(table, fields),
-		selectByIDSQL:   dsql.NewSelectWhereSQL(table, fields, "id=:$1"),
-		insertSQL:       dsql.NewInsertSQL(table, fields),
-		insertWithIDSQL: dsql.NewInsertSQL(table, fieldsWithID),
-		updateByIDSQL:   dsql.NewUpdateWhereSQL(table, fields, "id=:id"),
-		deleteByIDSQL:   dsql.NewDeleteWhereSQL(table, "id=:id"),
-		createSQL:       dsql.NewCreateSQL(table, types),
+	return &Table{
+		name:   name,
+		types:  types,
+		fields: fields,
 	}
 }

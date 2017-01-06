@@ -1,8 +1,9 @@
 package orm
 
 import (
-	"testing"
-
+	"github.com/goatcms/goat-core/db"
+	"github.com/goatcms/goat-core/db/adapter"
+	"github.com/goatcms/goat-core/db/dsql"
 	"github.com/goatcms/goat-core/filesystem"
 	"github.com/goatcms/goat-core/filesystem/filespace/memfs"
 	"github.com/goatcms/goat-core/types"
@@ -12,7 +13,7 @@ import (
 )
 
 const (
-	testTable = "testtable"
+	TestTableName = "TestTable"
 )
 
 func NewTestTypes(fs filesystem.Filespace) map[string]types.CustomType {
@@ -24,9 +25,10 @@ func NewTestTypes(fs filesystem.Filespace) map[string]types.CustomType {
 }
 
 type testScope struct {
-	bdtx  *sqlx.DB
-	dao   *BaseDAO
-	table *BaseTable
+	tx    db.TX
+	table db.Table
+	dsql  db.DSQL
+	fs    filesystem.Filespace
 }
 
 type TestEntity struct {
@@ -37,7 +39,7 @@ type TestEntity struct {
 }
 
 func newTestScope() (*testScope, error) {
-	bdtx, err := sqlx.Open("sqlite3", ":memory:")
+	db, err := sqlx.Open("sqlite3", ":memory:")
 	if err != nil {
 		return nil, err
 	}
@@ -45,76 +47,24 @@ func newTestScope() (*testScope, error) {
 	if err != nil {
 		return nil, err
 	}
-	types := NewTestTypes(fs)
-	table := NewBaseTable(testTable, types)
-	dao := NewBaseDAO(table)
-	dao.CreateTable(bdtx)
-	if err != nil {
-		return nil, err
-	}
+	table := NewTable(TestTableName, NewTestTypes(fs))
 	return &testScope{
 		table: table,
-		dao:   dao,
-		bdtx:  bdtx,
+		dsql:  dsql.NewDSQL(),
+		tx:    adapter.NewTXFromDB(db),
+		fs:    fs,
 	}, nil
 }
 
-func lodaFixtures(s *testScope) error {
-	if _, err := s.bdtx.NamedExec(s.table.insertWithIDSQL, &TestEntity{10, "title1", "content1", "path1"}); err != nil {
-		return err
-	}
-	if _, err := s.bdtx.NamedExec(s.table.insertWithIDSQL, TestEntity{20, "title2", "content2", "path2"}); err != nil {
-		return err
-	}
-	return nil
-}
-
-func loadResult(rows *sqlx.Rows) ([]TestEntity, error) {
-	result := []TestEntity{}
+func countResult(rows db.Rows) (int64, error) {
+	counter := int64(0)
 	for rows.Next() {
 		row := TestEntity{}
 		err := rows.StructScan(&row)
 		if err != nil {
-			return nil, err
+			return -1, err
 		}
-		result = append(result, row)
+		counter++
 	}
-	return result, nil
-}
-
-/*func compareResult(t *testing.T, context *testScope, expectetResult []TestEntity) {
-
-	compareSlice(t, result, expectetResult)
-}*/
-
-func compareSlice(t *testing.T, result, expectetResult []TestEntity) {
-	if len(result) != len(expectetResult) {
-		t.Errorf("table contains %v records (findAll return %v records)", len(expectetResult), len(result))
-		return
-	}
-	for _, row := range expectetResult {
-		finded := false
-		for i, resRow := range result {
-			if compareEntity(row, resRow) {
-				result = append(result[:i], result[i+1:]...)
-				finded = true
-				break
-			}
-		}
-		if finded == false {
-			t.Errorf("A result doesn't contain a expected record %v (in result: %v)", row, result)
-			return
-		}
-	}
-	if len(result) != 0 {
-		t.Errorf("A result contains more records than expected %v", result)
-		return
-	}
-}
-
-func compareEntity(row TestEntity, expectet TestEntity) bool {
-	return row.ID == expectet.ID &&
-		row.Title == expectet.Title &&
-		row.Content == expectet.Content &&
-		row.Image == expectet.Image
+	return counter, nil
 }
