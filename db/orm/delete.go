@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/goatcms/goat-core/db"
-	"github.com/goatcms/goat-core/dependency"
 )
 
 // DeleteContext is context for findByID function
@@ -42,16 +41,4 @@ func NewDelete(table db.Table, dsql db.DSQL) (db.Delete, error) {
 		query: query,
 	}
 	return context.Delete, nil
-}
-
-// CreateTableContext create new CreateTable function
-func NewDeleteFactory(table db.Table) dependency.Factory {
-	return func(dp dependency.Provider) (interface{}, error) {
-		dsqlIns, err := dp.Get(db.DSQLService)
-		if err != nil {
-			return nil, err
-		}
-		dsql := dsqlIns.(db.DSQL)
-		return NewDelete(table, dsql)
-	}
 }

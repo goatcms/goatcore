@@ -14,7 +14,6 @@ func TestCreateTable(t *testing.T) {
 		return
 	}
 	if err = ct(scope.tx); err != nil {
-		// first create table should be ok
 		t.Error(err)
 		return
 	}

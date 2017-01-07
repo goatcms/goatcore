@@ -1,9 +1,6 @@
 package orm
 
-import (
-	"github.com/goatcms/goat-core/db"
-	"github.com/goatcms/goat-core/dependency"
-)
+import "github.com/goatcms/goat-core/db"
 
 // FindByIDContext is context for findByID function
 type FindByIDContext struct {
@@ -26,16 +23,4 @@ func NewFindByID(table db.Table, dsql db.DSQL) (db.FindByID, error) {
 		query: query,
 	}
 	return context.FindByID, nil
-}
-
-// CreateTableContext create new CreateTable function
-func NewFindByIDFactory(table db.Table) dependency.Factory {
-	return func(dp dependency.Provider) (interface{}, error) {
-		dsqlIns, err := dp.Get(db.DSQLService)
-		if err != nil {
-			return nil, err
-		}
-		dsql := dsqlIns.(db.DSQL)
-		return NewFindByID(table, dsql)
-	}
 }
