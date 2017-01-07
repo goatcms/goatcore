@@ -1,11 +1,10 @@
-package command
+package terminal
 
 import (
 	"fmt"
 	"strings"
 
 	"github.com/goatcms/goat-core/app"
-	"github.com/goatcms/goat-core/app/goatapp"
 )
 
 // ModuleDependencies is a dependencies for the module
@@ -24,18 +23,20 @@ type Module struct {
 }
 
 // NewModule create new command module instance
-func NewModule() *Module {
-	return &Module{}
+func NewModule() app.Module {
+	return app.Module(&Module{})
 }
 
 // RegisterDependency is init callback to register module dependencies
-func (m *Module) RegisterDependency(goatapp.GoatApp) error {
+func (m *Module) RegisterDependencies(app.App) error {
 	return nil
 }
 
 // InitDependency is init callback to inject dependencies inside module
-func (m *Module) InitDependency(injector app.Injector) error {
-	injector.InjectTo(m.dependencies)
+func (m *Module) InitDependencies(app app.App) error {
+	if err := app.DependencyProvider().InjectTo(m.dependencies); err != nil {
+		return err
+	}
 	return nil
 }
 

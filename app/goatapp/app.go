@@ -207,3 +207,7 @@ func (gapp *GoatApp) CommandScope() app.Scope {
 func (gapp *GoatApp) DependencyProvider() dependency.Provider {
 	return gapp.dp
 }
+
+func (gapp *GoatApp) RootFilespace() filesystem.Filespace {
+	return gapp.rootFilespace
+}
