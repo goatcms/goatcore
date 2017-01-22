@@ -1,8 +1,9 @@
 package dsql
 
 import (
+	"fmt"
+
 	"github.com/goatcms/goat-core/db"
-	"github.com/goatcms/goat-core/types"
 )
 
 type DSQL struct{}
@@ -13,9 +14,14 @@ func NewDSQL() db.DSQL {
 
 // NewSelectSQL create new select query
 func (dsql DSQL) NewSelectSQL(table string, fields []string) (string, error) {
-	sql := "SELECT id"
+	sql := "SELECT "
+	i := 0
 	for _, row := range fields {
-		sql += ", " + row
+		if i > 0 {
+			sql += ", "
+		}
+		sql += row
+		i++
 	}
 	return sql + " FROM " + table, nil
 }
@@ -81,38 +87,18 @@ func (dsql DSQL) NewDeleteWhereSQL(table string, where string) (string, error) {
 	return deleteSQL + " WHERE " + where, nil
 }
 
-// NewSQLType create a sql type description
-func (dsql DSQL) NewSQLType(t types.CustomType) (string, error) {
-	s := t.SQLType()
-	if t.HasAttribute(types.Unique) {
-		s += " UNIQUE"
-	}
-	if t.HasAttribute(types.Primary) {
-		s += " PRIMARY KEY"
-	}
-	if t.HasAttribute(types.NotNull) {
-		s += " NOT NULL"
-	}
-	if t.HasAttribute(types.Required) {
-		s += " NOT NULL"
-	}
-	return s, nil
-}
-
 // NewCreateSQL create new create table query
-func (dsql DSQL) NewCreateSQL(table string, types map[string]types.CustomType) (string, error) {
-	var i = 1
+func (dsql DSQL) NewCreateSQL(table string, types map[string]string) (string, error) {
 	sql := "CREATE TABLE " + table + " (\n"
-	sql += "id INTEGER PRIMARY KEY AUTOINCREMENT"
-	for name, customType := range types {
+	i := 0
+	if len(types) == 0 {
+		return "", fmt.Errorf("types can not be empty")
+	}
+	for name, typeDesc := range types {
 		if i > 0 {
 			sql += ",\n"
 		}
-		typeStr, err := dsql.NewSQLType(customType)
-		if err != nil {
-			return "", err
-		}
-		sql += name + " " + typeStr
+		sql += name + " " + typeDesc
 		i++
 	}
 	return sql + ")", nil

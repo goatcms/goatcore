@@ -2,6 +2,7 @@ package orm
 
 import (
 	"database/sql"
+	"strings"
 
 	"github.com/goatcms/goat-core/db"
 	"github.com/goatcms/goat-core/varutil"
@@ -33,7 +34,17 @@ func (q InsertContext) Insert(tx db.TX, entity interface{}) (int64, error) {
 
 // InsertContext create new dao function instance
 func NewInsert(table db.Table, dsql db.DSQL) (db.Insert, error) {
-	query, err := dsql.NewInsertSQL(table.Name(), table.Fields())
+	fromFields := table.Fields()
+	fields := make([]string, len(fromFields))
+	i := 0
+	for _, v := range fromFields {
+		if strings.ToLower(v) != "id" {
+			fields[i] = v
+			i++
+		}
+	}
+	fields = fields[:i]
+	query, err := dsql.NewInsertSQL(table.Name(), fields)
 	if err != nil {
 		return nil, err
 	}

@@ -254,7 +254,7 @@ func TestSetDefault(t *testing.T) {
 	if o.Some == nil {
 		t.Errorf("o.Some can not be null after dependency injection")
 	}
-	if o.Some.Value() == 2 {
-		t.Errorf("o.Some.Value() should return 2 (for Two type)")
+	if o.Some.Value() != 2 {
+		t.Errorf("o.Some.Value() should return 2 (for Two type). It return %v", o.Some.Value())
 	}
 }

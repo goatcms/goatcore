@@ -1,6 +1,10 @@
 package goatapp
 
 import (
+	"os"
+	"strconv"
+	"strings"
+
 	"github.com/goatcms/goat-core/app"
 	"github.com/goatcms/goat-core/app/args"
 	"github.com/goatcms/goat-core/app/scope"
@@ -88,11 +92,7 @@ func NewGoatApp(name, version, basePath string) (*GoatApp, error) {
 }
 
 func (gapp *GoatApp) initEngineScope() error {
-	gapp.argsScope = scope.Scope{
-		EventScope: scope.NewEventScope(),
-		DataScope:  scope.NewDataScope(map[string]interface{}{}),
-		Injector:   args.NewInjector(app.EngineTagName),
-	}
+	gapp.engineScope = scope.NewScope(app.EngineTagName)
 	gapp.engineScope.Set(app.GoatVersion, app.GoatVersionValue)
 	return nil
 }
@@ -102,6 +102,15 @@ func (gapp *GoatApp) initArgsScope() error {
 		EventScope: scope.NewEventScope(),
 		DataScope:  scope.NewDataScope(map[string]interface{}{}),
 		Injector:   args.NewInjector(app.ArgsTagName),
+	}
+	for i, value := range os.Args {
+		gapp.argsScope.Set("$"+strconv.Itoa(i), value)
+		index := strings.Index(value, "=")
+		if index != -1 {
+			name := value[:index]
+			value := value[index+1:]
+			gapp.argsScope.Set(name, value)
+		}
 	}
 	return nil
 }
@@ -165,7 +174,7 @@ func (gapp *GoatApp) Version() string {
 
 // GlobalScope return global scope
 func (gapp *GoatApp) GlobalScope() app.Scope {
-	return gapp.engineScope
+	return gapp.globalScope
 }
 
 // EngineScope return engine scope

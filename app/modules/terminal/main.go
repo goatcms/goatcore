@@ -34,9 +34,10 @@ func (m *Module) RegisterDependencies(app.App) error {
 
 // InitDependency is init callback to inject dependencies inside module
 func (m *Module) InitDependencies(app app.App) error {
-	if err := app.DependencyProvider().InjectTo(m.dependencies); err != nil {
+	if err := app.GlobalScope().InjectTo(&m.dependencies); err != nil {
 		return err
 	}
+	fmt.Println("(&m.dependencies", &m.dependencies)
 	return nil
 }
 
@@ -49,21 +50,25 @@ func (m *Module) Run() error {
 	}
 
 	fmt.Println(deps.Name, " ", deps.Version)
-	fmt.Println(deps.Welcome)
+	if deps.Welcome != "" {
+		fmt.Println(deps.Welcome)
+	}
 	fmt.Println()
 	fmt.Println("Commands:")
 	for _, key := range keys {
-		helpStr, err := deps.CommandScope.Get(key)
-		if err != nil {
-			return err
-		}
 		if strings.HasPrefix(key, "help.") {
+			helpStr, err := deps.CommandScope.Get(key)
+			if err != nil {
+				return err
+			}
 			fmt.Println(" ", key[5:], ": ", helpStr)
 		}
 	}
 	if deps.Company != "" {
 		fmt.Println(deps.Company)
 	}
+
+	fmt.Println()
 	fmt.Println("Developed with GoatCore (", deps.GoatVersion, ")")
 	return nil
 }

@@ -1,21 +1,21 @@
-package typemsg
+package msgcollection
 
-import "github.com/goatcms/goat-core/types"
+import "github.com/goatcms/goat-core/messages"
 
 // MessageMap represent messages for object
 type MessageMap struct {
-	m map[string]types.MessageList
+	m map[string]messages.MessageList
 }
 
 // NewMessageMap create new message map
-func NewMessageMap() types.MessageMap {
+func NewMessageMap() messages.MessageMap {
 	return &MessageMap{
-		m: make(map[string]types.MessageList),
+		m: make(map[string]messages.MessageList),
 	}
 }
 
 // Get return single message list
-func (mm *MessageMap) Get(key string) types.MessageList {
+func (mm *MessageMap) Get(key string) messages.MessageList {
 	v, ok := mm.m[key]
 	if !ok {
 		v = NewMessageList()
@@ -25,7 +25,7 @@ func (mm *MessageMap) Get(key string) types.MessageList {
 }
 
 // GetAll return map of MessageList
-func (mm *MessageMap) GetAll() map[string]types.MessageList {
+func (mm *MessageMap) GetAll() map[string]messages.MessageList {
 	return mm.m
 }
 

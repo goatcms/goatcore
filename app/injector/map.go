@@ -3,6 +3,7 @@ package injector
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/goatcms/goat-core/app"
 )
@@ -25,11 +26,16 @@ func NewMapInjector(tagname string, data map[string]interface{}) app.Injector {
 func (mi MapInjector) InjectTo(obj interface{}) error {
 	structValue := reflect.ValueOf(obj).Elem()
 	for i := 0; i < structValue.NumField(); i++ {
+		var isRequired = true
 		valueField := structValue.Field(i)
 		structField := structValue.Type().Field(i)
 		key := structField.Tag.Get(mi.tagname)
 		if key == "" {
 			continue
+		}
+		if strings.HasPrefix(key, "?") {
+			isRequired = false
+			key = key[1:]
 		}
 		if !valueField.IsValid() {
 			return fmt.Errorf("MapInjector.InjectTo: %s is not valid", structField.Name)
@@ -39,6 +45,9 @@ func (mi MapInjector) InjectTo(obj interface{}) error {
 		}
 		newValue, ok := mi.data[key]
 		if !ok {
+			if !isRequired {
+				continue
+			}
 			return fmt.Errorf("value for %s is unknown", key)
 		}
 		if newValue == nil {

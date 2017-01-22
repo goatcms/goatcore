@@ -1,13 +1,13 @@
 package orm
 
 import (
+	"reflect"
+
 	"github.com/goatcms/goat-core/db"
 	"github.com/goatcms/goat-core/db/adapter"
 	"github.com/goatcms/goat-core/db/dsql"
 	"github.com/goatcms/goat-core/filesystem"
 	"github.com/goatcms/goat-core/filesystem/filespace/memfs"
-	"github.com/goatcms/goat-core/types"
-	"github.com/goatcms/goat-core/types/simpletype"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -15,14 +15,6 @@ import (
 const (
 	TestTableName = "TestTable"
 )
-
-func NewTestTypes(fs filesystem.Filespace) map[string]types.CustomType {
-	return map[string]types.CustomType{
-		"title":   simpletype.NewTitleType(map[string]string{types.Required: "true"}),
-		"content": simpletype.NewContentType(map[string]string{}),
-		"image":   simpletype.NewImageType(map[string]string{types.Required: "true"}, fs),
-	}
-}
 
 type testScope struct {
 	tx    db.TX
@@ -32,10 +24,10 @@ type testScope struct {
 }
 
 type TestEntity struct {
-	ID      int64  `db:"id"`
-	Title   string `db:"title"`
-	Content string `db:"content"`
-	Image   string `db:"image"`
+	ID      int64  `db:"id" sql:"INTEGER PRIMARY KEY"`
+	Title   string `db:"title" sql:"VARCHAR(400)"`
+	Content string `db:"content" sql:"VARCHAR(400)"`
+	Image   string `db:"image" sql:"VARCHAR(400)"`
 }
 
 func newTestScope() (*testScope, error) {
@@ -47,7 +39,8 @@ func newTestScope() (*testScope, error) {
 	if err != nil {
 		return nil, err
 	}
-	table := NewTable(TestTableName, NewTestTypes(fs))
+	var ptr *TestEntity
+	table := NewTable(TestTableName, reflect.TypeOf(ptr).Elem())
 	return &testScope{
 		table: table,
 		dsql:  dsql.NewDSQL(),

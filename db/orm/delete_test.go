@@ -17,18 +17,16 @@ func TestDelete(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	insert, err := NewInsert(scope.table, scope.dsql)
+	insert, err := NewInsertWithID(scope.table, scope.dsql)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	rowID, err := insert(scope.tx, &TestEntity{10, "title1", "content1", "path1"})
-	if err != nil {
+	if err = insert(scope.tx, &TestEntity{10, "title1", "content1", "path1"}); err != nil {
 		t.Error(err)
 		return
 	}
-	_, err = insert(scope.tx, &TestEntity{0, "title2", "content2", "path2"})
-	if err != nil {
+	if err = insert(scope.tx, &TestEntity{20, "title2", "content2", "path2"}); err != nil {
 		t.Error(err)
 		return
 	}
@@ -56,7 +54,7 @@ func TestDelete(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if err = delete(scope.tx, rowID); err != nil {
+	if err = delete(scope.tx, 10); err != nil {
 		t.Error(err)
 		return
 	}

@@ -25,7 +25,7 @@ func NewBootstrap(gapp app.App) app.Bootstrap {
 }
 
 // Register add new module
-func (b Bootstrap) Register(m app.Module) error {
+func (b *Bootstrap) Register(m app.Module) error {
 	if b.inited {
 		return fmt.Errorf("Can not add module after inited")
 	}
@@ -34,7 +34,7 @@ func (b Bootstrap) Register(m app.Module) error {
 }
 
 // Init all modules
-func (b Bootstrap) Init() error {
+func (b *Bootstrap) Init() error {
 	if b.inited {
 		return fmt.Errorf("Bootstrap can not be inited twice")
 	}
@@ -55,7 +55,7 @@ func (b Bootstrap) Init() error {
 }
 
 // Run all modules
-func (b Bootstrap) Run() error {
+func (b *Bootstrap) Run() error {
 	if !b.inited {
 		return fmt.Errorf("Bootstrap.Run must be run after modules init")
 	}

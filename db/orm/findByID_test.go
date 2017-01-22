@@ -17,14 +17,13 @@ func TestFindByID(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	insert, err := NewInsert(scope.table, scope.dsql)
+	insert, err := NewInsertWithID(scope.table, scope.dsql)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	inEntity := &TestEntity{0, "title1", "content1", "path1"}
-	rowID, err := insert(scope.tx, inEntity)
-	if err != nil {
+	inEntity := &TestEntity{10, "title1", "content1", "path1"}
+	if err = insert(scope.tx, inEntity); err != nil {
 		t.Error(err)
 		return
 	}
@@ -33,7 +32,7 @@ func TestFindByID(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	row, err := findByID(scope.tx, rowID)
+	row, err := findByID(scope.tx, 10)
 	if err != nil {
 		t.Error(err)
 		return

@@ -33,7 +33,7 @@ const (
 	AppCompany = "AppCompany"
 
 	// GoatVersionValue represent goat app engine version
-	GoatVersionValue = -0.001
+	GoatVersionValue = "0.0.0dx"
 	// GoatVersion is key to get goat version
 	GoatVersion = "GoatVersion"
 
@@ -91,6 +91,9 @@ const (
 	// DefaultUInt64Value is a default value for undefined env, configs etc
 	DefaultUInt64Value = 0
 )
+
+// TypeConverter convert from type to other (string->int etc)
+type TypeConverter func(interface{}) (interface{}, error)
 
 // EventCallback is a callback function with data
 type EventCallback func(interface{}) error

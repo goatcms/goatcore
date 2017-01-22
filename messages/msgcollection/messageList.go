@@ -1,6 +1,6 @@
-package typemsg
+package msgcollection
 
-import "github.com/goatcms/goat-core/types"
+import "github.com/goatcms/goat-core/messages"
 
 // MessageList represent a list of messages
 type MessageList struct {
@@ -8,7 +8,7 @@ type MessageList struct {
 }
 
 // NewMessageList create new message list for a field
-func NewMessageList() types.MessageList {
+func NewMessageList() messages.MessageList {
 	return &MessageList{
 		list: []string{},
 	}

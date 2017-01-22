@@ -46,3 +46,26 @@ func TestLoadStruct(t *testing.T) {
 		return
 	}
 }
+
+func TestSetField(t *testing.T) {
+	myStruct := &MyStruct{
+		Name: "",
+		Age:  0,
+	}
+	if err := SetField(myStruct, "Name", "Sebastian"); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := SetField(myStruct, "Age", int64(25)); err != nil {
+		t.Error(err)
+		return
+	}
+	if myStruct.Name != "Sebastian" {
+		t.Errorf("set name fail")
+		return
+	}
+	if myStruct.Age != 25 {
+		t.Errorf("set age fail")
+		return
+	}
+}

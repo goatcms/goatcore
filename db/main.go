@@ -1,15 +1,6 @@
 package db
 
-import (
-	"database/sql"
-
-	"github.com/goatcms/goat-core/types"
-)
-
-const (
-	// DSQLService is a key to access DSQL service
-	DSQLService = "DSQL"
-)
+import "database/sql"
 
 type FindAll func(TX) (Rows, error)
 type FindByID func(TX, int64) (Row, error)
@@ -19,7 +10,14 @@ type Update func(TX, interface{}) error
 type Delete func(TX, int64) error
 type CreateTable func(TX) error
 
-// DSQL is dynamic sql generator (build sql queries)
+// Table sd
+type Table interface {
+	Name() string
+	Fields() []string
+	Types() map[string]string
+}
+
+// DSQL is interface for SQL generator
 type DSQL interface {
 	NewSelectSQL(table string, fields []string) (string, error)
 	NewSelectWhereSQL(table string, fields []string, where string) (string, error)
@@ -28,15 +26,7 @@ type DSQL interface {
 	NewUpdateWhereSQL(table string, fields []string, where string) (string, error)
 	NewDeleteSQL(table string) (string, error)
 	NewDeleteWhereSQL(table string, where string) (string, error)
-	NewSQLType(t types.CustomType) (string, error)
-	NewCreateSQL(table string, types map[string]types.CustomType) (string, error)
-}
-
-// Table sd
-type Table interface {
-	Name() string
-	Fields() []string
-	Types() map[string]types.CustomType
+	NewCreateSQL(table string, types map[string]string) (string, error)
 }
 
 // TX represent a database transaction accessor
