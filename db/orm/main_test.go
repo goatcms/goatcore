@@ -5,7 +5,7 @@ import (
 
 	"github.com/goatcms/goat-core/db"
 	"github.com/goatcms/goat-core/db/adapter"
-	"github.com/goatcms/goat-core/db/dsql"
+	"github.com/goatcms/goat-core/db/dsql/sqliteDSQL"
 	"github.com/goatcms/goat-core/filesystem"
 	"github.com/goatcms/goat-core/filesystem/filespace/memfs"
 	"github.com/jmoiron/sqlx"
@@ -24,10 +24,10 @@ type testScope struct {
 }
 
 type TestEntity struct {
-	ID      int64  `db:"id" sql:"INTEGER PRIMARY KEY"`
-	Title   string `db:"title" sql:"VARCHAR(400)"`
-	Content string `db:"content" sql:"VARCHAR(400)"`
-	Image   string `db:"image" sql:"VARCHAR(400)"`
+	ID      int64  `db:"id" sql:"!int!primary!auto"`
+	Title   string `db:"title" sql:"!char(400)"`
+	Content string `db:"content" sql:"!char(400)"`
+	Image   string `db:"image" sql:"!char(400)"`
 }
 
 func newTestScope() (*testScope, error) {
@@ -43,7 +43,7 @@ func newTestScope() (*testScope, error) {
 	table := NewTable(TestTableName, reflect.TypeOf(ptr).Elem())
 	return &testScope{
 		table: table,
-		dsql:  dsql.NewDSQL(),
+		dsql:  sqliteDSQL.NewDSQL(),
 		tx:    adapter.NewTXFromDB(db),
 		fs:    fs,
 	}, nil
