@@ -72,6 +72,14 @@ func (fs *Filespace) WriteFile(subPath string, data []byte, perm os.FileMode) er
 	return ioutil.WriteFile(fs.path+subPath, data, perm)
 }
 
+func (fs *Filespace) Remove(subPath string) error {
+	return os.Remove(fs.path + subPath)
+}
+
+func (fs *Filespace) RemoveAll(subPath string) error {
+	return os.RemoveAll(fs.path + subPath)
+}
+
 func (fs *Filespace) Filespace(subPath string) (filesystem.Filespace, error) {
 	if !fs.IsDir(subPath) {
 		return nil, fmt.Errorf("Path is not a directory " + fs.path + subPath)

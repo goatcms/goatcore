@@ -3,6 +3,7 @@ package filesystem
 import (
 	"io"
 	"os"
+	"time"
 )
 
 const (
@@ -39,6 +40,8 @@ type Filespace interface {
 	Filespace(subPath string) (Filespace, error)
 	Reader(subPath string) (Reader, error)
 	Writer(subPath string) (Writer, error)
+	Remove(subPath string) error
+	RemoveAll(subPath string) error
 }
 
 // LoopOn is a callback type trigged on a file or directory
@@ -53,4 +56,22 @@ type Loop interface {
 	OnDir(LoopOn)
 	Filter(LoopFilter)
 	Run(fs Filespace) error
+}
+
+// Loop is standard loop interface
+type File interface {
+	Filespace() Filespace
+	Path() string
+
+	IsExist() bool
+	IsFile() bool
+	ReadFile() ([]byte, error)
+	WriteFile(data []byte, perm os.FileMode) error
+	Reader() (Reader, error)
+	Writer() (Writer, error)
+	Remove() error
+
+	MIME() string
+	Name() string
+	CreateTime() time.Time
 }

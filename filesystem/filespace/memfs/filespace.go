@@ -182,6 +182,14 @@ func (fs *Filespace) Filespace(subPath string) (filesystem.Filespace, error) {
 	}), nil
 }
 
+func (fs *Filespace) Remove(subPath string) error {
+	return fs.root.Remove(subPath, true)
+}
+
+func (fs *Filespace) RemoveAll(subPath string) error {
+	return fs.root.Remove(subPath, false)
+}
+
 func (fs *Filespace) DebugPrint() {
 	debugPrint("", fs.root)
 }

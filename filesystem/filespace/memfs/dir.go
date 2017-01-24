@@ -72,6 +72,46 @@ func (d *Dir) RemoveNodeByName(name string) error {
 	return fmt.Errorf("Con not find node to remove (by name " + name + ")")
 }
 
+func (d *Dir) Remove(nodePath string, emptyOnly bool) error {
+	var currentNode os.FileInfo = d
+	if nodePath == "." || nodePath == "./" || nodePath == "" {
+		return fmt.Errorf("memfs.Dir.Remove: It is not possible to delete myself")
+	}
+	pathNodes := strings.Split(path.Clean(nodePath), "/")
+	lastDirNode := len(pathNodes) - 1
+	for i := 0; i < lastDirNode; i++ {
+		nodeName := pathNodes[i]
+		if currentNode.IsDir() != true {
+			return fmt.Errorf("memfs.Dir.Remove: Node by name %v must be dir to get sub node (path %v )", currentNode.Name(), nodePath)
+		}
+		var dir *Dir = currentNode.(*Dir)
+		newNode, err := dir.GetNode(nodeName)
+		if err != nil {
+			return err
+		}
+		currentNode = newNode
+	}
+	if currentNode.IsDir() != true {
+		return fmt.Errorf("memfs.Dir.Remove: Node by name %v must be dir to get sub node (path %v )", currentNode.Name(), nodePath)
+	}
+	currentDir := currentNode.(*Dir)
+	removeNodeName := pathNodes[len(pathNodes)-1]
+	for key, removedNode := range currentDir.nodes {
+		if removedNode.Name() != removeNodeName {
+			continue
+		}
+		if emptyOnly && removedNode.IsDir() {
+			removedDir := removedNode.(*Dir)
+			if len(removedDir.nodes) != 0 {
+				return fmt.Errorf("memfs.Dir.Remove: Prevent remove no empty directory %v", nodePath)
+			}
+		}
+		currentDir.nodes = append(currentDir.nodes[:key], currentDir.nodes[key+1:]...)
+		return nil
+	}
+	return fmt.Errorf("memfs.Dir.Remove: Con not find node to remove (by name %v)", removeNodeName)
+}
+
 func (d *Dir) GetByPath(nodePath string) (os.FileInfo, error) {
 	var currentNode os.FileInfo = d
 	if nodePath == "." || nodePath == "./" {
@@ -169,7 +209,7 @@ func (d *Dir) WriteFile(subPath string, data []byte, perm os.FileMode) error {
 	node, err := d.GetByPath(subPath)
 	if err != nil {
 		//create new file if not exist
-		node, err := d.GetByPath(dirPath)
+		node, err = d.GetByPath(dirPath)
 		if err != nil {
 			return err
 		}
