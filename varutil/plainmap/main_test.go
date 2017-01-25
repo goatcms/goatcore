@@ -6,7 +6,7 @@ import (
 	"github.com/goatcms/goat-core/varutil"
 )
 
-func testPlainMapFromObject(t *testing.T) {
+func TestPlainMapFromObject(t *testing.T) {
 	sourcemap := map[string]interface{}{
 		"key1":   1,
 		"keystr": "str",
