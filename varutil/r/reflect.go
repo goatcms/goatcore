@@ -1,4 +1,4 @@
-package varutil
+package r
 
 import (
 	"fmt"
