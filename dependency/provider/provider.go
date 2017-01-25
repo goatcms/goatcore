@@ -17,6 +17,7 @@ type Provider struct {
 	callstack        []string
 	keys             []string
 	blocked          bool
+	autoclean        bool
 	tagname          string
 }
 
@@ -30,12 +31,13 @@ func NewProvider(tagname string) dependency.Provider {
 		callstack:        []string{},
 		keys:             []string{},
 		blocked:          false,
+		autoclean:        true,
 		tagname:          tagname,
 	}
 }
 
 // NewStaticProvider create a dependency provider from Factories map. It is static (mean that it is pre-defined and blocked for modifications)
-func NewStaticProvider(tagname string, factories map[string]dependency.Factory) dependency.Provider {
+func NewStaticProvider(tagname string, factories map[string]dependency.Factory, instances map[string]interface{}) dependency.Provider {
 	keys := make([]string, len(factories))
 	i := 0
 	for key, _ := range factories {
@@ -44,12 +46,13 @@ func NewStaticProvider(tagname string, factories map[string]dependency.Factory) 
 	}
 	return &Provider{
 		defaultFactories: map[string]dependency.Factory{},
-		factories:        map[string]dependency.Factory{},
+		factories:        factories,
 		defaultInstances: map[string]interface{}{},
-		instances:        map[string]interface{}{},
+		instances:        instances,
 		callstack:        []string{},
 		keys:             keys,
 		blocked:          true,
+		autoclean:        false,
 		tagname:          tagname,
 	}
 }
@@ -66,8 +69,10 @@ func (d *Provider) Block() {
 	}
 	for key, defaultVal := range d.defaultInstances {
 		if _, ok := d.instances[key]; !ok {
-			delete(d.defaultFactories, key)
-			delete(d.factories, key)
+			if d.autoclean {
+				delete(d.defaultFactories, key)
+				delete(d.factories, key)
+			}
 			d.instances[key] = defaultVal
 		}
 	}
@@ -108,7 +113,9 @@ func (d *Provider) Get(name string) (interface{}, error) {
 			return nil, fmt.Errorf("default factory for %s return nil as instance", name)
 		}
 		d.callstack = d.callstack[:len(d.callstack)-1]
-		delete(d.defaultFactories, name)
+		if d.autoclean {
+			delete(d.defaultFactories, name)
+		}
 		d.instances[name] = instance
 		return instance, nil
 	}
@@ -218,11 +225,13 @@ func (d *Provider) InjectTo(obj interface{}) error {
 }
 
 func (d *Provider) clean(name string) {
-	if _, exist := d.factories[name]; exist {
-		delete(d.factories, name)
-	}
-	if _, exist := d.defaultFactories[name]; exist {
-		delete(d.defaultFactories, name)
+	if d.autoclean {
+		if _, exist := d.factories[name]; exist {
+			delete(d.factories, name)
+		}
+		if _, exist := d.defaultFactories[name]; exist {
+			delete(d.defaultFactories, name)
+		}
 	}
 }
 
