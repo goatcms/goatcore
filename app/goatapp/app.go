@@ -123,6 +123,11 @@ func (gapp *GoatApp) initFilespaceScope(path string) error {
 	}
 	gapp.filespaceScope = scope.NewScope(app.FilespaceTagName)
 	gapp.filespaceScope.Set(app.RootFilespace, gapp.rootFilespace)
+	tmpFilespace, err := gapp.rootFilespace.Filespace("tmp")
+	if err != nil {
+		return err
+	}
+	gapp.filespaceScope.Set(app.TmpFilespace, tmpFilespace)
 	return nil
 }
 

@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/goatcms/goat-core/dependency"
 	"github.com/goatcms/goat-core/filesystem"
+	"github.com/goatcms/goat-core/messages"
 )
 
 const (
@@ -73,6 +74,8 @@ const (
 
 	//RootFilespace is key for root filesystem.Filespace
 	RootFilespace = "root"
+	//TmpFilespace is key for tmp filespace
+	TmpFilespace = "tmp"
 
 	// DefaultDurationValue is a default value for undefined env, configs etc
 	DefaultDurationValue = 0
@@ -154,4 +157,10 @@ type App interface {
 	AppScope() Scope
 	CommandScope() Scope
 	DependencyProvider() dependency.Provider
+}
+
+// Form represent a form data
+type Form interface {
+	Valid() (messages.MessageMap, error)
+	Data() interface{}
 }
