@@ -113,8 +113,10 @@ func (f File) Name() string {
 	return f.name
 }
 
-func (f File) Defer(scope app.EventScope) {
-	scope.On(app.RollbackEvent, func(interface{}) error {
-		return f.Remove()
-	})
+func (f File) removeSignal(interface{}) error {
+	return f.Remove()
+}
+
+func (f File) DeferOn(scope app.EventScope, eventID int) {
+	scope.On(eventID, f.removeSignal)
 }
