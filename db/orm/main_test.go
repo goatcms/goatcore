@@ -24,10 +24,10 @@ type testScope struct {
 }
 
 type TestEntity struct {
-	ID      int64  `db:"id" sql:"!int!primary!auto"`
-	Title   string `db:"title" sql:"!char(400)"`
-	Content string `db:"content" sql:"!char(400)"`
-	Image   string `db:"image" sql:"!char(400)"`
+	ID      int64  `db:"id" sqltype:"!int!primary!auto"`
+	Title   string `db:"title" sqltype:"!char(400)"`
+	Content string `db:"content" sqltype:"!char(400)"`
+	Image   string `db:"image" sqltype:"!char(400)"`
 }
 
 func newTestScope() (*testScope, error) {

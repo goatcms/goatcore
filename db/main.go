@@ -2,6 +2,10 @@ package db
 
 import "database/sql"
 
+const (
+	SQLTypeTagName = "sqltype"
+)
+
 type FindAll func(TX) (Rows, error)
 type FindByID func(TX, int64) (Row, error)
 type Insert func(TX, interface{}) (int64, error)

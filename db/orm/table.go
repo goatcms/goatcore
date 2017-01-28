@@ -32,7 +32,7 @@ func NewTable(name string, entityType reflect.Type) db.Table {
 	types := make(map[string]string)
 	for i := 0; i < numFields; i++ {
 		structField := entityType.Field(i)
-		sqlTypeString := structField.Tag.Get("sql")
+		sqlTypeString := structField.Tag.Get(db.SQLTypeTagName)
 		if sqlTypeString == "" {
 			continue
 		}
