@@ -30,9 +30,11 @@ func (ds *DataScope) Get(key string) (interface{}, error) {
 
 // Keys get map data
 func (ds *DataScope) Keys() ([]string, error) {
-	keys := make([]string, 0, len(ds.Data))
-	for k := range ds.Data {
-		keys = append(keys, k)
+	keys := make([]string, len(ds.Data))
+	i := 0
+	for key, _ := range ds.Data {
+		keys[i] = key
+		i++
 	}
 	return keys, nil
 }
