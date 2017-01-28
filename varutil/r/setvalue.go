@@ -76,6 +76,20 @@ func SetValueFromString(valueField reflect.Value, value string) error {
 		}
 		refValue := reflect.ValueOf(&val)
 		valueField.Set(refValue)
+	case bool:
+		val, err := totype.StringToBool(value)
+		if err != nil {
+			return err
+		}
+		refValue := reflect.ValueOf(val)
+		valueField.Set(refValue)
+	case *bool:
+		val, err := totype.StringToBool(value)
+		if err != nil {
+			return err
+		}
+		refValue := reflect.ValueOf(&val)
+		valueField.Set(refValue)
 	default:
 		return fmt.Errorf("unsupported value type %v", valueField.Type().String())
 	}

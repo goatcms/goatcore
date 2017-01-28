@@ -132,3 +132,35 @@ func TestSetValueFromString_Int64Ptr(t *testing.T) {
 		return
 	}
 }
+
+func TestSetValueFromString_Bool(t *testing.T) {
+	var value bool
+	if err := SetValueFromString(reflect.ValueOf(&value).Elem(), "true"); err != nil {
+		t.Error(err)
+		return
+	}
+	if value != true {
+		t.Errorf("Value incorrect %v != 111", value)
+		return
+	}
+}
+
+func TestSetValueFromString_BoolPtr(t *testing.T) {
+	var value *bool
+	if err := SetValueFromString(reflect.ValueOf(&value).Elem(), "true"); err != nil {
+		t.Error(err)
+		return
+	}
+	if *value != true {
+		t.Errorf("Value incorrect %v != true", value)
+		return
+	}
+}
+
+func TestSetValueFromString_UnknowError(t *testing.T) {
+	var value struct{}
+	if err := SetValueFromString(reflect.ValueOf(&value).Elem(), "true"); err == nil {
+		t.Errorf("Should return error for unknow type")
+		return
+	}
+}
