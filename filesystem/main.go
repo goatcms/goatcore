@@ -4,8 +4,6 @@ import (
 	"io"
 	"os"
 	"time"
-
-	"github.com/goatcms/goat-core/app"
 )
 
 const (
@@ -76,6 +74,4 @@ type File interface {
 	MIME() string
 	Name() string
 	CreateTime() time.Time
-
-	DeferOn(scope app.EventScope, eventID int)
 }
