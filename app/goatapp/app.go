@@ -2,12 +2,10 @@ package goatapp
 
 import (
 	"os"
-	"strconv"
-	"strings"
 
 	"github.com/goatcms/goat-core/app"
-	"github.com/goatcms/goat-core/app/args"
 	"github.com/goatcms/goat-core/app/scope"
+	"github.com/goatcms/goat-core/app/scope/argscope"
 	"github.com/goatcms/goat-core/dependency"
 	"github.com/goatcms/goat-core/dependency/provider"
 	"github.com/goatcms/goat-core/filesystem"
@@ -98,21 +96,9 @@ func (gapp *GoatApp) initEngineScope() error {
 }
 
 func (gapp *GoatApp) initArgsScope() error {
-	gapp.argsScope = scope.Scope{
-		EventScope: scope.NewEventScope(),
-		DataScope:  scope.NewDataScope(map[string]interface{}{}),
-		Injector:   args.NewInjector(app.ArgsTagName),
-	}
-	for i, value := range os.Args {
-		gapp.argsScope.Set("$"+strconv.Itoa(i), value)
-		index := strings.Index(value, "=")
-		if index != -1 {
-			name := value[:index]
-			value := value[index+1:]
-			gapp.argsScope.Set(name, value)
-		}
-	}
-	return nil
+	var err error
+	gapp.argsScope, err = argscope.NewScope(os.Args, app.ArgsTagName)
+	return err
 }
 
 func (gapp *GoatApp) initFilespaceScope(path string) error {

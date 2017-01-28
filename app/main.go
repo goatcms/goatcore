@@ -43,7 +43,7 @@ const (
 	// EngineTagName is a name for app vars / const injection
 	EngineTagName = "engine"
 	// ArgsTagName is a name for argument injection
-	ArgsTagName = "arg"
+	ArgsTagName = "argument"
 	// FilespaceTagName is a name for filepsace injection
 	FilespaceTagName = "filespace"
 	// ConfigTagName is a name for config injection
