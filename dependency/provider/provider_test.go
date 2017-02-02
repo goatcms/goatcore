@@ -258,3 +258,45 @@ func TestSetDefault(t *testing.T) {
 		t.Errorf("o.Some.Value() should return 2 (for Two type). It return %v", o.Some.Value())
 	}
 }
+
+func TestAddInjectors(t *testing.T) {
+	var deps struct {
+		TestString string `test:"valueAndTagAreIgnoredByTestInjector"`
+		Number     int    `test:"valueAndTagAreIgnoredByTestInjector"`
+	}
+	dp := NewProvider(TagName)
+	if err := dp.AddInjectors([]dependency.Injector{&TestInjector{}}); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := dp.InjectTo(&deps); err != nil {
+		t.Error(err)
+		return
+	}
+	if deps.TestString != "teststring" {
+		t.Errorf("deps.TestString must be equal to 'teststring' (it is %v)", deps.TestString)
+	}
+	if deps.Number != 2016 {
+		t.Errorf("deps.Number must be equal to 2016 (it is %v)", deps.Number)
+	}
+}
+
+func TestStaticProviderAddInjectors(t *testing.T) {
+	var deps struct {
+		TestString string `test:"valueAndTagAreIgnoredByTestInjector"`
+		Number     int    `test:"valueAndTagAreIgnoredByTestInjector"`
+	}
+	dp := NewStaticProvider(TagName, map[string]dependency.Factory{}, make(map[string]interface{}), []dependency.Injector{
+		&TestInjector{},
+	})
+	if err := dp.InjectTo(&deps); err != nil {
+		t.Error(err)
+		return
+	}
+	if deps.TestString != "teststring" {
+		t.Errorf("deps.TestString must be equal to 'teststring' (it is %v)", deps.TestString)
+	}
+	if deps.Number != 2016 {
+		t.Errorf("deps.Number must be equal to 2016 (it is %v)", deps.Number)
+	}
+}

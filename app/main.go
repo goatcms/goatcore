@@ -38,8 +38,6 @@ const (
 	// GoatVersion is key to get goat version
 	GoatVersion = "GoatVersion"
 
-	// GlobalTagName is a name for global vars / consts injection
-	GlobalTagName = "global"
 	// EngineTagName is a name for app vars / const injection
 	EngineTagName = "engine"
 	// ArgsTagName is a name for argument injection
@@ -126,7 +124,7 @@ type EventScope interface {
 type Scope interface {
 	DataScope
 	EventScope
-	InjectTo(obj interface{}) error
+	dependency.Injector
 }
 
 // Module represent a app module
@@ -148,7 +146,6 @@ type App interface {
 	Name() string
 	Version() string
 	RootFilespace() filesystem.Filespace
-	GlobalScope() Scope
 	EngineScope() Scope
 	ArgsScope() Scope
 	FilespaceScope() Scope

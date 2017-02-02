@@ -9,15 +9,15 @@ import (
 
 // Module is command unit
 type Module struct {
-	app          app.App
+	application  app.App
 	dependencies struct {
 		Name         string    `app:"AppName"`
 		Version      string    `app:"AppVersion"`
 		Welcome      string    `app:"?AppWelcome"`
 		Company      string    `app:"?AppCompany"`
 		GoatVersion  string    `engine:"GoatVersion"`
-		CommandScope app.Scope `global:"CommandScope"`
 		CommandName  string    `argument:"?$1"`
+		CommandScope app.Scope `dependency:"CommandScope"`
 	}
 }
 
@@ -35,11 +35,11 @@ func (m *Module) RegisterDependencies(a app.App) error {
 }
 
 // InitDependency is init callback to inject dependencies inside module
-func (m *Module) InitDependencies(app app.App) error {
-	if err := app.GlobalScope().InjectTo(&m.dependencies); err != nil {
+func (m *Module) InitDependencies(a app.App) error {
+	if err := a.DependencyProvider().InjectTo(&m.dependencies); err != nil {
 		return err
 	}
-	m.app = app
+	m.application = a
 	return nil
 }
 
@@ -55,7 +55,7 @@ func (m *Module) Run() error {
 	}
 	// content
 	if m.dependencies.CommandName == "" {
-		return m.Help(m.app)
+		return m.Help(m.application)
 	}
 	commandIns, err := m.dependencies.CommandScope.Get("command." + m.dependencies.CommandName)
 	if err != nil || commandIns == nil {
@@ -63,7 +63,7 @@ func (m *Module) Run() error {
 		return nil
 	}
 	command := commandIns.(func(app.App) error)
-	return command(m.app)
+	return command(m.application)
 }
 
 func (m *Module) Help(app.App) error {

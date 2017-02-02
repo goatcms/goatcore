@@ -1,6 +1,11 @@
 package provider
 
-import "github.com/goatcms/goat-core/dependency"
+import (
+	"fmt"
+	"reflect"
+
+	"github.com/goatcms/goat-core/dependency"
+)
 
 const (
 	MyDepName       = "MyDep"
@@ -53,4 +58,28 @@ func MyCircleDepFactory(dp dependency.Provider) (interface{}, error) {
 
 type SimpleObject struct {
 	Instance *MyDep `inject:"MyDep"`
+}
+
+type TestInjector struct{}
+
+// InjectTo inject dependencies to object
+func (injector *TestInjector) InjectTo(obj interface{}) error {
+	structValue := reflect.ValueOf(obj).Elem()
+	for i := 0; i < structValue.NumField(); i++ {
+		valueField := structValue.Field(i)
+		structField := structValue.Type().Field(i)
+		if !valueField.IsValid() {
+			return fmt.Errorf("goatcore/dependency/TestInjector.InjectTo: %s is invalid", structField.Name)
+		}
+		if !valueField.CanSet() {
+			return fmt.Errorf("goatcore/dependency/TestInjector.InjectTo: Cannot set %s field value", structField.Name)
+		}
+		switch valueField.Interface().(type) {
+		case int:
+			valueField.SetInt(2016)
+		case string:
+			valueField.SetString("teststring")
+		}
+	}
+	return nil
 }

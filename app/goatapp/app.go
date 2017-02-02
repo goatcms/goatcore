@@ -21,7 +21,6 @@ type GoatApp struct {
 
 	rootFilespace filesystem.Filespace
 
-	globalScope     app.Scope
 	engineScope     app.Scope
 	argsScope       app.Scope
 	filespaceScope  app.Scope
@@ -39,7 +38,7 @@ const (
 )
 
 // NewGoatApp create new app instance
-func NewGoatApp(name, version, basePath string) (*GoatApp, error) {
+func NewGoatApp(name, version, basePath string) (app.App, error) {
 	gapp := &GoatApp{
 		name:    name,
 		version: version,
@@ -67,24 +66,24 @@ func NewGoatApp(name, version, basePath string) (*GoatApp, error) {
 		return nil, err
 	}
 
-	gapp.globalScope = NewGlobalScope(app.GlobalTagName, []app.Scope{
+	gapp.dp.SetDefault(app.EngineScope, gapp.engineScope)
+	gapp.dp.SetDefault(app.ArgsScope, gapp.argsScope)
+	gapp.dp.SetDefault(app.FilespaceScope, gapp.filespaceScope)
+	gapp.dp.SetDefault(app.ConfigScope, gapp.configScope)
+	gapp.dp.SetDefault(app.DependencyScope, gapp.dependencyScope)
+	gapp.dp.SetDefault(app.AppScope, gapp.appScope)
+	gapp.dp.SetDefault(app.CommandScope, gapp.commandScope)
+
+	gapp.dp.AddInjectors([]dependency.Injector{
 		gapp.commandScope,
 		gapp.appScope,
-		gapp.dependencyScope,
+		// gapp.dependencyScope, <- it is wraper for dependency injection and musn't
+		// contains recursive injection
 		gapp.configScope,
 		gapp.filespaceScope,
 		gapp.argsScope,
 		gapp.engineScope,
 	})
-
-	gapp.globalScope.Set(app.EngineScope, gapp.engineScope)
-	gapp.globalScope.Set(app.ArgsScope, gapp.argsScope)
-	gapp.globalScope.Set(app.FilespaceScope, gapp.filespaceScope)
-	gapp.globalScope.Set(app.ConfigScope, gapp.configScope)
-	gapp.globalScope.Set(app.DependencyScope, gapp.dependencyScope)
-	gapp.globalScope.Set(app.AppScope, gapp.appScope)
-	gapp.globalScope.Set(app.CommandScope, gapp.commandScope)
-	gapp.globalScope.Set(app.GlobalScope, gapp.globalScope)
 
 	return gapp, nil
 }
@@ -161,11 +160,6 @@ func (gapp *GoatApp) Name() string {
 // Version return app version
 func (gapp *GoatApp) Version() string {
 	return gapp.version
-}
-
-// GlobalScope return global scope
-func (gapp *GoatApp) GlobalScope() app.Scope {
-	return gapp.globalScope
 }
 
 // EngineScope return engine scope

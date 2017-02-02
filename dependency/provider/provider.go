@@ -10,6 +10,7 @@ import (
 
 // Provider is default dependency distributor
 type Provider struct {
+	injectors        []dependency.Injector
 	defaultFactories map[string]dependency.Factory
 	factories        map[string]dependency.Factory
 	defaultInstances map[string]interface{}
@@ -24,6 +25,7 @@ type Provider struct {
 // NewProvider create new instance of a depenedency provider
 func NewProvider(tagname string) dependency.Provider {
 	return &Provider{
+		injectors:        []dependency.Injector{},
 		defaultFactories: map[string]dependency.Factory{},
 		factories:        map[string]dependency.Factory{},
 		defaultInstances: map[string]interface{}{},
@@ -37,7 +39,7 @@ func NewProvider(tagname string) dependency.Provider {
 }
 
 // NewStaticProvider create a dependency provider from Factories map. It is static (mean that it is pre-defined and blocked for modifications)
-func NewStaticProvider(tagname string, factories map[string]dependency.Factory, instances map[string]interface{}) dependency.Provider {
+func NewStaticProvider(tagname string, factories map[string]dependency.Factory, instances map[string]interface{}, injectors []dependency.Injector) dependency.Provider {
 	keys := make([]string, len(factories))
 	i := 0
 	for key, _ := range factories {
@@ -45,6 +47,7 @@ func NewStaticProvider(tagname string, factories map[string]dependency.Factory, 
 		i++
 	}
 	return &Provider{
+		injectors:        injectors,
 		defaultFactories: map[string]dependency.Factory{},
 		factories:        factories,
 		defaultInstances: map[string]interface{}{},
@@ -55,6 +58,15 @@ func NewStaticProvider(tagname string, factories map[string]dependency.Factory, 
 		autoclean:        false,
 		tagname:          tagname,
 	}
+}
+
+// AddInjectors add new injector to dependency provider
+func (d *Provider) AddInjectors(injectors []dependency.Injector) error {
+	if d.blocked {
+		return fmt.Errorf("goatcore/dependency/provider.AddInjectors: can not add new injector after got dependency")
+	}
+	d.injectors = append(d.injectors, injectors...)
+	return nil
 }
 
 // Keys return list of all defined dependencies names
@@ -220,6 +232,11 @@ func (d *Provider) InjectTo(obj interface{}) error {
 		}
 		depValue := reflect.ValueOf(dep)
 		valueField.Set(depValue)
+	}
+	for _, injector := range d.injectors {
+		if err := injector.InjectTo(obj); err != nil {
+			return err
+		}
 	}
 	return nil
 }
