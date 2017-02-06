@@ -15,11 +15,13 @@ const (
 	DefaultUnixDirMode = 0644
 )
 
+// Writer is a Writer stream
 type Writer interface {
 	io.Writer
 	Close() error
 }
 
+// Reader is a reader stream
 type Reader interface {
 	io.Reader
 	Close() error
@@ -45,10 +47,10 @@ type Filespace interface {
 }
 
 // LoopOn is a callback type trigged on a file or directory
-type LoopOn func(fs Filespace, subPath string, info os.FileInfo) error
+type LoopOn func(fs Filespace, subPath string) error
 
 // LoopFilter is a callback type which is used to filter filespace tree
-type LoopFilter func(fs Filespace, subPath string, info os.FileInfo) bool
+type LoopFilter func(fs Filespace, subPath string) bool
 
 // Loop is standard loop interface
 type Loop interface {
@@ -58,7 +60,7 @@ type Loop interface {
 	Run(fs Filespace) error
 }
 
-// Loop is standard loop interface
+// File is a files wraper
 type File interface {
 	Filespace() Filespace
 	Path() string

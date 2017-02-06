@@ -1,66 +1,80 @@
 package loop
 
 import (
+	"github.com/goatcms/goat-core/app"
 	"github.com/goatcms/goat-core/filesystem"
+	"github.com/goatcms/goat-core/workers"
+	"github.com/goatcms/goat-core/workers/paraller"
 )
 
+// Loop is a loop on a filespace
 type Loop struct {
-	onFile filesystem.LoopOn
-	onDir  filesystem.LoopOn
-	filter filesystem.LoopFilter
+	FS     filesystem.Filespace
+	Scope  app.EventScope
+	OnFile filesystem.LoopOn
+	OnDir  filesystem.LoopOn
+	Filter filesystem.LoopFilter
+
+	chans       *chans
+	producerJob workers.Job
+	consumerJob workers.Job
 }
 
-func NewLoop() filesystem.Loop {
-	return filesystem.Loop(&Loop{
-		onFile: nil,
-		onDir:  nil,
-		filter: nil,
+// KillSlot is a slot to kill the loop
+func (l *Loop) KillSlot(interface{}) error {
+	l.producerJob.Kill()
+	l.consumerJob.Kill()
+	return nil
+}
+
+// Run start process filesystem
+func (l *Loop) Run(path string) error {
+	l.chans = &chans{
+		dirChan:  make(chan string, 500),
+		fileChan: make(chan string, 500),
+		baseChan: make(chan string, 500),
+	}
+	l.chans.baseChan <- path
+	l.producerJob = paraller.NewParaller(producerBody{
+		fs:     l.FS,
+		filter: l.Filter,
+		chans:  l.chans,
 	})
-}
-
-func (l *Loop) OnFile(cb filesystem.LoopOn) {
-	l.onFile = cb
-}
-
-func (l *Loop) OnDir(cb filesystem.LoopOn) {
-	l.onDir = cb
-}
-
-func (l *Loop) Filter(cb filesystem.LoopFilter) {
-	l.filter = cb
-}
-
-func (l *Loop) Run(fs filesystem.Filespace) error {
-	return l.runLoop(fs, "")
-}
-
-func (l *Loop) runLoop(fs filesystem.Filespace, subPath string) error {
-	list, err := fs.ReadDir(subPath)
-	if err != nil {
+	l.producerJob.Defer(l.closeChans)
+	l.consumerJob = paraller.NewParaller(consumerBody{
+		fs:     l.FS,
+		onFile: l.OnFile,
+		onDir:  l.OnDir,
+		chans:  l.chans,
+	})
+	if l.Scope != nil {
+		l.Scope.On(app.ErrorEvent, l.producerJob.KillSlot)
+		l.Scope.On(app.KillEvent, l.consumerJob.KillSlot)
+	}
+	if err := l.producerJob.Run(); err != nil {
 		return err
 	}
-	for _, dir := range list {
-		if dir.Name() == "." || dir.Name() == ".." {
-			continue
-		}
-		newSubPath := subPath + dir.Name()
-		if l.Filter != nil && !l.filter(fs, newSubPath, dir) {
-			continue
-		}
-		if dir.IsDir() {
-			if l.onDir != nil {
-				if err = l.onDir(fs, newSubPath, dir); err != nil {
-					return err
-				}
-			}
-			if err = l.runLoop(fs, newSubPath+"/"); err != nil {
-				return err
-			}
-		} else {
-			if err = l.onFile(fs, newSubPath, dir); err != nil {
-				return err
-			}
-		}
+	if err := l.consumerJob.Run(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Wait wait for job finish
+func (l *Loop) closeChans() error {
+	close(l.chans.baseChan)
+	close(l.chans.dirChan)
+	close(l.chans.fileChan)
+	return nil
+}
+
+// Wait wait for job finish
+func (l *Loop) Wait() error {
+	if err := l.producerJob.Wait(); err != nil {
+		return err
+	}
+	if err := l.consumerJob.Wait(); err != nil {
+		return err
 	}
 	return nil
 }
