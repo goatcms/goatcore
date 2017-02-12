@@ -1,20 +1,19 @@
 package workers
 
-import "github.com/goatcms/goat-core/varutil/goaterr"
+import (
+	"fmt"
+	"runtime"
+	"time"
+)
 
-// DeferFunc is a function run on stop runner (kill or finish)
-type DeferFunc func() error
+const (
+	AsyncTestReapeat   = 1000
+	DefaultTestTimeout = time.Minute
+	DefaultTimeout     = 2 * time.Minute
+)
 
-// JobBody contains code executor
-type JobBody interface {
-	Step() (bool, error)
-}
+var (
+	MaxJob = runtime.NumCPU()
 
-// Job is async code api
-type Job interface {
-	Run() error
-	Kill()
-	KillSlot(interface{}) error
-	Wait() goaterr.Errors
-	Defer(DeferFunc)
-}
+	TimeoutError = fmt.Errorf("JobGroup timeout")
+)

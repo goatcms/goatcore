@@ -1,110 +1,71 @@
 package loop
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 	"testing"
 
 	"github.com/goatcms/goat-core/filesystem"
 	"github.com/goatcms/goat-core/filesystem/filespace/memfs"
+	"github.com/goatcms/goat-core/workers"
 )
 
-func TestCountFilesAndDirs(t *testing.T) {
-	var (
-		dirMU     sync.Mutex
-		dirCount  int
-		fileMU    sync.Mutex
-		fileCount int
-	)
-	// init
-	fs, err := memfs.NewFilespace()
-	if err != nil {
-		t.Error(err)
-	}
-	// create directories
-	if err := fs.MkdirAll("mydir1/mydir1t1/mydir1t1t1", 0777); err != nil {
-		t.Error(err)
-		return
-	}
-	if err := fs.MkdirAll("mydir1/mydir1t2/mydirt1t2t1", 0777); err != nil {
-		t.Error(err)
-		return
-	}
-	// loop
-	loop := Loop{
-		FS: fs,
-		OnDir: func(fs filesystem.Filespace, subPath string) error {
-			dirMU.Lock()
-			dirCount++
-			dirMU.Unlock()
-			return nil
-		},
-		OnFile: func(fs filesystem.Filespace, subPath string) error {
-			fileMU.Lock()
-			fileCount++
-			fileMU.Unlock()
-			return nil
-		},
-	}
-	if err := loop.Run("./"); err != nil {
-		t.Error(err)
-		return
-	}
-	if err := loop.Wait(); err != nil {
-		t.Error(err)
-		return
-	}
-	// test result
-	if dirCount != 5 {
-		t.Errorf("dir counter should be equals to 5 (it is %v)", dirCount)
-	}
-	if fileCount != 0 {
-		t.Errorf("file counter should be equals to 0 (it is %v)", fileCount)
-	}
+type TestCounter struct {
+	mu         sync.Mutex
+	DirCounter int
+}
+
+func (t *TestCounter) CountDir(fs filesystem.Filespace, subPath string) error {
+	t.mu.Lock()
+	t.DirCounter++
+	t.mu.Unlock()
+	return nil
 }
 
 func TestFilter(t *testing.T) {
-	var (
-		dirMU    sync.Mutex
-		dirCount int
-	)
-	// init
-	fs, err := memfs.NewFilespace()
-	if err != nil {
-		t.Error(err)
-	}
-	// create directories
-	if err := fs.MkdirAll("mydir1/mydir1t1.ex/mydir1t1t1.ex", 0777); err != nil {
-		t.Error(err)
-		return
-	}
-	if err := fs.MkdirAll("mydir1/mydir1t2.ex/mydirt1t2t1", 0777); err != nil {
-		t.Error(err)
-		return
-	}
-	// loop
-	loop := Loop{
-		FS: fs,
-		Filter: func(fs filesystem.Filespace, subPath string) bool {
-			return strings.HasSuffix(subPath, ".ex")
-		},
-		OnDir: func(fs filesystem.Filespace, subPath string) error {
-			dirMU.Lock()
-			dirCount++
-			dirMU.Unlock()
-			return nil
-		},
-	}
-	if err := loop.Run("./"); err != nil {
-		t.Error(err)
-		return
-	}
-	if err := loop.Wait(); err != nil {
-		t.Error(err)
-		return
-	}
-	// test result
-	if dirCount != 3 {
-		t.Errorf("dir counter should be equals to 3 (it is %v)", dirCount)
+	fileIteratorCounter := 1000
+	expectedCount := 4 * fileIteratorCounter
+	for ti := 0; ti < workers.AsyncTestReapeat; ti++ {
+		counter := &TestCounter{
+			DirCounter: 0,
+		}
+		// init
+		fs, err := memfs.NewFilespace()
+		if err != nil {
+			t.Error(err)
+		}
+		// create directories
+		for i := 0; i < fileIteratorCounter; i++ {
+			path := fmt.Sprintf("mydir%v.ex/mydir%vt1.ex/mydir%vt1t1.ex", i, i, i)
+			if err := fs.MkdirAll(path, 0777); err != nil {
+				t.Error(err)
+				return
+			}
+			path = fmt.Sprintf("mydir%v.ex/mydir%vt2.ex/mydir%vt1t1", i, i, i)
+			if err := fs.MkdirAll(path, 0777); err != nil {
+				t.Error(err)
+				return
+			}
+		}
+		// loop
+		loop := NewLoop(&LoopData{
+			Filespace: fs,
+			Filter: func(fs filesystem.Filespace, subPath string) bool {
+				return strings.HasSuffix(subPath, ".ex")
+			},
+			OnDir: counter.CountDir,
+		}, nil)
+		loop.Run("./")
+		loop.Wait()
+		// test result
+		if len(loop.Errors()) != 0 {
+			t.Errorf("Errors: %v", loop.Errors())
+			return
+		}
+		if counter.DirCounter != expectedCount {
+			t.Errorf("dir counter should be equals to %v (correct value is: %v)", counter.DirCounter, expectedCount)
+			return
+		}
 	}
 }

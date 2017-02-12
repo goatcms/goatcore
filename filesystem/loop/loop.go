@@ -2,79 +2,82 @@ package loop
 
 import (
 	"github.com/goatcms/goat-core/app"
-	"github.com/goatcms/goat-core/filesystem"
 	"github.com/goatcms/goat-core/workers"
-	"github.com/goatcms/goat-core/workers/paraller"
+	"github.com/goatcms/goat-core/workers/jobsync"
 )
 
 // Loop is a loop on a filespace
 type Loop struct {
-	FS     filesystem.Filespace
-	Scope  app.EventScope
-	OnFile filesystem.LoopOn
-	OnDir  filesystem.LoopOn
-	Filter filesystem.LoopFilter
-
-	chans       *chans
-	producerJob workers.Job
-	consumerJob workers.Job
+	scope        app.EventScope
+	loopData     *LoopData
+	lifecycle    *jobsync.Lifecycle
+	consumerPool *jobsync.Pool
 }
 
-// KillSlot is a slot to kill the loop
-func (l *Loop) KillSlot(interface{}) error {
-	l.producerJob.Kill()
-	l.consumerJob.Kill()
-	return nil
+func NewLoop(loopData *LoopData, scope app.EventScope) *Loop {
+	loop := &Loop{
+		scope:    scope,
+		loopData: loopData,
+	}
+	loop.loopData.chans.dirChan = make(chan string, ChanSize)
+	loop.loopData.chans.fileChan = make(chan string, ChanSize)
+	return loop
+}
+
+func (loop *Loop) Run(path string) {
+	loop.run(path)
 }
 
 // Run start process filesystem
-func (l *Loop) Run(path string) error {
-	l.chans = &chans{
-		dirChan:  make(chan string, 500),
-		fileChan: make(chan string, 500),
-		baseChan: make(chan string, 500),
+func (loop *Loop) run(path string) {
+	// lifecycle
+	loop.lifecycle = jobsync.NewLifecycle(workers.DefaultTimeout, true)
+	if loop.scope != nil {
+		loop.scope.On(app.ErrorEvent, loop.KillSlot)
+		loop.scope.On(app.KillEvent, loop.KillSlot)
 	}
-	l.chans.baseChan <- path
-	l.producerJob = paraller.NewParaller(producerBody{
-		fs:     l.FS,
-		filter: l.Filter,
-		chans:  l.chans,
-	})
-	l.producerJob.Defer(l.closeChans)
-	l.consumerJob = paraller.NewParaller(consumerBody{
-		fs:     l.FS,
-		onFile: l.OnFile,
-		onDir:  l.OnDir,
-		chans:  l.chans,
-	})
-	if l.Scope != nil {
-		l.Scope.On(app.ErrorEvent, l.producerJob.KillSlot)
-		l.Scope.On(app.KillEvent, l.consumerJob.KillSlot)
+	// producer
+	producerPool := jobsync.NewPool(workers.MaxJob)
+	producer := &Producer{
+		lifecycle: loop.lifecycle,
+		pool:      producerPool,
+		loopData:  loop.loopData,
+		path:      path,
 	}
-	if err := l.producerJob.Run(); err != nil {
-		return err
+	producerCounter := producerPool.Add(1)
+	if producerCounter != 1 {
+		panic("filesystem.Loop it is not possible to start producer job")
 	}
-	if err := l.consumerJob.Run(); err != nil {
-		return err
+	go producer.Loop()
+	// consumer
+	loop.consumerPool = jobsync.NewPool(workers.MaxJob)
+	consumer := &Consumer{
+		lifecycle: loop.lifecycle,
+		pool:      loop.consumerPool,
+		loopData:  loop.loopData,
 	}
-	return nil
+	consumerCounter := loop.consumerPool.Add(workers.MaxJob)
+	for i := 0; i < consumerCounter; i++ {
+		go consumer.Loop()
+	}
+	// lifecycle
+	go func() {
+		producerPool.Wait()
+		close(loop.loopData.chans.dirChan)
+		close(loop.loopData.chans.fileChan)
+	}()
 }
 
 // Wait wait for job finish
-func (l *Loop) closeChans() error {
-	close(l.chans.baseChan)
-	close(l.chans.dirChan)
-	close(l.chans.fileChan)
+func (loop *Loop) Wait() {
+	loop.consumerPool.Wait()
+}
+
+func (loop *Loop) KillSlot(interface{}) error {
+	loop.lifecycle.Kill()
 	return nil
 }
 
-// Wait wait for job finish
-func (l *Loop) Wait() error {
-	if err := l.producerJob.Wait(); err != nil {
-		return err
-	}
-	if err := l.consumerJob.Wait(); err != nil {
-		return err
-	}
-	return nil
+func (loop *Loop) Errors() []error {
+	return loop.lifecycle.Errors()
 }
