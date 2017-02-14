@@ -33,7 +33,7 @@ func (producer *Producer) processList(basePath string, readDir []os.FileInfo) bo
 			if producer.loopData.OnDir == nil {
 				continue
 			}
-			if producer.loopData.Filter != nil && !producer.loopData.Filter(producer.loopData.Filespace, nodePath) {
+			if producer.loopData.DirFilter != nil && !producer.loopData.DirFilter(producer.loopData.Filespace, nodePath) {
 				continue
 			}
 			if isKilled := producer.processDir(nodePath); isKilled {
@@ -43,7 +43,7 @@ func (producer *Producer) processList(basePath string, readDir []os.FileInfo) bo
 			if producer.loopData.OnFile == nil {
 				continue
 			}
-			if producer.loopData.Filter != nil && !producer.loopData.Filter(producer.loopData.Filespace, nodePath) {
+			if producer.loopData.FileFilter != nil && !producer.loopData.FileFilter(producer.loopData.Filespace, nodePath) {
 				continue
 			}
 			producer.processFile(nodePath)

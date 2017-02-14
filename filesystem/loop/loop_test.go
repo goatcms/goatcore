@@ -51,7 +51,7 @@ func TestFilter(t *testing.T) {
 		// loop
 		loop := NewLoop(&LoopData{
 			Filespace: fs,
-			Filter: func(fs filesystem.Filespace, subPath string) bool {
+			DirFilter: func(fs filesystem.Filespace, subPath string) bool {
 				return strings.HasSuffix(subPath, ".ex")
 			},
 			OnDir: counter.CountDir,

@@ -13,9 +13,10 @@ type Chans struct {
 }
 
 type LoopData struct {
-	chans     Chans
-	Filespace filesystem.Filespace
-	Filter    filesystem.LoopFilter
-	OnFile    filesystem.LoopOn
-	OnDir     filesystem.LoopOn
+	chans      Chans
+	Filespace  filesystem.Filespace
+	FileFilter filesystem.LoopFilter
+	DirFilter  filesystem.LoopFilter
+	OnFile     filesystem.LoopOn
+	OnDir      filesystem.LoopOn
 }
