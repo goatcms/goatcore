@@ -1,4 +1,4 @@
-package loop
+package fsloop
 
 import "github.com/goatcms/goat-core/filesystem"
 

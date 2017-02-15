@@ -8,7 +8,7 @@ import (
 
 	"github.com/goatcms/goat-core/app"
 	"github.com/goatcms/goat-core/filesystem"
-	"github.com/goatcms/goat-core/filesystem/loop"
+	"github.com/goatcms/goat-core/filesystem/fsloop"
 	"github.com/goatcms/goat-core/goathtml"
 )
 
@@ -55,7 +55,7 @@ func (provider *Provider) layout(name string, eventScope app.EventScope) (*templ
 	layoutTemplate := template.New(name)
 	layoutTemplate.Funcs(provider.funcs)
 	templateLoader := NewTemplateLoader(layoutTemplate)
-	loop := loop.NewLoop(&loop.LoopData{
+	loop := fsloop.NewLoop(&fsloop.LoopData{
 		Filespace: provider.fs,
 		FileFilter: func(fs filesystem.Filespace, subPath string) bool {
 			return strings.HasSuffix(subPath, goathtml.FileExtension)
@@ -107,7 +107,7 @@ func (provider *Provider) view(layoutName, viewName, key string, eventScope app.
 		return nil, []error{err}
 	}
 	templateLoader := NewTemplateLoader(viewTemplate)
-	loop := loop.NewLoop(&loop.LoopData{
+	loop := fsloop.NewLoop(&fsloop.LoopData{
 		Filespace: provider.fs,
 		FileFilter: func(fs filesystem.Filespace, subPath string) bool {
 			return strings.HasSuffix(subPath, goathtml.FileExtension)
