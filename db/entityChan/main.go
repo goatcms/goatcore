@@ -1,4 +1,4 @@
-package entityChan
+package entitychan
 
 import (
 	"github.com/goatcms/goat-core/app"

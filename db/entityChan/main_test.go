@@ -1,4 +1,4 @@
-package entityChan
+package entitychan
 
 import (
 	"testing"

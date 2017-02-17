@@ -10,6 +10,7 @@ import (
 	"github.com/goatcms/goat-core/filesystem"
 	"github.com/goatcms/goat-core/filesystem/fsloop"
 	"github.com/goatcms/goat-core/goathtml"
+	"github.com/goatcms/goat-core/varutil/goaterr"
 )
 
 type Provider struct {
@@ -34,7 +35,7 @@ func NewProvider(fs filesystem.Filespace, layoutPath, viewPath string, funcs tem
 	}
 }
 
-func (provider *Provider) Layout(name string, eventScope app.EventScope) (*template.Template, []error) {
+func (provider *Provider) Layout(name string, eventScope app.EventScope) (*template.Template, error) {
 	if name == "" {
 		name = goathtml.DefaultLayout
 	}
@@ -45,7 +46,7 @@ func (provider *Provider) Layout(name string, eventScope app.EventScope) (*templ
 	return provider.layout(name, eventScope)
 }
 
-func (provider *Provider) layout(name string, eventScope app.EventScope) (*template.Template, []error) {
+func (provider *Provider) layout(name string, eventScope app.EventScope) (*template.Template, error) {
 	provider.layoutMutex.Lock()
 	defer provider.layoutMutex.Unlock()
 	tmpl, ok := provider.layouts[name]
@@ -66,18 +67,18 @@ func (provider *Provider) layout(name string, eventScope app.EventScope) (*templ
 	loop.Run(path)
 	loop.Wait()
 	if len(loop.Errors()) != 0 {
-		return nil, loop.Errors()
+		return nil, goaterr.NewErrors(loop.Errors())
 	}
 	provider.layouts[name] = layoutTemplate
 	return layoutTemplate, nil
 }
 
-func (provider *Provider) View(layoutName, viewName string, eventScope app.EventScope) (*template.Template, []error) {
+func (provider *Provider) View(layoutName, viewName string, eventScope app.EventScope) (*template.Template, error) {
 	if layoutName == "" {
 		layoutName = goathtml.DefaultLayout
 	}
 	if viewName == "" {
-		return nil, []error{fmt.Errorf("goathtml.Provider: A view name is required")}
+		return nil, fmt.Errorf("goathtml.Provider: A view name is required")
 	}
 	key := layoutName + ":" + viewName
 	// check without lock (preformence feature)
@@ -88,7 +89,7 @@ func (provider *Provider) View(layoutName, viewName string, eventScope app.Event
 	return provider.view(layoutName, viewName, key, eventScope)
 }
 
-func (provider *Provider) view(layoutName, viewName, key string, eventScope app.EventScope) (*template.Template, []error) {
+func (provider *Provider) view(layoutName, viewName, key string, eventScope app.EventScope) (*template.Template, error) {
 	provider.viewMutex.Lock()
 	defer provider.viewMutex.Unlock()
 	// check after lock
@@ -97,14 +98,14 @@ func (provider *Provider) view(layoutName, viewName, key string, eventScope app.
 		return tmpl, nil
 	}
 	// create a new view
-	layoutTemplate, errs := provider.Layout(layoutName, eventScope)
-	if errs != nil {
-		return nil, errs
+	layoutTemplate, err := provider.Layout(layoutName, eventScope)
+	if err != nil {
+		return nil, err
 	}
 	viewTemplate, err := layoutTemplate.Clone()
 	viewTemplate.Funcs(provider.funcs)
 	if err != nil {
-		return nil, []error{err}
+		return nil, err
 	}
 	templateLoader := NewTemplateLoader(viewTemplate)
 	loop := fsloop.NewLoop(&fsloop.LoopData{
@@ -118,7 +119,7 @@ func (provider *Provider) view(layoutName, viewName, key string, eventScope app.
 	loop.Run(path)
 	loop.Wait()
 	if len(loop.Errors()) != 0 {
-		return nil, loop.Errors()
+		return nil, goaterr.NewErrors(loop.Errors())
 	}
 	tmpl = templateLoader.Template()
 	provider.views[key] = tmpl
