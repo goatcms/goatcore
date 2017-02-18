@@ -3,7 +3,7 @@ package plainmap
 import (
 	"testing"
 
-	"github.com/goatcms/goat-core/varutil"
+	"github.com/goatcms/goatcore/varutil"
 )
 
 func TestPlainMapFromObject(t *testing.T) {

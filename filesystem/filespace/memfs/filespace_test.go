@@ -3,8 +3,8 @@ package memfs_test
 import (
 	"testing"
 
-	"github.com/goatcms/goat-core/filesystem/filespace/memfs"
-	"github.com/goatcms/goat-core/testbase"
+	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
+	"github.com/goatcms/goatcore/testbase"
 )
 
 func TestMkdir(t *testing.T) {

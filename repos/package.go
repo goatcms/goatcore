@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/goatcms/goat-core/filesystem/disk"
-	"github.com/goatcms/goat-core/varutil"
+	"github.com/goatcms/goatcore/filesystem/disk"
+	"github.com/goatcms/goatcore/varutil"
 )
 
 type RepositoryPackage struct {

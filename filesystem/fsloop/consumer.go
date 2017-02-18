@@ -1,6 +1,6 @@
 package fsloop
 
-import "github.com/goatcms/goat-core/workers/jobsync"
+import "github.com/goatcms/goatcore/workers/jobsync"
 
 type Consumer struct {
 	lifecycle *jobsync.Lifecycle

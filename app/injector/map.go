@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/goatcms/goat-core/app"
+	"github.com/goatcms/goatcore/app"
 )
 
 // MapInjector is map data injector

@@ -5,8 +5,8 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/goatcms/goat-core/filesystem/disk"
-	"github.com/goatcms/goat-core/varutil"
+	"github.com/goatcms/goatcore/filesystem/disk"
+	"github.com/goatcms/goatcore/varutil"
 )
 
 type GitRepository struct {

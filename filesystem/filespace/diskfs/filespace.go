@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/goatcms/goat-core/filesystem"
-	"github.com/goatcms/goat-core/filesystem/disk"
-	"github.com/goatcms/goat-core/varutil"
+	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/filesystem/disk"
+	"github.com/goatcms/goatcore/varutil"
 )
 
 // Filespace is a files set on local filesystem

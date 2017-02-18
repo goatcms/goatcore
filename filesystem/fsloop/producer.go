@@ -3,7 +3,7 @@ package fsloop
 import (
 	"os"
 
-	"github.com/goatcms/goat-core/workers/jobsync"
+	"github.com/goatcms/goatcore/workers/jobsync"
 )
 
 type Producer struct {

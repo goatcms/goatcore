@@ -3,15 +3,15 @@ package goatapp
 import (
 	"os"
 
-	"github.com/goatcms/goat-core/app"
-	"github.com/goatcms/goat-core/app/scope"
-	"github.com/goatcms/goat-core/app/scope/argscope"
-	"github.com/goatcms/goat-core/dependency"
-	"github.com/goatcms/goat-core/dependency/provider"
-	"github.com/goatcms/goat-core/filesystem"
-	"github.com/goatcms/goat-core/filesystem/filespace/diskfs"
-	"github.com/goatcms/goat-core/filesystem/json"
-	"github.com/goatcms/goat-core/varutil/plainmap"
+	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/app/scope"
+	"github.com/goatcms/goatcore/app/scope/argscope"
+	"github.com/goatcms/goatcore/dependency"
+	"github.com/goatcms/goatcore/dependency/provider"
+	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/filesystem/filespace/diskfs"
+	"github.com/goatcms/goatcore/filesystem/json"
+	"github.com/goatcms/goatcore/varutil/plainmap"
 )
 
 // GoatApp is base app template

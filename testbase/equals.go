@@ -1,7 +1,7 @@
 package testbase
 
 import (
-	"github.com/goatcms/goat-core/varutil"
+	"github.com/goatcms/goatcore/varutil"
 )
 
 // ByteArrayEq compare two byte array, return true if equels

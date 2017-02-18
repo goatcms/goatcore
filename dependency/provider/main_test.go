@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/goatcms/goat-core/dependency"
+	"github.com/goatcms/goatcore/dependency"
 )
 
 const (

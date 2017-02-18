@@ -3,7 +3,7 @@ package validator
 import (
 	"testing"
 
-	"github.com/goatcms/goat-core/messages/msgcollection"
+	"github.com/goatcms/goatcore/messages/msgcollection"
 )
 
 func TestLengthValidator_Max_Pass(t *testing.T) {

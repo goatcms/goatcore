@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goatcms/goat-core/app"
-	"github.com/goatcms/goat-core/app/scope"
-	"github.com/goatcms/goat-core/varutil/r"
+	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/app/scope"
+	"github.com/goatcms/goatcore/varutil/r"
 )
 
 type ArgScope struct {

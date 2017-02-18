@@ -5,7 +5,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/goatcms/goat-core/filesystem"
+	"github.com/goatcms/goatcore/filesystem"
 )
 
 const (

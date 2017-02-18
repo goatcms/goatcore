@@ -1,6 +1,6 @@
 package scope
 
-import "github.com/goatcms/goat-core/app"
+import "github.com/goatcms/goatcore/app"
 
 // Scope is global scope interface
 type Scope struct {

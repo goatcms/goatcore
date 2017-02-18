@@ -1,6 +1,6 @@
 package orm
 
-import "github.com/goatcms/goat-core/db"
+import "github.com/goatcms/goatcore/db"
 
 // InsertWithIDContext is context for findByID function
 type InsertWithIDContext struct {

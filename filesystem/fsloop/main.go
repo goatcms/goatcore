@@ -1,6 +1,6 @@
 package fsloop
 
-import "github.com/goatcms/goat-core/filesystem"
+import "github.com/goatcms/goatcore/filesystem"
 
 const (
 	ChanSize        = 500

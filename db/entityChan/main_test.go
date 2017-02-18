@@ -3,9 +3,9 @@ package entitychan
 import (
 	"testing"
 
-	"github.com/goatcms/goat-core/db"
-	"github.com/goatcms/goat-core/testbase/mocks/mockentity"
-	"github.com/goatcms/goat-core/testbase/mocks/mockrows"
+	"github.com/goatcms/goatcore/db"
+	"github.com/goatcms/goatcore/testbase/mocks/mockentity"
+	"github.com/goatcms/goatcore/testbase/mocks/mockrows"
 )
 
 const (

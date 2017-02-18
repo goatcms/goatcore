@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/goatcms/goat-core/filesystem"
+	"github.com/goatcms/goatcore/filesystem"
 )
 
 // Copy duplicate a file or a directory

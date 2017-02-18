@@ -3,7 +3,7 @@ package bootstrap
 import (
 	"fmt"
 
-	"github.com/goatcms/goat-core/app"
+	"github.com/goatcms/goatcore/app"
 )
 
 // Bootstrap is default boot sequence

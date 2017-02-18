@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/goatcms/goat-core/workers"
+	"github.com/goatcms/goatcore/workers"
 )
 
 type TestErrorBody struct {

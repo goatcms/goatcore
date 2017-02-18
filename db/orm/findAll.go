@@ -1,6 +1,6 @@
 package orm
 
-import "github.com/goatcms/goat-core/db"
+import "github.com/goatcms/goatcore/db"
 
 // FindAllContext is context for findAll function
 type FindAllContext struct {

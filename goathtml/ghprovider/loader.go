@@ -3,7 +3,7 @@ package ghprovider
 import (
 	"html/template"
 
-	"github.com/goatcms/goat-core/filesystem"
+	"github.com/goatcms/goatcore/filesystem"
 )
 
 type TemplateLoader struct {

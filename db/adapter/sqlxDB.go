@@ -3,7 +3,7 @@ package adapter
 import (
 	"fmt"
 
-	"github.com/goatcms/goat-core/db"
+	"github.com/goatcms/goatcore/db"
 	"github.com/jmoiron/sqlx"
 )
 

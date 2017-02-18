@@ -1,6 +1,6 @@
 package validator
 
-import "github.com/goatcms/goat-core/messages"
+import "github.com/goatcms/goatcore/messages"
 
 const (
 	// InvalidMinLength is key for too short strings

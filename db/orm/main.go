@@ -1,6 +1,6 @@
 package orm
 
-import "github.com/goatcms/goat-core/db"
+import "github.com/goatcms/goatcore/db"
 
 // IDContainer is simple struct to contains id
 type IDContainer struct {

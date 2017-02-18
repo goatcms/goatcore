@@ -3,7 +3,7 @@ package mockmultipart
 import (
 	"mime/multipart"
 
-	"github.com/goatcms/goat-core/testbase/mocks/mockfile"
+	"github.com/goatcms/goatcore/testbase/mocks/mockfile"
 )
 
 // FileHeader is mock represent FileHeader

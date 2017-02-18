@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/goatcms/goat-core/db"
+	"github.com/goatcms/goatcore/db"
 )
 
 type DSQL struct{}

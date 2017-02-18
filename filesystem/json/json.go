@@ -3,8 +3,8 @@ package json
 import (
 	"path/filepath"
 
-	"github.com/goatcms/goat-core/filesystem"
-	"github.com/goatcms/goat-core/varutil"
+	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/varutil"
 )
 
 // ReadJSON read data from json file to object

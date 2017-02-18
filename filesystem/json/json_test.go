@@ -3,8 +3,8 @@ package json_test
 import (
 	"testing"
 
-	"github.com/goatcms/goat-core/filesystem/filespace/memfs"
-	"github.com/goatcms/goat-core/filesystem/json"
+	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
+	"github.com/goatcms/goatcore/filesystem/json"
 )
 
 type TestObject struct {

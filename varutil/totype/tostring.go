@@ -3,7 +3,7 @@ package totype
 import (
 	"strconv"
 
-	"github.com/goatcms/goat-core/varutil"
+	"github.com/goatcms/goatcore/varutil"
 )
 
 func BoolToString(from bool) (string, error) {

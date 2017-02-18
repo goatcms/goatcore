@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goatcms/goat-core/workers"
+	"github.com/goatcms/goatcore/workers"
 )
 
 type Lifecycle struct {

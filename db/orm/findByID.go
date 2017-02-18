@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goatcms/goat-core/db"
+	"github.com/goatcms/goatcore/db"
 )
 
 // FindByIDContext is context for findByID function

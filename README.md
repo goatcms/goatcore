@@ -1,1 +1,1 @@
-# goat-core
+# goatcore

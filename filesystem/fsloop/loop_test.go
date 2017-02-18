@@ -6,9 +6,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/goatcms/goat-core/filesystem"
-	"github.com/goatcms/goat-core/filesystem/filespace/memfs"
-	"github.com/goatcms/goat-core/workers"
+	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
+	"github.com/goatcms/goatcore/workers"
 )
 
 type TestCounter struct {

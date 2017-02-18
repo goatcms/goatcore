@@ -3,7 +3,7 @@ package argscope
 import (
 	"testing"
 
-	"github.com/goatcms/goat-core/app"
+	"github.com/goatcms/goatcore/app"
 )
 
 type TestDeps struct {

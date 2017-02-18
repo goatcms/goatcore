@@ -3,7 +3,7 @@ package jobsync
 import (
 	"testing"
 
-	"github.com/goatcms/goat-core/workers"
+	"github.com/goatcms/goatcore/workers"
 )
 
 type TestInfinityBody struct {

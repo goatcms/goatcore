@@ -3,7 +3,7 @@ package validator
 import (
 	"regexp"
 
-	"github.com/goatcms/goat-core/messages"
+	"github.com/goatcms/goatcore/messages"
 )
 
 const (

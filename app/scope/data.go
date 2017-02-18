@@ -1,8 +1,8 @@
 package scope
 
 import (
-	"github.com/goatcms/goat-core/app"
-	"github.com/goatcms/goat-core/app/injector"
+	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/app/injector"
 )
 
 // DataScope represent scope data

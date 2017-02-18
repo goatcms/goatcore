@@ -3,11 +3,11 @@ package orm
 import (
 	"reflect"
 
-	"github.com/goatcms/goat-core/db"
-	"github.com/goatcms/goat-core/db/adapter"
-	"github.com/goatcms/goat-core/db/dsql/sqliteDSQL"
-	"github.com/goatcms/goat-core/filesystem"
-	"github.com/goatcms/goat-core/filesystem/filespace/memfs"
+	"github.com/goatcms/goatcore/db"
+	"github.com/goatcms/goatcore/db/adapter"
+	"github.com/goatcms/goatcore/db/dsql/sqliteDSQL"
+	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )

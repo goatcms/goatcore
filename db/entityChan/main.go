@@ -1,8 +1,8 @@
 package entitychan
 
 import (
-	"github.com/goatcms/goat-core/app"
-	"github.com/goatcms/goat-core/db"
+	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/db"
 )
 
 // Factory create entity intance

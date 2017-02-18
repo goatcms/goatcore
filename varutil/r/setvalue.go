@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/goatcms/goat-core/varutil/totype"
+	"github.com/goatcms/goatcore/varutil/totype"
 )
 
 func SetValueFromString(valueField reflect.Value, value string) error {

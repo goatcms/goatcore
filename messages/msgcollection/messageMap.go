@@ -1,6 +1,6 @@
 package msgcollection
 
-import "github.com/goatcms/goat-core/messages"
+import "github.com/goatcms/goatcore/messages"
 
 // MessageMap represent messages for object
 type MessageMap struct {

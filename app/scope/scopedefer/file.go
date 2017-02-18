@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/goatcms/goat-core/app"
-	"github.com/goatcms/goat-core/filesystem"
+	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/filesystem"
 )
 
 type FileDefer struct {

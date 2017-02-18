@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/goatcms/goat-core/app"
+	"github.com/goatcms/goatcore/app"
 )
 
 // Module is command unit
@@ -49,7 +49,7 @@ func (m *Module) Run() error {
 	if m.dependencies.Company != "" {
 		fmt.Println(m.dependencies.Company)
 	}
-	fmt.Printf("Supported by goatcore %s (%s) \n", m.dependencies.GoatVersion, "https://github.com/goatcms/goat-core")
+	fmt.Printf("Supported by goatcore %s (%s) \n", m.dependencies.GoatVersion, "https://github.com/goatcms/goatcore")
 	if m.dependencies.Welcome != "" {
 		fmt.Printf("\n%s\n", m.dependencies.Welcome)
 	}

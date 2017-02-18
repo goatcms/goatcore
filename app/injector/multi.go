@@ -1,6 +1,6 @@
 package injector
 
-import "github.com/goatcms/goat-core/app"
+import "github.com/goatcms/goatcore/app"
 
 // MultiInjector is wrap for many injection interface to run them by onc call
 type MultiInjector struct {

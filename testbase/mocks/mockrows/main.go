@@ -1,6 +1,6 @@
 package mockrows
 
-import "github.com/goatcms/goat-core/varutil"
+import "github.com/goatcms/goatcore/varutil"
 
 // List represent plain data for mock interface
 type List []Row

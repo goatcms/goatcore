@@ -1,9 +1,9 @@
 package fsloop
 
 import (
-	"github.com/goatcms/goat-core/app"
-	"github.com/goatcms/goat-core/workers"
-	"github.com/goatcms/goat-core/workers/jobsync"
+	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/workers"
+	"github.com/goatcms/goatcore/workers/jobsync"
 )
 
 // Loop is a loop on a filespace

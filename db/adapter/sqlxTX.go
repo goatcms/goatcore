@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	"github.com/goatcms/goat-core/db"
+	"github.com/goatcms/goatcore/db"
 	"github.com/jmoiron/sqlx"
 )
 

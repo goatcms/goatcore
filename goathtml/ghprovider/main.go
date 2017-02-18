@@ -6,11 +6,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/goatcms/goat-core/app"
-	"github.com/goatcms/goat-core/filesystem"
-	"github.com/goatcms/goat-core/filesystem/fsloop"
-	"github.com/goatcms/goat-core/goathtml"
-	"github.com/goatcms/goat-core/varutil/goaterr"
+	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/filesystem/fsloop"
+	"github.com/goatcms/goatcore/goathtml"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 type Provider struct {

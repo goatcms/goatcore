@@ -1,6 +1,6 @@
 package validator
 
-import "github.com/goatcms/goat-core/messages"
+import "github.com/goatcms/goatcore/messages"
 
 const (
 	// InvalidMaxLength is key for too long strings

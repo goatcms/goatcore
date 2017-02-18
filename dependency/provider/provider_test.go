@@ -3,7 +3,7 @@ package provider
 import (
 	"testing"
 
-	"github.com/goatcms/goat-core/dependency"
+	"github.com/goatcms/goatcore/dependency"
 )
 
 type TestInterface interface {

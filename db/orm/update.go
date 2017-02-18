@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/goatcms/goat-core/db"
+	"github.com/goatcms/goatcore/db"
 )
 
 // UpdateContext is context for findByID function

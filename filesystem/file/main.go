@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/goatcms/goat-core/app"
-	"github.com/goatcms/goat-core/filesystem"
-	"github.com/goatcms/goat-core/varutil"
+	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/varutil"
 )
 
 type File struct {

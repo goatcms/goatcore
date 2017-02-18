@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/goatcms/goat-core/filesystem/filespace/memfs"
-	"github.com/goatcms/goat-core/goathtml"
-	"github.com/goatcms/goat-core/workers"
+	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
+	"github.com/goatcms/goatcore/goathtml"
+	"github.com/goatcms/goatcore/workers"
 )
 
 const (

@@ -1,8 +1,8 @@
 package goatapp
 
 import (
-	"github.com/goatcms/goat-core/app"
-	"github.com/goatcms/goat-core/app/scope"
+	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/app/scope"
 )
 
 // GlobalScope represent dependency scope lvl

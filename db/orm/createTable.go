@@ -1,6 +1,6 @@
 package orm
 
-import "github.com/goatcms/goat-core/db"
+import "github.com/goatcms/goatcore/db"
 
 // CreateTableContext is context for findByID function
 type CreateTableContext struct {

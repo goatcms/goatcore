@@ -1,6 +1,6 @@
 package diskfs
 
-import "github.com/goatcms/goat-core/dependency"
+import "github.com/goatcms/goatcore/dependency"
 
 // BuildFilespaceFactory return local filespace builder for specific path
 func BuildFilespaceFactory(path string) dependency.Factory {

@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"strings"
 
-	"github.com/goatcms/goat-core/db"
-	"github.com/goatcms/goat-core/varutil"
+	"github.com/goatcms/goatcore/db"
+	"github.com/goatcms/goatcore/varutil"
 )
 
 // InsertContext is context for findByID function
