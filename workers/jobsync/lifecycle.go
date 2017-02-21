@@ -13,6 +13,8 @@ type Lifecycle struct {
 	strictMode bool
 	errors     []error
 	deadpoint  time.Time
+	muStep     sync.RWMutex
+	step       int
 }
 
 func NewLifecycle(lifetime time.Duration, strictMode bool) *Lifecycle {
@@ -55,4 +57,16 @@ func (lifecycle *Lifecycle) Error(e ...error) {
 
 func (lifecycle *Lifecycle) Errors() []error {
 	return lifecycle.errors
+}
+
+func (lifecycle *Lifecycle) Step() int {
+	lifecycle.muStep.RLock()
+	defer lifecycle.muStep.RUnlock()
+	return lifecycle.step
+}
+
+func (lifecycle *Lifecycle) NextStep(step int) {
+	lifecycle.muStep.Lock()
+	lifecycle.step = step
+	lifecycle.muStep.Unlock()
 }

@@ -24,12 +24,8 @@ func NewLoop(loopData *LoopData, scope app.EventScope) *Loop {
 	return loop
 }
 
-func (loop *Loop) Run(path string) {
-	loop.run(path)
-}
-
 // Run start process filesystem
-func (loop *Loop) run(path string) {
+func (loop *Loop) Run(path string) {
 	// lifecycle
 	loop.lifecycle = jobsync.NewLifecycle(workers.DefaultTimeout, true)
 	if loop.scope != nil {
@@ -37,7 +33,11 @@ func (loop *Loop) run(path string) {
 		loop.scope.On(app.KillEvent, loop.KillSlot)
 	}
 	// producer
-	producerPool := jobsync.NewPool(workers.MaxJob)
+	producentMaxJob := loop.loopData.Producents
+	if producentMaxJob == 0 || producentMaxJob > workers.MaxJob {
+		producentMaxJob = workers.MaxJob
+	}
+	producerPool := jobsync.NewPool(producentMaxJob)
 	producer := &Producer{
 		lifecycle: loop.lifecycle,
 		pool:      producerPool,
@@ -50,7 +50,11 @@ func (loop *Loop) run(path string) {
 	}
 	go producer.Loop()
 	// consumer
-	loop.consumerPool = jobsync.NewPool(workers.MaxJob)
+	consumerMaxJob := loop.loopData.Consumers
+	if consumerMaxJob == 0 || consumerMaxJob > workers.MaxJob {
+		consumerMaxJob = workers.MaxJob
+	}
+	loop.consumerPool = jobsync.NewPool(consumerMaxJob)
 	consumer := &Consumer{
 		lifecycle: loop.lifecycle,
 		pool:      loop.consumerPool,
@@ -63,6 +67,7 @@ func (loop *Loop) run(path string) {
 	// lifecycle
 	go func() {
 		producerPool.Wait()
+		loop.lifecycle.NextStep(StepClose)
 		close(loop.loopData.chans.dirChan)
 		close(loop.loopData.chans.fileChan)
 	}()

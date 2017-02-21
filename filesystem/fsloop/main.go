@@ -1,15 +1,22 @@
 package fsloop
 
-import "github.com/goatcms/goatcore/filesystem"
+import (
+	"sync"
+
+	"github.com/goatcms/goatcore/filesystem"
+)
 
 const (
-	ChanSize        = 500
-	MinExtraJobData = 500
+	ChanSize = 1000
+
+	StepClose = 1
 )
 
 type Chans struct {
-	dirChan  chan string
-	fileChan chan string
+	muDirChan  sync.Mutex
+	dirChan    chan string
+	muFileChan sync.Mutex
+	fileChan   chan string
 }
 
 type LoopData struct {
@@ -19,4 +26,6 @@ type LoopData struct {
 	DirFilter  filesystem.LoopFilter
 	OnFile     filesystem.LoopOn
 	OnDir      filesystem.LoopOn
+	Consumers  int
+	Producents int
 }

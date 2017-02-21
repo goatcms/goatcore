@@ -55,6 +55,8 @@ func TestFilter(t *testing.T) {
 				return strings.HasSuffix(subPath, ".ex")
 			},
 			OnDir: counter.CountDir,
+			//Consumers:  1,
+			//Producents: 1,
 		}, nil)
 		loop.Run("./")
 		loop.Wait()
@@ -63,8 +65,12 @@ func TestFilter(t *testing.T) {
 			t.Errorf("Errors: %v", loop.Errors())
 			return
 		}
+		if loop.lifecycle.IsKilled() {
+			t.Errorf("loop was killed")
+			return
+		}
 		if counter.DirCounter != expectedCount {
-			t.Errorf("dir counter should be equals to %v (correct value is: %v)", counter.DirCounter, expectedCount)
+			t.Errorf("dir counter is equals to %v (expected value is: %v)", counter.DirCounter, expectedCount)
 			return
 		}
 	}

@@ -61,7 +61,9 @@ func (provider *Provider) layout(name string, eventScope app.EventScope) (*templ
 		FileFilter: func(fs filesystem.Filespace, subPath string) bool {
 			return strings.HasSuffix(subPath, goathtml.FileExtension)
 		},
-		OnFile: templateLoader.Load,
+		OnFile:     templateLoader.Load,
+		Producents: 1,
+		Consumers:  1,
 	}, eventScope)
 	path := strings.Replace(provider.layoutPath, "{name}", name, 1)
 	loop.Run(path)
@@ -113,7 +115,9 @@ func (provider *Provider) view(layoutName, viewName, key string, eventScope app.
 		FileFilter: func(fs filesystem.Filespace, subPath string) bool {
 			return strings.HasSuffix(subPath, goathtml.FileExtension)
 		},
-		OnFile: templateLoader.Load,
+		OnFile:     templateLoader.Load,
+		Consumers:  1,
+		Producents: 1,
 	}, eventScope)
 	path := strings.Replace(provider.viewPath, "{name}", viewName, 1)
 	loop.Run(path)
