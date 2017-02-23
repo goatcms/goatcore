@@ -9,4 +9,4 @@ This command install the package into your $GOPATH.
 Right now, you likely have an older version installed under $GOPATH/pkg/ and therefore Go is recompiling it for every build.
 
 ## Improve test execution time
-You can set *AsyncTestReapeat* at workers\\main.go to lower value like 200/500. Simultaneously tests will less-restrictic and faster.
+You can set *AsyncTestReapeat* at workers\\main.go to lower value like 200 or 500. Tests will less-restrictic for simultaneously processing errors. A good site is faster tests execution.
