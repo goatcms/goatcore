@@ -1,0 +1,11 @@
+{
+  "sender": {
+    "smtpAddr": "smtp.gmail.com:587",
+    "authHost":     "smtp.gmail.com",
+    "authUsername": "somemail@gmail.com",
+    "authPassword": "*******",
+    "authIdentity": ""
+  },
+  "fromAddress": "somemail@gmail.com",
+  "toAddress": "somemail@gmail.com"
+}

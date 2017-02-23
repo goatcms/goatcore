@@ -18,9 +18,14 @@ var (
 
 // EmailValid add error message if email is invalid
 func EmailValid(value string, basekey string, mm messages.MessageMap) error {
-	if !emailRegexp.MatchString(value) {
+	if !IsEmail(value) {
 		mm.Add(basekey, InvalidEmail)
 		return nil
 	}
 	return nil
+}
+
+// IsEmail return true if a strig value is a email
+func IsEmail(value string) bool {
+	return emailRegexp.MatchString(value)
 }

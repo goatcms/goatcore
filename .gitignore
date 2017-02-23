@@ -2,4 +2,4 @@
 npm-debug.log
 *.test
 *~
- 
+tests/smtp.json
