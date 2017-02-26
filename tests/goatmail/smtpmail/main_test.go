@@ -1,9 +1,14 @@
-package smtpmail
+package smtpmail_test
 
 import (
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/goatcms/goatcore/goatmail"
+	"github.com/goatcms/goatcore/goatmail/smtpmail"
+	"github.com/goatcms/goatcore/workers"
+	"github.com/goatcms/goatcore/workers/jobsync"
 )
 
 func TestSendEmail(t *testing.T) {
@@ -13,9 +18,11 @@ func TestSendEmail(t *testing.T) {
 		return
 	}
 
-	ms := NewMailSender(config.SenderConfig)
+	sender := smtpmail.NewMailSender(config.SenderConfig)
 
+	mailtime := time.Now()
 	mail := &goatmail.Mail{
+		Date: mailtime,
 		From: goatmail.Address{
 			Name:    config.FromAddress,
 			Address: config.FromAddress,
@@ -29,9 +36,17 @@ func TestSendEmail(t *testing.T) {
 			"text/plain": "some content",
 			"text/html":  "some <b>content</b>",
 		},
+		Attachments: []goatmail.Attachment{
+			goatmail.Attachment{
+				Name:   "attachment1.txt",
+				MIME:   "text/plain",
+				Reader: strings.NewReader("text file content"),
+			},
+		},
 	}
 
-	if err := ms.Send(mail); err != nil {
+	lc := jobsync.NewLifecycle(workers.DefaultTestTimeout, true)
+	if err := sender.Send(mail, lc); err != nil {
 		t.Error(err)
 		return
 	}

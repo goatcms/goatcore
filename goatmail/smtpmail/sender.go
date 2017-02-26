@@ -1,12 +1,14 @@
 package smtpmail
 
 import (
-	"encoding/base64"
+	"crypto/tls"
+	"fmt"
+	"net"
 	"net/smtp"
-	"strings"
 
 	"github.com/goatcms/goatcore/goatmail"
-	"github.com/goatcms/goatcore/varutil"
+	"github.com/goatcms/goatcore/workers/jobsync"
+	"github.com/goatcms/goatcore/workers/wio"
 )
 
 type MailSender struct {
@@ -19,50 +21,62 @@ func NewMailSender(config Config) *MailSender {
 	}
 }
 
-func (ms *MailSender) Send(mail *goatmail.Mail) error {
-	msg, err := ms.FormatMail(mail)
+func (ms *MailSender) Send(mail *goatmail.Mail, lc *jobsync.Lifecycle) error {
+	if len(mail.To) < 1 {
+		return fmt.Errorf("must define one or more recipient")
+	}
+
+	auth := smtp.PlainAuth(ms.config.AuthIdentity, ms.config.AuthUsername, ms.config.AuthPassword, ms.config.AuthHost)
+
+	host, _, _ := net.SplitHostPort(ms.config.SmtpAddr)
+
+	tlsconfig := &tls.Config{
+		InsecureSkipVerify: true,
+		ServerName:         host,
+	}
+
+	// Here is the key, you need to call tls.Dial instead of smtp.Dial
+	// for smtp servers running on 465 that require an ssl connection
+	// from the very beginning (no starttls)
+	conn, err := tls.Dial("tcp", ms.config.SmtpAddr, tlsconfig)
 	if err != nil {
 		return err
 	}
-	if err := smtp.SendMail(ms.config.SmtpAddr,
-		smtp.PlainAuth(ms.config.AuthIdentity, ms.config.AuthUsername, ms.config.AuthPassword, ms.config.AuthHost),
-		mail.From.Address, mail.ToAddrs(), []byte(msg)); err != nil {
+
+	c, err := smtp.NewClient(conn, host)
+	if err != nil {
 		return err
 	}
+
+	if err = c.Auth(auth); err != nil {
+		return err
+	}
+
+	if err = c.Mail(mail.From.Address); err != nil {
+		return err
+	}
+
+	if err = c.Rcpt(mail.To[0].Address); err != nil {
+		return err
+	}
+
+	w, err := c.Data()
+	if err != nil {
+		return err
+	}
+
+	smtpreader, err := FormatMail(mail, lc)
+	if err != nil {
+		return err
+	}
+
+	wio.Copy(w, smtpreader, lc)
+	err = w.Close()
+	if err != nil {
+		lc.Error(err)
+	}
+	c.Quit()
+
 	return nil
-}
 
-func (ms *MailSender) FormatMail(mail *goatmail.Mail) (string, error) {
-	// from
-	protocol := "From: " + mail.From.String() + "\n"
-	protocol += "Reply-To: " + mail.From.Address + "\n"
-	// to
-	to := ""
-	for i, recipant := range mail.To {
-		if i > 0 {
-			to += ", " + recipant.String()
-		} else {
-			to += recipant.String()
-		}
-	}
-	protocol += "To: " + to + "\n"
-	// subject
-	protocol += "Subject: " + EscepeSubject(mail.Subject) + "\n"
-	// content
-	boundary := varutil.RandString(20, varutil.AlphaNumericBytes)
-	protocol += "Content-Type: multipart/alternative; boundary=\"" + boundary + "\"\n"
-	for mime, content := range mail.Body {
-		protocol += "\n--" + boundary + "\n"
-		protocol += "Content-Type: " + mime + "; charset=\"utf-8\"\n"
-		protocol += "Content-Transfer-Encoding: base64\n\n"
-		protocol += base64.StdEncoding.EncodeToString([]byte(content))
-		protocol += boundary + "\n"
-	}
-	protocol += "\n\n--" + boundary + "--\n"
-	return protocol, nil
-}
-
-func EscepeSubject(s string) string {
-	s = strings.Replace(s, "\n", "", -1)
-	return s
 }

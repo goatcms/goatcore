@@ -1,6 +1,10 @@
 package goatmail
 
-import "net/mail"
+import (
+	"io"
+	"net/mail"
+	"time"
+)
 
 type Address mail.Address
 
@@ -11,11 +15,19 @@ func (a Address) String() string {
 	return "\"" + a.Name + "\" <" + a.Address + ">"
 }
 
+type Attachment struct {
+	Name   string
+	MIME   string
+	Reader io.Reader
+}
+
 type Mail struct {
-	From    Address
-	To      []Address
-	Subject string
-	Body    map[string]string
+	Date        time.Time
+	From        Address
+	To          []Address
+	Subject     string
+	Body        map[string]string
+	Attachments []Attachment
 }
 
 func (mail Mail) ToAddrs() []string {
