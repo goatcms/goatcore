@@ -16,4 +16,5 @@ var (
 	MaxJob = runtime.NumCPU()
 
 	TimeoutError = fmt.Errorf("JobGroup timeout")
+	KilledError  = fmt.Errorf("JobGroup was killed")
 )
