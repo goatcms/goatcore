@@ -2,6 +2,7 @@ package goatapp
 
 import (
 	"os"
+	"strings"
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/scope"
@@ -34,7 +35,7 @@ type GoatApp struct {
 
 const (
 	// ConfigJSONPath is path to main config file
-	ConfigJSONPath = "/config/config.json"
+	ConfigJSONPath = "/config/config_{{env}}.json"
 )
 
 // NewGoatApp create new app instance
@@ -117,8 +118,21 @@ func (gapp *GoatApp) initFilespaceScope(path string) error {
 }
 
 func (gapp *GoatApp) initConfigScope() error {
-	var fullmap map[string]interface{}
-	json.ReadJSON(gapp.rootFilespace, ConfigJSONPath, fullmap)
+	var (
+		deps struct {
+			Env string `argument:"?env"`
+		}
+		err error
+	)
+	if err = gapp.argsScope.InjectTo(&deps); err != nil {
+		return err
+	}
+	if deps.Env == "" {
+		deps.Env = app.DefaultEnv
+	}
+	fullmap := make(map[string]interface{})
+	path := strings.Replace(ConfigJSONPath, "{{env}}", deps.Env, -1)
+	json.ReadJSON(gapp.rootFilespace, path, &fullmap)
 	plainmap, err := plainmap.ToPlainMap(fullmap)
 	if err != nil {
 		return err

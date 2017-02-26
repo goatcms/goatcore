@@ -91,6 +91,12 @@ const (
 	DefaultUIntValue = 0
 	// DefaultUInt64Value is a default value for undefined env, configs etc
 	DefaultUInt64Value = 0
+
+	// ENVArg is name default enviroment application argument
+	ENVArg = "env"
+
+	// DefaultEnv is name of default system enviroment
+	DefaultEnv = "prod"
 )
 
 // TypeConverter convert from type to other (string->int etc)

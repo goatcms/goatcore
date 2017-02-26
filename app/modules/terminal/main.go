@@ -7,6 +7,11 @@ import (
 	"github.com/goatcms/goatcore/app"
 )
 
+const (
+	commandPrefix  = "help.command."
+	argumentPrefix = "help.argument."
+)
+
 // Module is command unit
 type Module struct {
 	application  app.App
@@ -73,12 +78,22 @@ func (m *Module) Help(app.App) error {
 	}
 	fmt.Printf("\nCommands:\n")
 	for _, key := range keys {
-		if strings.HasPrefix(key, "help.") {
+		if strings.HasPrefix(key, commandPrefix) {
 			helpStr, err := m.dependencies.CommandScope.Get(key)
 			if err != nil {
 				return err
 			}
-			fmt.Println(" ", key[5:], ": ", helpStr)
+			fmt.Printf(" %s: %s\n", key[len(commandPrefix):], helpStr)
+		}
+	}
+	fmt.Printf("\n\nArguments:\n")
+	for _, key := range keys {
+		if strings.HasPrefix(key, argumentPrefix) {
+			helpStr, err := m.dependencies.CommandScope.Get(key)
+			if err != nil {
+				return err
+			}
+			fmt.Printf(" %s: %s\n", key[len(argumentPrefix):], helpStr)
 		}
 	}
 	return nil
