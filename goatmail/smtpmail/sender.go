@@ -26,9 +26,8 @@ func (ms *MailSender) Send(mail *goatmail.Mail, lc *jobsync.Lifecycle) error {
 		return fmt.Errorf("must define one or more recipient")
 	}
 
-	auth := smtp.PlainAuth(ms.config.AuthIdentity, ms.config.AuthUsername, ms.config.AuthPassword, ms.config.AuthHost)
-
 	host, _, _ := net.SplitHostPort(ms.config.SmtpAddr)
+	auth := smtp.PlainAuth(ms.config.AuthIdentity, ms.config.AuthUsername, ms.config.AuthPassword, host)
 
 	tlsconfig := &tls.Config{
 		InsecureSkipVerify: true,

@@ -1,6 +1,7 @@
 package smtpmail_test
 
 import (
+	"io"
 	"strings"
 	"testing"
 	"time"
@@ -32,9 +33,9 @@ func TestSendEmail(t *testing.T) {
 			Address: config.ToAddress,
 		}},
 		Subject: "Goatcore subject",
-		Body: map[string]string{
-			"text/plain": "some content",
-			"text/html":  "some <b>content</b>",
+		Body: map[string]io.Reader{
+			"text/plain": strings.NewReader("some content"),
+			"text/html":  strings.NewReader("some <b>content</b>"),
 		},
 		Attachments: []goatmail.Attachment{
 			goatmail.Attachment{

@@ -3,6 +3,8 @@ package smtpmail
 import (
 	"bytes"
 	"encoding/base64"
+	"fmt"
+	"io"
 	"strings"
 	"testing"
 	"time"
@@ -29,9 +31,9 @@ func TestFormatMailContent(t *testing.T) {
 			Address: "to2@goatcms.com",
 		}},
 		Subject: "Goatcore subject",
-		Body: map[string]string{
-			"text/plain": "some plain text",
-			"text/html":  "some <b>html</b>",
+		Body: map[string]io.Reader{
+			"text/plain": strings.NewReader("some plain text"),
+			"text/html":  strings.NewReader("some <b>html</b>"),
 		},
 		Attachments: []goatmail.Attachment{
 			goatmail.Attachment{
@@ -57,6 +59,7 @@ func TestFormatMailContent(t *testing.T) {
 		t.Errorf("%v", lifecycle.Errors())
 		return
 	}
+	fmt.Println(body)
 
 	if !strings.Contains(body, "some plain text") {
 		t.Errorf("body lost plain/text alternative")

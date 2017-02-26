@@ -1,6 +1,7 @@
 package smtpmail
 
 import (
+	"io"
 	"net/mail"
 	"strings"
 	"testing"
@@ -28,9 +29,9 @@ func TestFormatMail(t *testing.T) {
 			Address: "to2@goatcms.com",
 		}},
 		Subject: "Goatcore subject",
-		Body: map[string]string{
-			"text/plain": "some plain text",
-			"text/html":  "some <b>html</b>",
+		Body: map[string]io.Reader{
+			"text/plain": strings.NewReader("some plain text"),
+			"text/html":  strings.NewReader("some <b>html</b>"),
 		},
 		Attachments: []goatmail.Attachment{
 			goatmail.Attachment{

@@ -1,7 +1,6 @@
 {
   "sender": {
     "smtpAddr": "smtp.gmail.com:465",
-    "authHost":     "smtp.gmail.com",
     "authUsername": "somemail@gmail.com",
     "authPassword": "*******",
     "authIdentity": ""

@@ -26,7 +26,7 @@ type Mail struct {
 	From        Address
 	To          []Address
 	Subject     string
-	Body        map[string]string
+	Body        map[string]io.Reader
 	Attachments []Attachment
 }
 

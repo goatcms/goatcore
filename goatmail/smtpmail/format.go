@@ -49,11 +49,14 @@ func FormatMail(mail *goatmail.Mail, lc *jobsync.Lifecycle) (io.Reader, error) {
 		bodyHeader += "Content-Transfer-Encoding: QUOTED-PRINTABLE\n\n"
 		reader, writer := io.Pipe()
 		w := quotedprintable.NewWriter(writer)
-		go func(b []byte) {
-			w.Write(b)
+		go func(bodyReader io.Reader) {
+			_, err := wio.Copy(w, bodyReader, lc)
+			if err != nil {
+				lc.Error(err)
+			}
 			w.Close()
 			writer.Close()
-		}([]byte(body))
+		}(body)
 		readers = append(readers, strings.NewReader(bodyHeader), reader)
 	}
 	readers = append(readers, strings.NewReader("\n\n--content_"+boundary+"--\n"))
@@ -66,14 +69,14 @@ func FormatMail(mail *goatmail.Mail, lc *jobsync.Lifecycle) (io.Reader, error) {
 		attStr += "Content-Disposition: attachment; filename=\"" + attachment.Name + "\"\n\n"
 		reader, writer := io.Pipe()
 		encoder := base64.NewEncoder(base64.StdEncoding, writer)
-		go func() {
-			_, err := wio.Copy(encoder, attachment.Reader, lc)
+		go func(reader io.Reader) {
+			_, err := wio.Copy(encoder, reader, lc)
 			if err != nil {
 				lc.Error(err)
 			}
 			encoder.Close()
 			writer.Close()
-		}()
+		}(attachment.Reader)
 		readers = append(readers, strings.NewReader(attStr), reader)
 	}
 	readers = append(readers, strings.NewReader("\n\n--"+boundary+"--\n"))
