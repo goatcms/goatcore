@@ -28,6 +28,7 @@ func TestLoadDefaultLayout(t *testing.T) {
 	fs, err := memfs.NewFilespace()
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	// create test data
 	if err := fs.MkdirAll("layouts/", 0777); err != nil {
