@@ -26,6 +26,9 @@ func NewLoop(loopData *LoopData, scope app.EventScope) *Loop {
 
 // Run start process filesystem
 func (loop *Loop) Run(path string) {
+	if path == "" {
+		path = "./"
+	}
 	// lifecycle
 	loop.lifecycle = jobsync.NewLifecycle(workers.DefaultTimeout, true)
 	if loop.scope != nil {

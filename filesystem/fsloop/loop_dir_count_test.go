@@ -26,27 +26,27 @@ func (t *TestCounter) CountDir(fs filesystem.Filespace, subPath string) error {
 func TestFilter(t *testing.T) {
 	fileIteratorCounter := 1000
 	expectedCount := 4 * fileIteratorCounter
+	// init
+	fs, err := memfs.NewFilespace()
+	if err != nil {
+		t.Error(err)
+	}
+	// create directories
+	for i := 0; i < fileIteratorCounter; i++ {
+		path := fmt.Sprintf("mydir%v.ex/mydir%vt1.ex/mydir%vt1t1.ex", i, i, i)
+		if err := fs.MkdirAll(path, 0777); err != nil {
+			t.Error(err)
+			return
+		}
+		path = fmt.Sprintf("mydir%v.ex/mydir%vt2.ex/mydir%vt1t1", i, i, i)
+		if err := fs.MkdirAll(path, 0777); err != nil {
+			t.Error(err)
+			return
+		}
+	}
 	for ti := 0; ti < workers.AsyncTestReapeat; ti++ {
 		counter := &TestCounter{
 			DirCounter: 0,
-		}
-		// init
-		fs, err := memfs.NewFilespace()
-		if err != nil {
-			t.Error(err)
-		}
-		// create directories
-		for i := 0; i < fileIteratorCounter; i++ {
-			path := fmt.Sprintf("mydir%v.ex/mydir%vt1.ex/mydir%vt1t1.ex", i, i, i)
-			if err := fs.MkdirAll(path, 0777); err != nil {
-				t.Error(err)
-				return
-			}
-			path = fmt.Sprintf("mydir%v.ex/mydir%vt2.ex/mydir%vt1t1", i, i, i)
-			if err := fs.MkdirAll(path, 0777); err != nil {
-				t.Error(err)
-				return
-			}
 		}
 		// loop
 		loop := NewLoop(&LoopData{

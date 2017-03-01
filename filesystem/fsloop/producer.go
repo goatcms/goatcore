@@ -30,11 +30,19 @@ func (producer *Producer) processList(basePath string, readDir []os.FileInfo) bo
 		}
 		nodePath := basePath + node.Name()
 		if node.IsDir() {
-			if producer.loopData.OnDir == nil {
+			if producer.loopData.DirFilter != nil {
+				if producer.loopData.DirFilter(producer.loopData.Filespace, nodePath) {
+					if producer.loopData.OnDir != nil {
+						producer.loopData.chans.dirChan <- nodePath
+					}
+					if isKilled := producer.processDir(nodePath); isKilled {
+						return true
+					}
+				}
 				continue
 			}
-			if producer.loopData.DirFilter != nil && !producer.loopData.DirFilter(producer.loopData.Filespace, nodePath) {
-				continue
+			if producer.loopData.OnDir != nil {
+				producer.loopData.chans.dirChan <- nodePath
 			}
 			if isKilled := producer.processDir(nodePath); isKilled {
 				return true
@@ -60,7 +68,6 @@ func (producer *Producer) processFile(nodePath string) {
 }
 
 func (producer *Producer) processDir(nodePath string) bool {
-	producer.loopData.chans.dirChan <- nodePath
 	jobCounter := producer.pool.Add(1)
 	if jobCounter == 0 {
 		// recursive process if no free thread
