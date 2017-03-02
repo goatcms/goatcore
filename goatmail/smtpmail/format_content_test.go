@@ -3,7 +3,6 @@ package smtpmail
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -59,7 +58,6 @@ func TestFormatMailContent(t *testing.T) {
 		t.Errorf("%v", lifecycle.Errors())
 		return
 	}
-	fmt.Println(body)
 
 	if !strings.Contains(body, "some plain text") {
 		t.Errorf("body lost plain/text alternative")

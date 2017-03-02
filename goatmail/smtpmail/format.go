@@ -10,7 +10,6 @@ import (
 	"github.com/goatcms/goatcore/goatmail"
 	"github.com/goatcms/goatcore/varutil"
 	"github.com/goatcms/goatcore/workers/jobsync"
-	"github.com/goatcms/goatcore/workers/wio"
 )
 
 func FormatMail(mail *goatmail.Mail, lc *jobsync.Lifecycle) (io.Reader, error) {
@@ -50,7 +49,7 @@ func FormatMail(mail *goatmail.Mail, lc *jobsync.Lifecycle) (io.Reader, error) {
 		reader, writer := io.Pipe()
 		w := quotedprintable.NewWriter(writer)
 		go func(bodyReader io.Reader) {
-			_, err := wio.Copy(w, bodyReader, lc)
+			_, err := io.Copy(w, bodyReader)
 			if err != nil {
 				lc.Error(err)
 			}
@@ -70,7 +69,7 @@ func FormatMail(mail *goatmail.Mail, lc *jobsync.Lifecycle) (io.Reader, error) {
 		reader, writer := io.Pipe()
 		encoder := base64.NewEncoder(base64.StdEncoding, writer)
 		go func(reader io.Reader) {
-			_, err := wio.Copy(encoder, reader, lc)
+			_, err := io.Copy(encoder, reader)
 			if err != nil {
 				lc.Error(err)
 			}
