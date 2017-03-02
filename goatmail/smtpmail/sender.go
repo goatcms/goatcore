@@ -3,12 +3,12 @@ package smtpmail
 import (
 	"crypto/tls"
 	"fmt"
+	"io"
 	"net"
 	"net/smtp"
 
 	"github.com/goatcms/goatcore/goatmail"
 	"github.com/goatcms/goatcore/workers/jobsync"
-	"github.com/goatcms/goatcore/workers/wio"
 )
 
 type MailSender struct {
@@ -69,7 +69,7 @@ func (ms *MailSender) Send(mail *goatmail.Mail, lc *jobsync.Lifecycle) error {
 		return err
 	}
 
-	wio.Copy(w, smtpreader, lc)
+	io.Copy(w, smtpreader)
 	err = w.Close()
 	if err != nil {
 		lc.Error(err)
