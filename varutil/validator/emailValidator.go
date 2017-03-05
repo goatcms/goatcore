@@ -8,7 +8,7 @@ import (
 
 const (
 	// InvalidEmail is key of invalid email message
-	InvalidEmail = "validator.email"
+	InvalidEmail = "email"
 )
 
 var (

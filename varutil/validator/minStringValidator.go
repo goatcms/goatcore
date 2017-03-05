@@ -4,7 +4,7 @@ import "github.com/goatcms/goatcore/messages"
 
 const (
 	// InvalidMinLength is key for too short strings
-	InvalidMinLength = "validator.length.min"
+	InvalidMinLength = "length_min"
 )
 
 // MinStringValid add error message if string is shorten then some value
