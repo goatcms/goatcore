@@ -24,7 +24,7 @@ type testScope struct {
 }
 
 type TestEntity struct {
-	ID      int64  `db:"id" sqltype:"!int!primary!auto"`
+	ID      int64  `db:"id" sqltype:"!id"`
 	Title   string `db:"title" sqltype:"!char(400)"`
 	Content string `db:"content" sqltype:"!char(400)"`
 	Image   string `db:"image" sqltype:"!char(400)"`
