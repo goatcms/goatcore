@@ -107,7 +107,7 @@ func (dsql DSQL) NewCreateSQL(table string, types map[string]string) (string, er
 
 func (dsql DSQL) enrichDSQLKeywords(sql string) string {
 	sql = strings.Replace(sql, "!int", " INTEGER ", -1)
-	sql = strings.Replace(sql, "!auto", " AUTOINCREMENT ", -1)
+	sql = strings.Replace(sql, "!auto", " AUTO_INCREMENT ", -1)
 	sql = strings.Replace(sql, "!primary", " PRIMARY KEY ", -1)
 	sql = strings.Replace(sql, "!char", " VARCHAR", -1)
 	return sql
