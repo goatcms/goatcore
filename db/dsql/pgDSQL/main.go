@@ -107,7 +107,7 @@ func (dsql DSQL) NewCreateSQL(table string, types map[string]string) (string, er
 
 // NewDropTableSQL create new drop table query
 func (dsql DSQL) NewDropTableSQL(table string) (string, error) {
-	sql := "CREATE TABLE " + table + ";"
+	sql := "DROP TABLE " + table + ";"
 	return sql, nil
 }
 
