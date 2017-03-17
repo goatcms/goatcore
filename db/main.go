@@ -1,6 +1,10 @@
 package db
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"github.com/jmoiron/sqlx"
+)
 
 const (
 	SQLTypeTagName = "sqltype"
@@ -15,6 +19,11 @@ type Delete func(TX, int64) error
 type CreateTable func(TX) error
 type DropTable func(TX) error
 
+type Database struct {
+	DSQL     DSQL
+	instance *sqlx.DB
+}
+
 // Table sd
 type Table interface {
 	Name() string
@@ -24,6 +33,19 @@ type Table interface {
 
 // DSQL is interface for SQL generator
 type DSQL interface {
+	NewSelectSQL(table string, fields []string) (string, error)
+	NewSelectWhereSQL(table string, fields []string, where string) (string, error)
+	NewInsertSQL(table string, fields []string) (string, error)
+	NewUpdateSQL(table string, fields []string) (string, error)
+	NewUpdateWhereSQL(table string, fields []string, where string) (string, error)
+	NewDeleteSQL(table string) (string, error)
+	NewDeleteWhereSQL(table string, where string) (string, error)
+	NewCreateSQL(table string, types map[string]string) (string, error)
+	NewDropTableSQL(table string) (string, error)
+}
+
+// ORM is interface for simple orm
+type ORM interface {
 	NewSelectSQL(table string, fields []string) (string, error)
 	NewSelectWhereSQL(table string, fields []string, where string) (string, error)
 	NewInsertSQL(table string, fields []string) (string, error)

@@ -28,6 +28,10 @@ func TestInsert(t *testing.T) {
 		t.Error(err)
 		return
 	}
+	if rowID == 0 {
+		t.Errorf("Row id must not be equels to zero (it is %v)", rowID)
+		return
+	}
 	findByID, err := NewFindByID(scope.table, scope.dsql)
 	if err != nil {
 		t.Error(err)

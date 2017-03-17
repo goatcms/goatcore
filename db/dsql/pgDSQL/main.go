@@ -115,6 +115,6 @@ func (dsql DSQL) enrichDSQLKeywords(sql string) string {
 	sql = strings.Replace(sql, "!int", " INTEGER ", -1)
 	sql = strings.Replace(sql, "!primary", " PRIMARY KEY ", -1)
 	sql = strings.Replace(sql, "!char", " VARCHAR", -1)
-	sql = strings.Replace(sql, "!id", " SERIAL NOT NULL ", -1)
+	sql = strings.Replace(sql, "!id", " BIGINT PRIMARY KEY ", -1)
 	return sql
 }
