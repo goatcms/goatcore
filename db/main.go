@@ -13,6 +13,7 @@ type InsertWithID func(TX, interface{}) error
 type Update func(TX, interface{}) error
 type Delete func(TX, int64) error
 type CreateTable func(TX) error
+type DropTable func(TX) error
 
 // Table sd
 type Table interface {
@@ -31,6 +32,7 @@ type DSQL interface {
 	NewDeleteSQL(table string) (string, error)
 	NewDeleteWhereSQL(table string, where string) (string, error)
 	NewCreateSQL(table string, types map[string]string) (string, error)
+	NewDropTableSQL(table string) (string, error)
 }
 
 // TX represent a database transaction accessor

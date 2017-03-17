@@ -105,6 +105,12 @@ func (dsql DSQL) NewCreateSQL(table string, types map[string]string) (string, er
 	return dsql.enrichDSQLKeywords(sql + ");"), nil
 }
 
+// NewDropTableSQL create new drop table query
+func (dsql DSQL) NewDropTableSQL(table string) (string, error) {
+	sql := "CREATE TABLE " + table + ";"
+	return sql, nil
+}
+
 func (dsql DSQL) enrichDSQLKeywords(sql string) string {
 	sql = strings.Replace(sql, "!int", " INTEGER ", -1)
 	sql = strings.Replace(sql, "!primary", " PRIMARY KEY ", -1)

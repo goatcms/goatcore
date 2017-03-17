@@ -105,6 +105,12 @@ func (dsql DSQL) NewCreateSQL(table string, types map[string]string) (string, er
 	return dsql.enrichDSQLKeywords(sql + ")"), nil
 }
 
+// NewDropTableSQL create new drop table query
+func (dsql DSQL) NewDropTableSQL(table string) (string, error) {
+	sql := "DROP TABLE " + table + ";\n"
+	return sql, nil
+}
+
 func (dsql DSQL) enrichDSQLKeywords(sql string) string {
 	sql = strings.Replace(sql, "!int", " INTEGER ", -1)
 	//sql = strings.Replace(sql, "!auto", " AUTOINCREMENT ", -1) - unsupported by pgsql
