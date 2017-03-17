@@ -3,3 +3,4 @@ npm-debug.log
 *.test
 *~
 tests/smtp.json
+tests/db_postgres.json

@@ -1,0 +1,3 @@
+{
+  "url":"postgres://testuser:testpass@hosturlorip/testdb?sslmode=disable",
+}
