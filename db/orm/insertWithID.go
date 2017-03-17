@@ -1,6 +1,10 @@
 package orm
 
-import "github.com/goatcms/goatcore/db"
+import (
+	"fmt"
+
+	"github.com/goatcms/goatcore/db"
+)
 
 // InsertWithIDContext is context for findByID function
 type InsertWithIDContext struct {
@@ -10,7 +14,7 @@ type InsertWithIDContext struct {
 // Insert create new record
 func (q InsertWithIDContext) InsertWithID(tx db.TX, entity interface{}) error {
 	if _, err := tx.NamedExec(q.query, entity); err != nil {
-		return err
+		return fmt.Errorf("%s: %s", err.Error(), q.query)
 	}
 	return nil
 }

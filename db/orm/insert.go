@@ -2,6 +2,7 @@ package orm
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"github.com/goatcms/goatcore/db"
@@ -21,13 +22,13 @@ func (q InsertContext) Insert(tx db.TX, entity interface{}) (int64, error) {
 		id  int64
 	)
 	if res, err = tx.NamedExec(q.query, entity); err != nil {
-		return -1, err
+		return -1, fmt.Errorf("%s: %s", err.Error(), q.query)
 	}
 	if id, err = res.LastInsertId(); err != nil {
-		return -1, err
+		return -1, fmt.Errorf("%s: %s", err.Error(), q.query)
 	}
 	if err = varutil.SetField(entity, "ID", id); err != nil {
-		return -1, err
+		return -1, fmt.Errorf("%s: %s", err.Error(), q.query)
 	}
 	return id, nil
 }

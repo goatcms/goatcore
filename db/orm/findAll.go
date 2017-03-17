@@ -1,6 +1,10 @@
 package orm
 
-import "github.com/goatcms/goatcore/db"
+import (
+	"fmt"
+
+	"github.com/goatcms/goatcore/db"
+)
 
 // FindAllContext is context for findAll function
 type FindAllContext struct {
@@ -10,7 +14,10 @@ type FindAllContext struct {
 // FindAll obtain all articles from database
 func (q FindAllContext) FindAll(tx db.TX) (db.Rows, error) {
 	rows, err := tx.Queryx(q.query)
-	return rows.(db.Rows), err
+	if err != nil {
+		return nil, fmt.Errorf("%s: %s", err.Error(), q.query)
+	}
+	return rows.(db.Rows), nil
 }
 
 // NewFindAll create new FindAll function

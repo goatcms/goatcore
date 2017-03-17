@@ -20,10 +20,10 @@ func (q DeleteContext) Delete(tx db.TX, id int64) error {
 		count int64
 	)
 	if res, err = tx.NamedExec(q.query, &IDContainer{ID: id}); err != nil {
-		return err
+		return fmt.Errorf("%s: %s", err.Error(), q.query)
 	}
 	if count, err = res.RowsAffected(); err != nil {
-		return err
+		return fmt.Errorf("%s: %s", err.Error(), q.query)
 	}
 	if count != 1 {
 		return fmt.Errorf("Delete more than one record (%v records deleted)", count)

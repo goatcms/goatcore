@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -15,7 +16,10 @@ type FindByIDContext struct {
 // FindByIDContext return row by id
 func (q FindByIDContext) FindByID(tx db.TX, id int64) (db.Row, error) {
 	row, err := tx.QueryRowx(strings.Replace(q.query, ":id", strconv.FormatInt(id, 10), -1))
-	return row.(db.Row), err
+	if err != nil {
+		return nil, fmt.Errorf("%s: %s", err.Error(), q.query)
+	}
+	return row.(db.Row), nil
 }
 
 // NewFindByID create new dao function instance

@@ -20,13 +20,13 @@ func (q UpdateContext) Update(tx db.TX, entity interface{}) error {
 		count int64
 	)
 	if res, err = tx.NamedExec(q.query, entity); err != nil {
-		return err
+		return fmt.Errorf("%s: %s", err.Error(), q.query)
 	}
 	if count, err = res.RowsAffected(); err != nil {
-		return err
+		return fmt.Errorf("%s: %s", err.Error(), q.query)
 	}
 	if count != 1 {
-		return fmt.Errorf("Update modified more then one record (%v records modyfieds)", count)
+		return fmt.Errorf("Update modified more then one record (%v records modyfieds): %s", count, q.query)
 	}
 	return nil
 }
