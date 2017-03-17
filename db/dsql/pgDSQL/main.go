@@ -102,7 +102,7 @@ func (dsql DSQL) NewCreateSQL(table string, types map[string]string) (string, er
 		sql += name + " " + typeDesc
 		i++
 	}
-	return dsql.enrichDSQLKeywords(sql + ")"), nil
+	return dsql.enrichDSQLKeywords(sql + ");"), nil
 }
 
 func (dsql DSQL) enrichDSQLKeywords(sql string) string {
