@@ -15,8 +15,8 @@ const (
 	testCcontent2 = "content2"
 )
 
-// TestChanCorverterOneThread test convert data for single thread
-func TestChanCorverterOneThread(t *testing.T) {
+// TestChanConverterOneThread test convert data for single thread
+func TestChanConverterOneThread(t *testing.T) {
 	var rows db.Rows = mockrows.NewRows(mockrows.List{
 		mockrows.Row{
 			"title":   testTitle1,
@@ -27,7 +27,7 @@ func TestChanCorverterOneThread(t *testing.T) {
 			"content": testCcontent2,
 		},
 	})
-	c := NewChanCorverter(nil, rows, mockentity.NewEntityI)
+	c := NewChanConverter(nil, rows, mockentity.NewEntityI)
 	c.Go()
 
 	r1 := (<-c.Chan).(*mockentity.Entity)
@@ -52,8 +52,8 @@ func TestChanCorverterOneThread(t *testing.T) {
 	}*/
 }
 
-// TestChanCorverterMultiThread test convert data for two thread
-func TestChanCorverterMultiThread(t *testing.T) {
+// TestChanConverterMultiThread test convert data for two thread
+func TestChanConverterMultiThread(t *testing.T) {
 	var rows db.Rows = mockrows.NewRows(mockrows.List{
 		mockrows.Row{
 			"title":   testTitle1,
@@ -64,7 +64,7 @@ func TestChanCorverterMultiThread(t *testing.T) {
 			"content": testCcontent2,
 		},
 	})
-	c := NewChanCorverter(nil, rows, mockentity.NewEntityI)
+	c := NewChanConverter(nil, rows, mockentity.NewEntityI)
 	go c.Go()
 
 	r1 := (<-c.Chan).(*mockentity.Entity)

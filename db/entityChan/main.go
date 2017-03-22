@@ -11,8 +11,8 @@ type Factory func() interface{}
 // EntityChan is entity channel
 type EntityChan chan interface{}
 
-// ChanCorverter is channel for entities
-type ChanCorverter struct {
+// ChanConverter is channel for entities
+type ChanConverter struct {
 	Rows    db.Rows
 	Factory Factory
 	Chan    EntityChan
@@ -21,9 +21,9 @@ type ChanCorverter struct {
 	kill    bool
 }
 
-// NewChanCorverter create new instance of ChanCorverter
-func NewChanCorverter(s app.Scope, r db.Rows, f Factory) *ChanCorverter {
-	c := &ChanCorverter{
+// NewChanConverter create new instance of ChanConverter
+func NewChanConverter(s app.Scope, r db.Rows, f Factory) *ChanConverter {
+	c := &ChanConverter{
 		Rows:    r,
 		Factory: f,
 		Scope:   s,
@@ -33,7 +33,7 @@ func NewChanCorverter(s app.Scope, r db.Rows, f Factory) *ChanCorverter {
 }
 
 // Init prepare struct to run
-func (c *ChanCorverter) Init() {
+func (c *ChanConverter) Init() {
 	if c.inited {
 		return
 	}
@@ -46,16 +46,16 @@ func (c *ChanCorverter) Init() {
 }
 
 // Go convert entities and add to channel
-func (c *ChanCorverter) Go() {
+func (c *ChanConverter) Go() {
 	c.Init()
 	//var entities = []*models.ArticleEntity{}
 	for c.Rows.Next() && !c.kill {
 		entity := c.Factory()
 		if err := c.Rows.StructScan(entity); err != nil {
-			c.Scope.Set(app.Error, err)
-			c.Scope.Trigger(app.ErrorEvent, nil)
-			c.Scope.Trigger(app.KillEvent, nil)
 			c.close()
+			c.Scope.Set(app.Error, err)
+			c.Scope.Trigger(app.ErrorEvent, err)
+			c.Scope.Trigger(app.KillEvent, err)
 			return
 		}
 		c.Chan <- entity
@@ -64,16 +64,17 @@ func (c *ChanCorverter) Go() {
 }
 
 // Close close converter
-func (c *ChanCorverter) close() error {
+func (c *ChanConverter) close() error {
+	c.kill = true
+	close(c.Chan)
 	if err := c.Rows.Close(); err != nil {
 		return err
 	}
-	close(c.Chan)
 	return nil
 }
 
 // Kill thread
-func (c *ChanCorverter) Kill(interface{}) error {
+func (c *ChanConverter) Kill(interface{}) error {
 	// select & case is fix to get element without deadlock
 	select {
 	case _, ok := <-c.Chan:
