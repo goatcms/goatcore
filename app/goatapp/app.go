@@ -133,7 +133,7 @@ func (gapp *GoatApp) initConfigScope() error {
 	fullmap := make(map[string]interface{})
 	path := strings.Replace(ConfigJSONPath, "{{env}}", deps.Env, -1)
 	json.ReadJSON(gapp.rootFilespace, path, &fullmap)
-	plainmap, err := plainmap.ToPlainMap(fullmap)
+	plainmap, err := plainmap.RecursiveMapToPlainMap(fullmap)
 	if err != nil {
 		return err
 	}

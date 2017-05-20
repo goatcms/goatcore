@@ -6,7 +6,7 @@ import (
 	"github.com/goatcms/goatcore/varutil"
 )
 
-func TestPlainMapFromObject(t *testing.T) {
+func TestRMapToPMapFromObject(t *testing.T) {
 	sourcemap := map[string]interface{}{
 		"key1":   1,
 		"keystr": "str",
@@ -15,7 +15,7 @@ func TestPlainMapFromObject(t *testing.T) {
 		},
 	}
 
-	outmap, err := ToPlainMap(sourcemap)
+	outmap, err := RecursiveMapToPlainMap(sourcemap)
 	if err != nil {
 		t.Error(err)
 		return
@@ -32,7 +32,7 @@ func TestPlainMapFromObject(t *testing.T) {
 	}
 }
 
-func TestToPlainMapWorkWithJson(t *testing.T) {
+func TestRMapToPMapWithJson(t *testing.T) {
 	var sourcemap map[string]interface{}
 	err := varutil.ObjectFromJSON(&sourcemap, "{\"key1\": \"1\", \"keymap\": {\"key11\": \"11\"}}")
 	if err != nil {
@@ -40,7 +40,7 @@ func TestToPlainMapWorkWithJson(t *testing.T) {
 		return
 	}
 
-	outmap, err := ToPlainMap(sourcemap)
+	outmap, err := RecursiveMapToPlainMap(sourcemap)
 	if err != nil {
 		t.Error(err)
 		return
