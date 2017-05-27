@@ -8,7 +8,7 @@ func TestInsert(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	createTable, err := NewCreateTable(scope.table, scope.dsql)
+	createTable, err := NewCreateTable(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return
@@ -17,7 +17,7 @@ func TestInsert(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	insert, err := NewInsert(scope.table, scope.dsql)
+	insert, err := NewInsert(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return
@@ -32,7 +32,7 @@ func TestInsert(t *testing.T) {
 		t.Errorf("Row id must not be equels to zero (it is %v)", rowID)
 		return
 	}
-	findByID, err := NewFindByID(scope.table, scope.dsql)
+	findByID, err := NewFindByID(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return

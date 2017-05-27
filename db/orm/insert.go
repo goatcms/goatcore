@@ -1,43 +1,42 @@
 package orm
 
 import (
-	"fmt"
-	"math/rand"
+	"strings"
 
 	"github.com/goatcms/goatcore/db"
-	"github.com/goatcms/goatcore/varutil"
 )
 
 // InsertContext is context for findByID function
 type InsertContext struct {
-	query string
+	query  string
+	driver db.Driver
 }
 
 // Insert create new record
 func (q InsertContext) Insert(tx db.TX, entity interface{}) (int64, error) {
-	var (
-		//res sql.Result
-		err error
-		id  int64
-	)
-	id = rand.Int63()
-	if err = varutil.SetField(entity, "ID", id); err != nil {
-		return -1, fmt.Errorf("%s: %s", err.Error(), q.query)
-	}
-	if _, err = tx.NamedExec(q.query, entity); err != nil {
-		return -1, fmt.Errorf("%s: %s", err.Error(), q.query)
-	}
-	return id, nil
+	return q.driver.RunInsert(tx, q.query, entity)
 }
 
 // InsertContext create new dao function instance
-func NewInsert(table db.Table, dsql db.DSQL) (db.Insert, error) {
-	query, err := dsql.NewInsertSQL(table.Name(), table.Fields())
+func NewInsert(table db.Table, driver db.Driver) (db.Insert, error) {
+	dsql := driver.DSQL()
+	fromFields := table.Fields()
+	fields := make([]string, len(fromFields))
+	i := 0
+	for _, v := range fromFields {
+		if strings.ToLower(v) != "id" {
+			fields[i] = v
+			i++
+		}
+	}
+	fields = fields[:i]
+	query, err := dsql.NewInsertSQL(table.Name(), fields)
 	if err != nil {
 		return nil, err
 	}
 	context := &InsertContext{
-		query: query,
+		query:  query,
+		driver: driver,
 	}
 	return context.Insert, nil
 }

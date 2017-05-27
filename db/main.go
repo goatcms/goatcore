@@ -1,10 +1,6 @@
 package db
 
-import (
-	"database/sql"
-
-	"github.com/jmoiron/sqlx"
-)
+import "database/sql"
 
 const (
 	SQLTypeTagName = "sqltype"
@@ -19,9 +15,21 @@ type Delete func(TX, int64) error
 type CreateTable func(TX) error
 type DropTable func(TX) error
 
-type Database struct {
-	DSQL     DSQL
-	instance *sqlx.DB
+type Driver interface {
+	DSQL() DSQL
+	Open(string) (Connection, error)
+
+	RunSelect(tx TX, query string) (Rows, error)
+	RunInsert(tx TX, query string, data interface{}) (int64, error)
+	RunUpdate(tx TX, query string, data interface{}) error
+	RunDelete(tx TX, query string, data interface{}) error
+	RunCreateTable(tx TX, query string) error
+	RunDropTable(tx TX, query string) error
+}
+
+type Connection interface {
+	TX
+	Begin() (TX, error)
 }
 
 // Table sd
@@ -44,25 +52,12 @@ type DSQL interface {
 	NewDropTableSQL(table string) (string, error)
 }
 
-// ORM is interface for simple orm
-type ORM interface {
-	NewSelectSQL(table string, fields []string) (string, error)
-	NewSelectWhereSQL(table string, fields []string, where string) (string, error)
-	NewInsertSQL(table string, fields []string) (string, error)
-	NewUpdateSQL(table string, fields []string) (string, error)
-	NewUpdateWhereSQL(table string, fields []string, where string) (string, error)
-	NewDeleteSQL(table string) (string, error)
-	NewDeleteWhereSQL(table string, where string) (string, error)
-	NewCreateSQL(table string, types map[string]string) (string, error)
-	NewDropTableSQL(table string) (string, error)
-}
-
 // TX represent a database transaction accessor
 type TX interface {
 	Queryx(query string, args ...interface{}) (Rows, error)
 	QueryRowx(query string, args ...interface{}) (Row, error)
 	NamedExec(query string, arg interface{}) (sql.Result, error)
-	MustExec(query string, args ...interface{}) sql.Result
+	//MustExec(query string, arg interface{}) sql.Result
 	Commit() error
 	Rollback() error
 }

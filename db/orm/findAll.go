@@ -21,7 +21,8 @@ func (q FindAllContext) FindAll(tx db.TX) (db.Rows, error) {
 }
 
 // NewFindAll create new FindAll function
-func NewFindAll(table db.Table, dsql db.DSQL) (db.FindAll, error) {
+func NewFindAll(table db.Table, driver db.Driver) (db.FindAll, error) {
+	dsql := driver.DSQL()
 	query, err := dsql.NewSelectSQL(table.Name(), table.Fields())
 	if err != nil {
 		return nil, err

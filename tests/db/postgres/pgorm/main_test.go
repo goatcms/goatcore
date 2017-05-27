@@ -4,13 +4,13 @@ import (
 	"reflect"
 
 	"github.com/goatcms/goatcore/db"
-	"github.com/goatcms/goatcore/db/adapter"
 	"github.com/goatcms/goatcore/db/dsql/pgDSQL"
 	"github.com/goatcms/goatcore/db/orm"
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
-	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+
+	"github.com/goatcms/goatcore/db/dbdriver"
+	_ "github.com/goatcms/goatcore/db/dbdriver/pgdriver"
 )
 
 const (
@@ -18,10 +18,11 @@ const (
 )
 
 type testScope struct {
-	tx    db.TX
-	table db.Table
-	dsql  db.DSQL
-	fs    filesystem.Filespace
+	tx     db.TX
+	table  db.Table
+	dsql   db.DSQL
+	fs     filesystem.Filespace
+	driver db.Driver
 }
 
 type TestEntity struct {
@@ -35,13 +36,21 @@ func newTestScope() (*testScope, error) {
 	var (
 		err    error
 		config *TestConfig
-		db     *sqlx.DB
+		db     db.Connection
 	)
 	config, err = LoadTestConfig()
 	if err != nil {
 		return nil, err
 	}
-	db, err = sqlx.Open("postgres", config.URL)
+	driver, err := dbdriver.Driver("postgres")
+	if err != nil {
+		return nil, err
+	}
+	db, err = driver.Open(config.URL)
+	if err != nil {
+		return nil, err
+	}
+	tx, err := db.Begin()
 	if err != nil {
 		return nil, err
 	}
@@ -52,10 +61,11 @@ func newTestScope() (*testScope, error) {
 	var ptr *TestEntity
 	table := orm.NewTable(TestTableName, reflect.TypeOf(ptr).Elem())
 	return &testScope{
-		table: table,
-		dsql:  pgDSQL.NewDSQL(),
-		tx:    adapter.NewTXFromDB(db),
-		fs:    fs,
+		table:  table,
+		dsql:   pgDSQL.NewDSQL(),
+		tx:     tx,
+		fs:     fs,
+		driver: driver,
 	}, nil
 }
 

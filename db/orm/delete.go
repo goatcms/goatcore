@@ -32,7 +32,8 @@ func (q DeleteContext) Delete(tx db.TX, id int64) error {
 }
 
 // NewDelete create new delete function instance
-func NewDelete(table db.Table, dsql db.DSQL) (db.Delete, error) {
+func NewDelete(table db.Table, driver db.Driver) (db.Delete, error) {
+	dsql := driver.DSQL()
 	query, err := dsql.NewDeleteWhereSQL(table.Name(), "id=:id")
 	if err != nil {
 		return nil, err

@@ -8,7 +8,7 @@ func TestDelete(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	createTable, err := NewCreateTable(scope.table, scope.dsql)
+	createTable, err := NewCreateTable(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return
@@ -17,7 +17,7 @@ func TestDelete(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	insert, err := NewInsertWithID(scope.table, scope.dsql)
+	insert, err := NewInsertWithID(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return
@@ -30,7 +30,7 @@ func TestDelete(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	findAll, err := NewFindAll(scope.table, scope.dsql)
+	findAll, err := NewFindAll(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return
@@ -49,7 +49,7 @@ func TestDelete(t *testing.T) {
 		t.Errorf("insert record error")
 		return
 	}
-	delete, err := NewDelete(scope.table, scope.dsql)
+	delete, err := NewDelete(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return

@@ -67,7 +67,7 @@ const (
 	AppScope = "AppScope"
 	// CommandScope is a command scope
 	CommandScope = "CommandScope"
-	// CommandScope is a command scope
+	// GlobalScope is a command scope
 	GlobalScope = "GlobalScope"
 
 	//RootFilespace is key for root filesystem.Filespace

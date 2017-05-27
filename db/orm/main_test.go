@@ -9,7 +9,9 @@ import (
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
+
+	"github.com/goatcms/goatcore/db/dbdriver"
+	_ "github.com/goatcms/goatcore/db/dbdriver/itedriver"
 )
 
 const (
@@ -17,10 +19,11 @@ const (
 )
 
 type testScope struct {
-	tx    db.TX
-	table db.Table
-	dsql  db.DSQL
-	fs    filesystem.Filespace
+	tx     db.TX
+	table  db.Table
+	dsql   db.DSQL
+	driver db.Driver
+	fs     filesystem.Filespace
 }
 
 type TestEntity struct {
@@ -35,6 +38,10 @@ func newTestScope() (*testScope, error) {
 	if err != nil {
 		return nil, err
 	}
+	driver, err := dbdriver.Driver("sqlite3")
+	if err != nil {
+		return nil, err
+	}
 	fs, err := memfs.NewFilespace()
 	if err != nil {
 		return nil, err
@@ -42,10 +49,11 @@ func newTestScope() (*testScope, error) {
 	var ptr *TestEntity
 	table := NewTable(TestTableName, reflect.TypeOf(ptr).Elem())
 	return &testScope{
-		table: table,
-		dsql:  sqliteDSQL.NewDSQL(),
-		tx:    adapter.NewTXFromDB(db),
-		fs:    fs,
+		table:  table,
+		dsql:   sqliteDSQL.NewDSQL(),
+		tx:     adapter.NewTXFromDB(db),
+		driver: driver,
+		fs:     fs,
 	}, nil
 }
 

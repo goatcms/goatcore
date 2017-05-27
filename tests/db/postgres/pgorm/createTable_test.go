@@ -15,9 +15,9 @@ func TestCreateTable(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	dropTable, _ := orm.NewDropTable(table, scope.dsql)
+	dropTable, _ := orm.NewDropTable(table, scope.driver)
 	dropTable(scope.tx)
-	createTable, _ := orm.NewCreateTable(table, scope.dsql)
+	createTable, _ := orm.NewCreateTable(table, scope.driver)
 	if err = createTable(scope.tx); err != nil {
 		t.Error(err)
 		return

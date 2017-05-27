@@ -15,14 +15,14 @@ func TestInsert(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	dropTable, _ := orm.NewDropTable(table, scope.dsql)
+	dropTable, _ := orm.NewDropTable(table, scope.driver)
 	dropTable(scope.tx)
-	createTable, _ := orm.NewCreateTable(table, scope.dsql)
+	createTable, _ := orm.NewCreateTable(table, scope.driver)
 	if err = createTable(scope.tx); err != nil {
 		t.Error(err)
 		return
 	}
-	insert, err := orm.NewInsert(table, scope.dsql)
+	insert, err := orm.NewInsert(table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return
@@ -33,7 +33,7 @@ func TestInsert(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	findByID, err := orm.NewFindByID(table, scope.dsql)
+	findByID, err := orm.NewFindByID(table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return

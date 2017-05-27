@@ -8,7 +8,7 @@ func TestFindAll(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	createTable, err := NewCreateTable(scope.table, scope.dsql)
+	createTable, err := NewCreateTable(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return
@@ -17,7 +17,7 @@ func TestFindAll(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	findAll, err := NewFindAll(scope.table, scope.dsql)
+	findAll, err := NewFindAll(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return
@@ -36,7 +36,7 @@ func TestFindAll(t *testing.T) {
 		t.Errorf("(during start) we have 0 record")
 		return
 	}
-	insert, err := NewInsert(scope.table, scope.dsql)
+	insert, err := NewInsert(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return

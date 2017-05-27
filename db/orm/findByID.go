@@ -23,7 +23,8 @@ func (q FindByIDContext) FindByID(tx db.TX, id int64) (db.Row, error) {
 }
 
 // NewFindByID create new dao function instance
-func NewFindByID(table db.Table, dsql db.DSQL) (db.FindByID, error) {
+func NewFindByID(table db.Table, driver db.Driver) (db.FindByID, error) {
+	dsql := driver.DSQL()
 	query, err := dsql.NewSelectWhereSQL(table.Name(), table.Fields(), "id=:id LIMIT 1")
 	if err != nil {
 		return nil, err

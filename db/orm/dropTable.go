@@ -4,23 +4,25 @@ import "github.com/goatcms/goatcore/db"
 
 // DropTableContext is context for DropTable function
 type DropTableContext struct {
-	query string
+	query  string
+	driver db.Driver
 }
 
 // DropTable remove table with data
 func (q DropTableContext) DropTable(tx db.TX) error {
-	tx.MustExec(q.query)
+	q.driver.RunCreateTable(tx, q.query)
 	return nil
 }
 
 // NewDropTable create new dao function instance
-func NewDropTable(table db.Table, dsql db.DSQL) (db.DropTable, error) {
-	query, err := dsql.NewDropTableSQL(table.Name())
+func NewDropTable(table db.Table, driver db.Driver) (db.DropTable, error) {
+	query, err := driver.DSQL().NewDropTableSQL(table.Name())
 	if err != nil {
 		return nil, err
 	}
 	context := &DropTableContext{
-		query: query,
+		query:  query,
+		driver: driver,
 	}
 	return context.DropTable, nil
 }

@@ -20,7 +20,8 @@ func (q InsertWithIDContext) InsertWithID(tx db.TX, entity interface{}) error {
 }
 
 // NewInsertWithID create new dao function instance
-func NewInsertWithID(table db.Table, dsql db.DSQL) (db.InsertWithID, error) {
+func NewInsertWithID(table db.Table, driver db.Driver) (db.InsertWithID, error) {
+	dsql := driver.DSQL()
 	query, err := dsql.NewInsertSQL(table.Name(), table.Fields())
 	if err != nil {
 		return nil, err

@@ -8,7 +8,7 @@ func TestUpdate(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	createTable, err := NewCreateTable(scope.table, scope.dsql)
+	createTable, err := NewCreateTable(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return
@@ -17,7 +17,7 @@ func TestUpdate(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	insertWithID, err := NewInsertWithID(scope.table, scope.dsql)
+	insertWithID, err := NewInsertWithID(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return
@@ -27,7 +27,7 @@ func TestUpdate(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	update, err := NewUpdate(scope.table, scope.dsql)
+	update, err := NewUpdate(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return
@@ -37,7 +37,7 @@ func TestUpdate(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	findByID, err := NewFindByID(scope.table, scope.dsql)
+	findByID, err := NewFindByID(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return

@@ -49,7 +49,7 @@ func (dsql DSQL) NewInsertSQL(table string, fields []string) (string, error) {
 			sqlValues += ", :" + row
 		}
 	}
-	return sqlUpdate + ") " + sqlValues + ")", nil
+	return sqlUpdate + ") " + sqlValues + ") RETURNING id;", nil
 }
 
 // NewUpdateSQL create new update sql

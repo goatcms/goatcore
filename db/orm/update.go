@@ -32,7 +32,8 @@ func (q UpdateContext) Update(tx db.TX, entity interface{}) error {
 }
 
 // NewUpdate create new dao function instance
-func NewUpdate(table db.Table, dsql db.DSQL) (db.Update, error) {
+func NewUpdate(table db.Table, driver db.Driver) (db.Update, error) {
+	dsql := driver.DSQL()
 	query, err := dsql.NewUpdateSQL(table.Name(), table.Fields())
 	if err != nil {
 		return nil, err

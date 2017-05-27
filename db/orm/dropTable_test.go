@@ -8,7 +8,7 @@ func TestDropTable(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	ct, err := NewCreateTable(scope.table, scope.dsql)
+	ct, err := NewCreateTable(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return
@@ -17,7 +17,7 @@ func TestDropTable(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	ctd, err := NewDropTable(scope.table, scope.dsql)
+	ctd, err := NewDropTable(scope.table, scope.driver)
 	if err != nil {
 		t.Error(err)
 		return
