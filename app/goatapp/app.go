@@ -109,6 +109,9 @@ func (gapp *GoatApp) initFilespaceScope(path string) error {
 	}
 	gapp.filespaceScope = scope.NewScope(app.FilespaceTagName)
 	gapp.filespaceScope.Set(app.RootFilespace, gapp.rootFilespace)
+	if err = gapp.rootFilespace.MkdirAll("tmp", 0766); err != nil {
+		return err
+	}
 	tmpFilespace, err := gapp.rootFilespace.Filespace("tmp")
 	if err != nil {
 		return err

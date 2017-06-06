@@ -167,3 +167,16 @@ type Form interface {
 	Valid() (messages.MessageMap, error)
 	Data() interface{}
 }
+
+// Input represent a standard input
+type Input interface {
+	Scan(a ...interface{}) (n int, err error)
+	Scanln(a ...interface{}) (n int, err error)
+}
+
+// Output represent a standard output
+type Output interface {
+	Print(a ...interface{}) (n int, err error)
+	Printf(format string, a ...interface{}) (n int, err error)
+	Println(a ...interface{}) (n int, err error)
+}
