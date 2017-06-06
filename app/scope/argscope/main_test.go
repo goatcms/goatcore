@@ -15,6 +15,7 @@ type TestDeps struct {
 }
 
 func TestInjectTo(t *testing.T) {
+	t.Parallel()
 	var deps TestDeps
 	scope, err := NewScope([]string{"v1", "path=my/path", "number=12", "flag=1"}, app.ArgsTagName)
 	if err != nil {
@@ -40,6 +41,7 @@ func TestInjectTo(t *testing.T) {
 }
 
 func TestInjectToFail(t *testing.T) {
+	t.Parallel()
 	var deps TestDeps
 	scope, err := NewScope([]string{"v1"}, app.ArgsTagName)
 	if err != nil {
@@ -53,6 +55,7 @@ func TestInjectToFail(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
+	t.Parallel()
 	scope, err := NewScope([]string{"v1", "path=my/path", "number=12", "--some=true"}, app.ArgsTagName)
 	if err != nil {
 		t.Error(err)

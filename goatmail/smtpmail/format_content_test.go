@@ -14,6 +14,7 @@ import (
 )
 
 func TestFormatMailContent(t *testing.T) {
+	t.Parallel()
 	mailtime := time.Now()
 
 	email := &goatmail.Mail{

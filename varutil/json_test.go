@@ -17,6 +17,7 @@ type TestObject struct {
 }
 
 func TestObjectToJSON(t *testing.T) {
+	t.Parallel()
 	var obj1 = TestObject{
 		Value1: "v1",
 		Value2: "v2",
@@ -40,6 +41,7 @@ func TestObjectToJSON(t *testing.T) {
 }
 
 func TestObjectFromJSON(t *testing.T) {
+	t.Parallel()
 	var obj1 = TestObject{}
 	err := ObjectFromJSON(&obj1, exampleJSON)
 	if err != nil {

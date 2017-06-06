@@ -8,6 +8,7 @@ import (
 )
 
 func TestEventStory(t *testing.T) {
+	t.Parallel()
 	var called1 = false
 	var called2 = false
 	c := NewEventScope()
@@ -29,6 +30,7 @@ func TestEventStory(t *testing.T) {
 }
 
 func TestErrorStory(t *testing.T) {
+	t.Parallel()
 	c := NewEventScope()
 	c.On(app.KillEvent, func(interface{}) error {
 		return fmt.Errorf("something is wrong")

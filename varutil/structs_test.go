@@ -8,6 +8,7 @@ type MyStruct struct {
 }
 
 func TestFillStruct(t *testing.T) {
+	t.Parallel()
 	mapData := map[string]interface{}{}
 	mapData["Name"] = "Sebastian"
 	mapData["Age"] = int64(25)
@@ -28,6 +29,7 @@ func TestFillStruct(t *testing.T) {
 }
 
 func TestLoadStruct(t *testing.T) {
+	t.Parallel()
 	mapData := map[string]interface{}{}
 	mapData["Name"] = "Sebastian"
 	mapData["myage"] = int64(25)
@@ -48,6 +50,7 @@ func TestLoadStruct(t *testing.T) {
 }
 
 func TestSetField(t *testing.T) {
+	t.Parallel()
 	myStruct := &MyStruct{
 		Name: "",
 		Age:  0,

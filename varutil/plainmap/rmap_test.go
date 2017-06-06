@@ -7,6 +7,7 @@ import (
 )
 
 func TestRMapToPMapFromObject(t *testing.T) {
+	t.Parallel()
 	sourcemap := map[string]interface{}{
 		"key1":   1,
 		"keystr": "str",
@@ -33,6 +34,7 @@ func TestRMapToPMapFromObject(t *testing.T) {
 }
 
 func TestRMapToPMapWithJson(t *testing.T) {
+	t.Parallel()
 	var sourcemap map[string]interface{}
 	err := varutil.ObjectFromJSON(&sourcemap, "{\"key1\": \"1\", \"keymap\": {\"key11\": \"11\"}}")
 	if err != nil {

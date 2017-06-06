@@ -15,6 +15,7 @@ const (
 )
 
 func TestGOTemplateParse(t *testing.T) {
+	t.Parallel()
 	var (
 		funcs     = template.FuncMap{"join": strings.Join}
 		guardians = []string{"Gamora", "Groot", "Nebula", "Rocket", "Star-Lord"}

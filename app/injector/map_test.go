@@ -10,6 +10,7 @@ type TestInjectableObject struct {
 }
 
 func TestSimpleInject(t *testing.T) {
+	t.Parallel()
 	mapData := map[string]interface{}{}
 	mapData["SomeStringKey"] = "SomeStringValue"
 	mapData["SomeIntKey"] = int(11)

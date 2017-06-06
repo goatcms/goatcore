@@ -8,6 +8,7 @@ import (
 )
 
 func TestCopy(t *testing.T) {
+	t.Parallel()
 	const (
 		srcPath   = "src"
 		destPath  = "dest"
@@ -51,6 +52,7 @@ func TestCopy(t *testing.T) {
 }
 
 func TestCopySingleFile(t *testing.T) {
+	t.Parallel()
 	const (
 		srcPath   = "src"
 		destPath  = "dest"

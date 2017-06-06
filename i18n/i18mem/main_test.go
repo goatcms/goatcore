@@ -8,6 +8,7 @@ const (
 )
 
 func TestSimpleLoad(t *testing.T) {
+	t.Parallel()
 	i18 := NewI18N()
 	i18.Set(map[string]string{
 		PLTranslate: "Minimalna długość pola to %v znaków",

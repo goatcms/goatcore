@@ -78,6 +78,7 @@ func CircleFactory(dp dependency.Provider) (interface{}, error) {
 }
 
 func TestDefaultFactory(t *testing.T) {
+	t.Parallel()
 	dp := NewProvider(TagName)
 	if err := dp.AddDefaultFactory("one", OneFactory); err != nil {
 		t.Error("Add OneFactory fail", err)
@@ -100,6 +101,7 @@ func TestDefaultFactory(t *testing.T) {
 }
 
 func TestFactory(t *testing.T) {
+	t.Parallel()
 	dp := NewProvider(TagName)
 	if err := dp.AddDefaultFactory("one", TwoFactory); err != nil {
 		t.Error("Add OneFactory fail", err)
@@ -126,6 +128,7 @@ func TestFactory(t *testing.T) {
 }
 
 func TestInjectTo(t *testing.T) {
+	t.Parallel()
 	dp := NewProvider(TagName)
 	if err := dp.AddDefaultFactory("one", OneFactory); err != nil {
 		t.Error("Add OneFactory fail", err)
@@ -156,6 +159,7 @@ func TestInjectTo(t *testing.T) {
 }
 
 func TestPreventCircle(t *testing.T) {
+	t.Parallel()
 	dp := NewProvider(TagName)
 	if err := dp.AddDefaultFactory("circle", CircleFactory); err != nil {
 		t.Error(err)
@@ -167,6 +171,7 @@ func TestPreventCircle(t *testing.T) {
 }
 
 func TestRequireInjection(t *testing.T) {
+	t.Parallel()
 	dp := NewProvider(TagName)
 	if err := dp.AddDefaultFactory("dep", OneFactory); err != nil {
 		t.Error(err)
@@ -185,6 +190,7 @@ func TestRequireInjection(t *testing.T) {
 }
 
 func TestUnrequireInjection(t *testing.T) {
+	t.Parallel()
 	dp := NewProvider(TagName)
 	if err := dp.AddDefaultFactory("dep", OneFactory); err != nil {
 		t.Error(err)
@@ -203,6 +209,7 @@ func TestUnrequireInjection(t *testing.T) {
 }
 
 func TestUnrequiredSkipInjection(t *testing.T) {
+	t.Parallel()
 	dp := NewProvider(TagName)
 	o := &ObjectWithUnrequired{
 		Some: nil,
@@ -217,6 +224,7 @@ func TestUnrequiredSkipInjection(t *testing.T) {
 }
 
 func TestSet(t *testing.T) {
+	t.Parallel()
 	dp := NewProvider(TagName)
 	if err := dp.Set("dep", NewOne()); err != nil {
 		t.Error(err)
@@ -235,6 +243,7 @@ func TestSet(t *testing.T) {
 }
 
 func TestSetDefault(t *testing.T) {
+	t.Parallel()
 	dp := NewProvider(TagName)
 	if err := dp.Set("dep", NewTwo()); err != nil {
 		t.Error(err)
@@ -260,6 +269,7 @@ func TestSetDefault(t *testing.T) {
 }
 
 func TestAddInjectors(t *testing.T) {
+	t.Parallel()
 	var deps struct {
 		TestString string `test:"valueAndTagAreIgnoredByTestInjector"`
 		Number     int    `test:"valueAndTagAreIgnoredByTestInjector"`
@@ -282,6 +292,7 @@ func TestAddInjectors(t *testing.T) {
 }
 
 func TestStaticProviderAddInjectors(t *testing.T) {
+	t.Parallel()
 	var deps struct {
 		TestString string `test:"valueAndTagAreIgnoredByTestInjector"`
 		Number     int    `test:"valueAndTagAreIgnoredByTestInjector"`

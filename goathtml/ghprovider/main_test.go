@@ -21,6 +21,7 @@ const (
 )
 
 func TestLoadDefaultLayout(t *testing.T) {
+	t.Parallel()
 	var (
 		funcs     = template.FuncMap{"join": strings.Join}
 		guardians = []string{"Gamora", "Groot", "Nebula", "Rocket", "Star-Lord"}
@@ -61,6 +62,7 @@ func TestLoadDefaultLayout(t *testing.T) {
 }
 
 func TestLoadViewWithDefaultLayout(t *testing.T) {
+	t.Parallel()
 	var (
 		funcs     = template.FuncMap{"join": strings.Join}
 		guardians = []string{"Gamora", "Groot", "Nebula", "Rocket", "Star-Lord"}
@@ -108,6 +110,7 @@ func TestLoadViewWithDefaultLayout(t *testing.T) {
 }
 
 func TestLoadManyFiles(t *testing.T) {
+	t.Parallel()
 	var (
 		funcs     = template.FuncMap{"join": strings.Join}
 		guardians = []string{"Gamora", "Groot", "Nebula", "Rocket", "Star-Lord"}

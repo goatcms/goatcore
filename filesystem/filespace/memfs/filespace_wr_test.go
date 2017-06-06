@@ -8,6 +8,7 @@ import (
 )
 
 func TestWriteAndReader(t *testing.T) {
+	t.Parallel()
 	// init
 	fs, err := memfs.NewFilespace()
 	if err != nil {

@@ -13,6 +13,7 @@ type TestObject struct {
 }
 
 func TestWriteAndRead(t *testing.T) {
+	t.Parallel()
 	var writeObject, readObject TestObject
 	// init
 	fs, err := memfs.NewFilespace()

@@ -17,6 +17,7 @@ const (
 
 // TestChanConverterOneThread test convert data for single thread
 func TestChanConverterOneThread(t *testing.T) {
+	t.Parallel()
 	var rows db.Rows = mockrows.NewRows(mockrows.List{
 		mockrows.Row{
 			"title":   testTitle1,

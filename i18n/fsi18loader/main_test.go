@@ -42,6 +42,7 @@ const (
 )
 
 func TestSimpleLoad(t *testing.T) {
+	t.Parallel()
 	i18 := i18mem.NewI18N()
 
 	fs, err := memfs.NewFilespace()

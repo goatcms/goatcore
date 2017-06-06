@@ -7,6 +7,7 @@ import (
 )
 
 func TestMkdir(t *testing.T) {
+	t.Parallel()
 	// init
 	fs, err := memfs.NewFilespace()
 	if err != nil {

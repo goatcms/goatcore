@@ -7,6 +7,7 @@ import (
 )
 
 func TestLengthValidator_Max_Pass(t *testing.T) {
+	t.Parallel()
 	messagesMap := msgcollection.NewMessageMap()
 	str := "a"
 	if err := MaxStringValid(str, "", messagesMap, 1); err != nil {
@@ -20,6 +21,7 @@ func TestLengthValidator_Max_Pass(t *testing.T) {
 }
 
 func TestLengthValidator_Max_Fail(t *testing.T) {
+	t.Parallel()
 	messagesMap := msgcollection.NewMessageMap()
 	str := "aa"
 	if err := MaxStringValid(str, "", messagesMap, 1); err != nil {

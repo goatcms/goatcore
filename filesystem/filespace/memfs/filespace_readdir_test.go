@@ -7,6 +7,7 @@ import (
 )
 
 func TestReadDir(t *testing.T) {
+	t.Parallel()
 	var dir1 bool
 	var dir2 bool
 	// init

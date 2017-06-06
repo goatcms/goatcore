@@ -7,6 +7,7 @@ import (
 )
 
 func TestEmailValidator_Pass(t *testing.T) {
+	t.Parallel()
 	messagesMap := msgcollection.NewMessageMap()
 	if err := EmailValid("myown@email.address", "", messagesMap); err != nil {
 		t.Error(err)
@@ -19,6 +20,7 @@ func TestEmailValidator_Pass(t *testing.T) {
 }
 
 func TestEmailValidator_Fail(t *testing.T) {
+	t.Parallel()
 	messagesMap := msgcollection.NewMessageMap()
 	if err := EmailValid("sdasdsadasd", "", messagesMap); err != nil {
 		t.Error(err)

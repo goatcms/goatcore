@@ -7,6 +7,7 @@ import (
 )
 
 func TestLengthValidator_Min_Pass(t *testing.T) {
+	t.Parallel()
 	messagesMap := msgcollection.NewMessageMap()
 	str := "aa"
 	if err := MinStringValid(str, "", messagesMap, 2); err != nil {
@@ -20,6 +21,7 @@ func TestLengthValidator_Min_Pass(t *testing.T) {
 }
 
 func TestLengthValidator_Min_Fail(t *testing.T) {
+	t.Parallel()
 	messagesMap := msgcollection.NewMessageMap()
 	str := "a"
 	if err := MinStringValid(str, "", messagesMap, 2); err != nil {

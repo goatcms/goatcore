@@ -3,6 +3,7 @@ package orm
 import "testing"
 
 func TestDelete(t *testing.T) {
+	t.Parallel()
 	scope, err := newTestScope()
 	if err != nil {
 		t.Error(err)
