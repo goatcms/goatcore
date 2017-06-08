@@ -77,7 +77,7 @@ func NewGoatApp(name, version, basePath string) (app.App, error) {
 	gapp.dp.SetDefault(app.CommandScope, gapp.commandScope)
 
 	gapp.dp.SetDefault(app.InputService, gio.NewAppInput(os.Stdin))
-	gapp.dp.SetDefault(app.InputService, gio.NewAppOutput(os.Stdout))
+	gapp.dp.SetDefault(app.OutputService, gio.NewAppOutput(os.Stdout))
 
 	gapp.dp.AddInjectors([]dependency.Injector{
 		gapp.commandScope,
