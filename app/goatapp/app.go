@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/app/gio"
 	"github.com/goatcms/goatcore/app/scope"
 	"github.com/goatcms/goatcore/app/scope/argscope"
 	"github.com/goatcms/goatcore/dependency"
@@ -74,6 +75,9 @@ func NewGoatApp(name, version, basePath string) (app.App, error) {
 	gapp.dp.SetDefault(app.DependencyScope, gapp.dependencyScope)
 	gapp.dp.SetDefault(app.AppScope, gapp.appScope)
 	gapp.dp.SetDefault(app.CommandScope, gapp.commandScope)
+
+	gapp.dp.SetDefault(app.InputService, gio.NewAppInput(os.Stdin))
+	gapp.dp.SetDefault(app.InputService, gio.NewAppOutput(os.Stdout))
 
 	gapp.dp.AddInjectors([]dependency.Injector{
 		gapp.commandScope,
@@ -219,6 +223,7 @@ func (gapp *GoatApp) DependencyProvider() dependency.Provider {
 	return gapp.dp
 }
 
+// RootFilespace return main filespace for application (current directory by default)
 func (gapp *GoatApp) RootFilespace() filesystem.Filespace {
 	return gapp.rootFilespace
 }
