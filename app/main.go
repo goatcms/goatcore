@@ -67,8 +67,13 @@ const (
 	AppScope = "AppScope"
 	// CommandScope is a command scope
 	CommandScope = "CommandScope"
-	// CommandScope is a command scope
+	// GlobalScope is a scope for global events and data
 	GlobalScope = "GlobalScope"
+
+	// InputService is a default input service
+	InputService = "InputService"
+	// OutputService is a default output service
+	OutputService = "GlobalScope"
 
 	//RootFilespace is key for root filesystem.Filespace
 	RootFilespace = "root"
@@ -170,13 +175,11 @@ type Form interface {
 
 // Input represent a standard input
 type Input interface {
-	Scan(a ...interface{}) (n int, err error)
-	Scanln(a ...interface{}) (n int, err error)
+	ReadWord() (string, error)
+	ReadLine() (string, error)
 }
 
 // Output represent a standard output
 type Output interface {
-	Print(a ...interface{}) (n int, err error)
-	Printf(format string, a ...interface{}) (n int, err error)
-	Println(a ...interface{}) (n int, err error)
+	Printf(format string, a ...interface{}) error
 }
