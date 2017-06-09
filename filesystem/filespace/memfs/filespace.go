@@ -119,7 +119,11 @@ func (fs *Filespace) IsExist(subPath string) bool {
 }
 
 func (fs *Filespace) IsFile(subPath string) bool {
-	return !fs.IsDir(subPath)
+	srcNode, err := fs.root.GetByPath(subPath)
+	if err != nil || srcNode == nil {
+		return false
+	}
+	return !srcNode.IsDir()
 }
 
 func (fs *Filespace) IsDir(subPath string) bool {
