@@ -73,7 +73,7 @@ const (
 	// InputService is a default input service
 	InputService = "InputService"
 	// OutputService is a default output service
-	OutputService = "GlobalScope"
+	OutputService = "OutputService"
 
 	//RootFilespace is key for root filesystem.Filespace
 	RootFilespace = "root"
