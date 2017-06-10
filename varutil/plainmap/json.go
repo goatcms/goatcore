@@ -36,7 +36,7 @@ func jsonToPlainStringMap(resultKey string, result map[string]string, data []byt
 	})
 }
 
-func StringPlainmapToJSON(plainmap map[string]string) (json string, err error) {
+func PlainStringMapToJSON(plainmap map[string]string) (json string, err error) {
 	// sort keys
 	keys := make([]string, len(plainmap))
 	i := 0
@@ -46,14 +46,14 @@ func StringPlainmapToJSON(plainmap map[string]string) (json string, err error) {
 	}
 	sort.Strings(keys)
 	// prepare json
-	_, json, err = stringPlainmapToJSON("", 0, keys, plainmap)
+	_, json, err = plainStringMapToJSON("", 0, keys, plainmap)
 	if err != nil {
 		return "", err
 	}
 	return "{" + json + "}", nil
 }
 
-func stringPlainmapToJSON(prefix string, index int, keys []string, plainmap map[string]string) (i int, json string, err error) {
+func plainStringMapToJSON(prefix string, index int, keys []string, plainmap map[string]string) (i int, json string, err error) {
 	for i = index; i < len(keys); {
 		fullkey := keys[i]
 		if !strings.HasPrefix(fullkey, prefix) {
@@ -63,7 +63,7 @@ func stringPlainmapToJSON(prefix string, index int, keys []string, plainmap map[
 		doti := strings.Index(diff, ".")
 		if doti != -1 {
 			var prejson string
-			i, prejson, err = stringPlainmapToJSON(fullkey[:len(prefix)+doti+1], i, keys, plainmap)
+			i, prejson, err = plainStringMapToJSON(fullkey[:len(prefix)+doti+1], i, keys, plainmap)
 			if err != nil {
 				return 0, "", err
 			}
