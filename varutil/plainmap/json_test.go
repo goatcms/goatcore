@@ -24,3 +24,19 @@ func TestJSONToPlainStringMap(t *testing.T) {
 		t.Error("number != 11")
 	}
 }
+
+func TestStringPlainmapToJSON(t *testing.T) {
+	t.Parallel()
+	json, err := StringPlainmapToJSON(map[string]string{
+		"k1.k2.k3": "value\"1\"",
+		"s1.s2.s3": "value2",
+		"s1.s2.s4": "value3",
+	})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if json != `{"k1":{"k2":{"k3":"value\"1\""}},"s1":{"s2":{"s3":"value2","s4":"value3"}}}` {
+		t.Errorf("incorrect result json: %s", json)
+	}
+}
