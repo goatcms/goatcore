@@ -95,6 +95,11 @@ LoopSkipWhiteAtBeginOfString:
 			}
 		}
 		if err = in.fill(); err != nil {
+			if err == io.EOF {
+				in.buf = nil
+				in.rd = nil
+				in.eof = true
+			}
 			return "", err
 		}
 	}
