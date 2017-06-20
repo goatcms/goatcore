@@ -1,6 +1,7 @@
 package memfs
 
 import (
+	"io"
 	"os"
 	"time"
 )
@@ -57,6 +58,9 @@ func (f *File) Close() error {
 func (f *File) Read(p []byte) (int, error) {
 	n := copy(p, f.data[f.pointer:])
 	f.pointer += n
+	if f.pointer == len(f.data) {
+		return n, io.EOF
+	}
 	return n, nil
 }
 

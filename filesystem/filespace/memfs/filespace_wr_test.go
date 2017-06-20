@@ -1,6 +1,7 @@
 package memfs_test
 
 import (
+	"io"
 	"testing"
 
 	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
@@ -31,7 +32,7 @@ func TestWriteAndReader(t *testing.T) {
 	}
 	buf := make([]byte, 222)
 	n, err := reader.Read(buf)
-	if err != nil {
+	if err != io.EOF {
 		t.Error(err)
 		return
 	}
