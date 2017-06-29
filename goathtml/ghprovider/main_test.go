@@ -42,7 +42,7 @@ func TestLoadDefaultLayout(t *testing.T) {
 	}
 	// test loop
 	for ti := 0; ti < workers.AsyncTestReapeat; ti++ {
-		provider := NewProvider(fs, goathtml.LayoutPath, goathtml.ViewPath, funcs)
+		provider := NewProvider(fs, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs)
 		view, err := provider.Layout(goathtml.DefaultLayout, nil)
 		if err != nil {
 			t.Errorf("Errors: %v", err)
@@ -90,7 +90,7 @@ func TestLoadViewWithDefaultLayout(t *testing.T) {
 	}
 	// test loop
 	for ti := 0; ti < workers.AsyncTestReapeat; ti++ {
-		provider := NewProvider(fs, goathtml.LayoutPath, goathtml.ViewPath, funcs)
+		provider := NewProvider(fs, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs)
 		view, err := provider.View(goathtml.DefaultLayout, "myview", nil)
 		if err != nil {
 			t.Errorf("Errors: %v", err)
@@ -150,7 +150,7 @@ func TestLoadManyFiles(t *testing.T) {
 	}
 	// test loop
 	for ti := 0; ti < workers.AsyncTestReapeat; ti++ {
-		provider := NewProvider(fs, goathtml.LayoutPath, goathtml.ViewPath, funcs)
+		provider := NewProvider(fs, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs)
 		view, errs := provider.View(goathtml.DefaultLayout, "myview", nil)
 		if errs != nil {
 			t.Errorf("Errors: %v", errs)

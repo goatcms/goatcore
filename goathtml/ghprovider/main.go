@@ -17,6 +17,7 @@ type Provider struct {
 	fs          filesystem.Filespace
 	layoutPath  string
 	viewPath    string
+	extension   string
 	layoutMutex sync.Mutex
 	layouts     map[string]*template.Template
 	viewMutex   sync.Mutex
@@ -24,11 +25,12 @@ type Provider struct {
 	funcs       template.FuncMap
 }
 
-func NewProvider(fs filesystem.Filespace, layoutPath, viewPath string, funcs template.FuncMap) *Provider {
+func NewProvider(fs filesystem.Filespace, layoutPath, viewPath, extension string, funcs template.FuncMap) *Provider {
 	return &Provider{
 		fs:         fs,
 		layoutPath: layoutPath,
 		viewPath:   viewPath,
+		extension:  extension,
 		layouts:    map[string]*template.Template{},
 		views:      map[string]*template.Template{},
 		funcs:      funcs,
@@ -59,7 +61,7 @@ func (provider *Provider) layout(name string, eventScope app.EventScope) (*templ
 	loop := fsloop.NewLoop(&fsloop.LoopData{
 		Filespace: provider.fs,
 		FileFilter: func(fs filesystem.Filespace, subPath string) bool {
-			return strings.HasSuffix(subPath, goathtml.FileExtension)
+			return strings.HasSuffix(subPath, provider.extension)
 		},
 		OnFile:     templateLoader.Load,
 		Producents: 1,
