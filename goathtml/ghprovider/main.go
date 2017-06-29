@@ -115,7 +115,7 @@ func (provider *Provider) view(layoutName, viewName, key string, eventScope app.
 	loop := fsloop.NewLoop(&fsloop.LoopData{
 		Filespace: provider.fs,
 		FileFilter: func(fs filesystem.Filespace, subPath string) bool {
-			return strings.HasSuffix(subPath, goathtml.FileExtension)
+			return strings.HasSuffix(subPath, provider.extension)
 		},
 		OnFile:     templateLoader.Load,
 		Consumers:  1,
