@@ -13,3 +13,5 @@ You can set *AsyncTestReapeat* at workers\\main.go to lower value like 200 or 50
 
 ## About
 * https://www.youtube.com/watch?v=DUKq5WMz4Y8 (PL) [Slides](https://docs.google.com/presentation/d/1i6e8XM8zZ5FsxIAEqxYjYziafBZt7N-ADYtKY5ENsVc/edit#slide=id.p)
+* P.I.W.O (Poznańska Impreza Wolnego Oprogramownaia) - 2017
+[Nagranie (PL)](https://www.youtube.com/watch?v=r5etsT7r5No) [Slides](https://docs.google.com/presentation/d/1i6e8XM8zZ5FsxIAEqxYjYziafBZt7N-ADYtKY5ENsVc/edit#slide=id.p)
