@@ -31,7 +31,7 @@ func NewModule() app.Module {
 	return &Module{}
 }
 
-// RegisterDependency is init callback to register module dependencies
+// RegisterDependencies is init callback to register module dependencies
 func (m *Module) RegisterDependencies(a app.App) error {
 	commandScope := a.CommandScope()
 	commandScope.Set("command.h", m.Help)
@@ -39,7 +39,7 @@ func (m *Module) RegisterDependencies(a app.App) error {
 	return nil
 }
 
-// InitDependency is init callback to inject dependencies inside module
+// InitDependencies is init callback to inject dependencies inside module
 func (m *Module) InitDependencies(a app.App) error {
 	if err := a.DependencyProvider().InjectTo(&m.dependencies); err != nil {
 		return err
@@ -48,6 +48,7 @@ func (m *Module) InitDependencies(a app.App) error {
 	return nil
 }
 
+// Run start command line loop
 func (m *Module) Run() error {
 	// header
 	fmt.Println(m.dependencies.Name, " ", m.dependencies.Version)

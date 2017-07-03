@@ -21,11 +21,12 @@ const (
 
 // Input represent system input
 type Input struct {
-	buf  []byte
-	rd   io.Reader // reader provided by the client
-	r, w int       // buf read and write positions
-	mu   sync.Mutex
-	eof  bool
+	buf    []byte
+	rd     io.Reader // reader provided by the client
+	r, w   int       // buf read and write positions
+	mu     sync.Mutex
+	eof    bool
+	inited bool
 }
 
 // NewInputSize returns a new Input whose buffer has at least the specified
@@ -39,7 +40,6 @@ func NewInputSize(rd io.Reader, size int) *Input {
 		r:   0,
 		w:   0,
 	}
-	in.fill()
 	return in
 }
 
@@ -86,6 +86,10 @@ func (in *Input) ReadWord() (s string, err error) {
 	defer in.mu.Unlock()
 	if in.eof {
 		return "", io.EOF
+	}
+	if !in.inited {
+		in.fill()
+		in.inited = true
 	}
 LoopSkipWhiteAtBeginOfString:
 	for isWhiteChar(in.buf[in.r]) {
@@ -144,6 +148,10 @@ func (in *Input) ReadLine() (s string, err error) {
 	defer in.mu.Unlock()
 	if in.eof {
 		return "", io.EOF
+	}
+	if !in.inited {
+		in.fill()
+		in.inited = true
 	}
 LoopSkipWhiteAtBeginOfString:
 	for isWhiteChar(in.buf[in.r]) {
