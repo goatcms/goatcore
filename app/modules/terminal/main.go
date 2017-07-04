@@ -80,24 +80,32 @@ func (m *Module) Help(app.App) error {
 	if err != nil {
 		return err
 	}
-	m.deps.Output.Printf("\nCommands:\n")
+	isFirstCommand := true
 	for _, key := range keys {
 		if strings.HasPrefix(key, commandPrefix) {
+			if isFirstCommand {
+				m.deps.Output.Printf("\nCommands:\n")
+				isFirstCommand = false
+			}
 			helpStr, err := m.deps.CommandScope.Get(key)
 			if err != nil {
 				return err
 			}
-			m.deps.Output.Printf(" %s: %s\n", key[len(commandPrefix):], helpStr)
+			m.deps.Output.Printf("%11s  %s\n", key[len(commandPrefix):], helpStr)
 		}
 	}
-	m.deps.Output.Printf("\nArguments:\n")
+	isFirstArgument := true
 	for _, key := range keys {
 		if strings.HasPrefix(key, argumentPrefix) {
+			if isFirstArgument {
+				m.deps.Output.Printf("\nArguments:\n")
+				isFirstArgument = false
+			}
 			helpStr, err := m.deps.CommandScope.Get(key)
 			if err != nil {
 				return err
 			}
-			m.deps.Output.Printf(" %s: %s\n", key[len(argumentPrefix):], helpStr)
+			m.deps.Output.Printf("%11s  %s\n", key[len(argumentPrefix):], helpStr)
 		}
 	}
 	m.deps.Output.Printf("\n")
