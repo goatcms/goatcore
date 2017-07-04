@@ -14,8 +14,8 @@ const (
 
 // Module is command unit
 type Module struct {
-	application  app.App
-	dependencies struct {
+	app  app.App
+	deps struct {
 		Name         string    `app:"AppName"`
 		Version      string    `app:"AppVersion"`
 		Welcome      string    `app:"?AppWelcome"`
@@ -23,6 +23,9 @@ type Module struct {
 		GoatVersion  string    `engine:"GoatVersion"`
 		CommandName  string    `argument:"?$1"`
 		CommandScope app.Scope `dependency:"CommandScope"`
+
+		Input  app.Input  `dependency:"InputService"`
+		Output app.Output `dependency:"OutputService"`
 	}
 }
 
@@ -41,61 +44,62 @@ func (m *Module) RegisterDependencies(a app.App) error {
 
 // InitDependencies is init callback to inject dependencies inside module
 func (m *Module) InitDependencies(a app.App) error {
-	if err := a.DependencyProvider().InjectTo(&m.dependencies); err != nil {
+	if err := a.DependencyProvider().InjectTo(&m.deps); err != nil {
 		return err
 	}
-	m.application = a
+	m.app = a
 	return nil
 }
 
 // Run start command line loop
 func (m *Module) Run() error {
 	// header
-	fmt.Println(m.dependencies.Name, " ", m.dependencies.Version)
-	if m.dependencies.Company != "" {
-		fmt.Println(m.dependencies.Company)
+	m.deps.Output.Printf("%s %s\n", m.deps.Name, m.deps.Version)
+	if m.deps.Company != "" {
+		m.deps.Output.Printf("Develop by @%s all rights reserved\n", m.deps.Company)
 	}
-	fmt.Printf("Supported by goatcore %s (%s) \n", m.dependencies.GoatVersion, "https://github.com/goatcms/goatcore")
-	if m.dependencies.Welcome != "" {
-		fmt.Printf("\n%s\n", m.dependencies.Welcome)
+	m.deps.Output.Printf("Powered by GoatCore %s (%s)\n", m.deps.GoatVersion, "https://github.com/goatcms/goatcore")
+	if m.deps.Welcome != "" {
+		m.deps.Output.Printf("\n%s\n", m.deps.Welcome)
 	}
 	// content
-	if m.dependencies.CommandName == "" {
-		return m.Help(m.application)
+	if m.deps.CommandName == "" {
+		return m.Help(m.app)
 	}
-	commandIns, err := m.dependencies.CommandScope.Get("command." + m.dependencies.CommandName)
+	commandIns, err := m.deps.CommandScope.Get("command." + m.deps.CommandName)
 	if err != nil || commandIns == nil {
-		fmt.Printf("Error: unknown command %s\n", m.dependencies.CommandName)
+		fmt.Printf("Error: unknown command %s\n", m.deps.CommandName)
 		return nil
 	}
 	command := commandIns.(func(app.App) error)
-	return command(m.application)
+	return command(m.app)
 }
 
 func (m *Module) Help(app.App) error {
-	keys, err := m.dependencies.CommandScope.Keys()
+	keys, err := m.deps.CommandScope.Keys()
 	if err != nil {
 		return err
 	}
-	fmt.Printf("\nCommands:\n")
+	m.deps.Output.Printf("\nCommands:\n")
 	for _, key := range keys {
 		if strings.HasPrefix(key, commandPrefix) {
-			helpStr, err := m.dependencies.CommandScope.Get(key)
+			helpStr, err := m.deps.CommandScope.Get(key)
 			if err != nil {
 				return err
 			}
-			fmt.Printf(" %s: %s\n", key[len(commandPrefix):], helpStr)
+			m.deps.Output.Printf(" %s: %s\n", key[len(commandPrefix):], helpStr)
 		}
 	}
-	fmt.Printf("\n\nArguments:\n")
+	m.deps.Output.Printf("\nArguments:\n")
 	for _, key := range keys {
 		if strings.HasPrefix(key, argumentPrefix) {
-			helpStr, err := m.dependencies.CommandScope.Get(key)
+			helpStr, err := m.deps.CommandScope.Get(key)
 			if err != nil {
 				return err
 			}
-			fmt.Printf(" %s: %s\n", key[len(argumentPrefix):], helpStr)
+			m.deps.Output.Printf(" %s: %s\n", key[len(argumentPrefix):], helpStr)
 		}
 	}
+	m.deps.Output.Printf("\n")
 	return nil
 }
