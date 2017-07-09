@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/filesystem/disk"
@@ -68,8 +69,12 @@ func (fs *Filespace) ReadFile(subPath string) ([]byte, error) {
 	return ioutil.ReadFile(fs.path + subPath)
 }
 
-func (fs *Filespace) WriteFile(subPath string, data []byte, perm os.FileMode) error {
-	return ioutil.WriteFile(fs.path+subPath, data, perm)
+func (fs *Filespace) WriteFile(subPath string, data []byte, perm os.FileMode) (err error) {
+	path := fs.path + subPath
+	if err = fs.MkdirAll(filepath.Dir(path), perm); err != nil {
+		return err
+	}
+	return ioutil.WriteFile(path, data, perm)
 }
 
 func (fs *Filespace) Remove(subPath string) error {
