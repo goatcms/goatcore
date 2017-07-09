@@ -154,9 +154,9 @@ func (in *Input) ReadLine() (s string, err error) {
 		in.inited = true
 	}
 LoopSkipWhiteAtBeginOfString:
-	for isWhiteChar(in.buf[in.r]) {
+	for isSeparateChar(in.buf[in.r]) {
 		for ; in.r < in.w; in.r++ {
-			if !isWhiteChar(in.buf[in.r]) {
+			if !isSeparateChar(in.buf[in.r]) {
 				break LoopSkipWhiteAtBeginOfString
 			}
 		}
@@ -172,6 +172,7 @@ LoopSkipWhiteAtBeginOfString:
 			if isNewLine(in.buf[pos]) {
 				s := string(in.buf[in.r:pos])
 				in.r = pos
+				in.skipEOLChars()
 				return s, nil
 			}
 			offset++
@@ -196,5 +197,10 @@ LoopSkipWhiteAtBeginOfString:
 			}
 		}
 		pos = in.r + offset
+	}
+}
+
+func (in *Input) skipEOLChars() {
+	for ; isNewLine(in.buf[in.r]) && in.r < in.w; in.r++ {
 	}
 }
