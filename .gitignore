@@ -4,3 +4,4 @@ npm-debug.log
 *~
 tests/smtp.json
 tests/db_postgres.json
+.goat/properties.json
