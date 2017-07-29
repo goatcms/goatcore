@@ -1,0 +1,42 @@
+[{
+  "prompt":"Insert your postgres url (like 'postgres://testuser:testpass@hosturlorip/testdb?sslmode=disable')",
+  "key":"test.postgres.url",
+  "type":"line",
+  "min":1,
+  "max":1024
+},{
+  "prompt":"Insert your SMTP auth username (like 'smtp.gmail.com:465')",
+  "key":"test.smtp.url",
+  "type":"line",
+  "min":1,
+  "max":50,
+  "pattern": "^[a-zA-Z0-9]+[a-zA-Z0-9\\.]*[a-zA-Z0-9]+(:[0-9]+)?$"
+},{
+  "prompt":"Insert your SMTP auth username",
+  "key":"test.smtp.username",
+  "type":"line",
+  "min":1,
+  "max":150
+},{
+  "prompt":"Insert your SMTP auth passwrod",
+  "key":"test.smtp.password",
+  "type":"line",
+  "min":1,
+  "max":150
+},{
+  "prompt":"Insert your SMTP auth identity",
+  "key":"test.smtp.identity",
+  "type":"line"
+},{
+  "prompt":"Insert your SMTP from address",
+  "key":"test.smtp.fromAddress",
+  "type":"line",
+  "min":1,
+  "max":1024
+},{
+  "prompt":"Insert your SMTP to address",
+  "key":"test.smtp.toAddress",
+  "type":"line",
+  "min":1,
+  "max":1024
+}]

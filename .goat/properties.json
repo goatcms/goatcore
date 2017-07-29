@@ -1,0 +1,1 @@
+{"test":{"postgres":{"url":"postgres://testuser:testpass@hosturlorip/testdb?sslmode=disable"},"smtp":{"fromAddress":"prog255@gmail.com","identity":"","password":"pass","toAddress":"prog255@gmail.com","url":"smtp.gmail.com:465","username":"prog255@gmail.com"}}}
