@@ -1,14 +1,14 @@
-{{$smtpPath := (print .To "/tests/smtp.json")}}
-{{$postgresPath := (print .To "/tests/db_postgres.json")}}
+{{- $smtpPath := (print .To "/tests/smtp.json") -}}
+{{- $postgresPath := (print .To "/tests/db_postgres.json") -}}
 
-{{if not (.Filesystem.IsFile $smtpPath)}}
-  {{.Out.File $smtpPath -}}
-    {{template "smtp" .}}
-  {{.Out.EOF}}
-{{end}}
+{{- if not (.Filesystem.IsFile $smtpPath) -}}
+  {{- .Out.File $smtpPath -}}
+    {{- template "smtp" . -}}
+  {{- .Out.EOF -}}
+{{- end -}}
 
-{{if not (.Filesystem.IsFile $postgresPath)}}
-  {{.Out.File $postgresPath -}}
-    {{template "postgres" .}}
-  {{.Out.EOF}}
-{{end}}
+{{- if not (.Filesystem.IsFile $postgresPath) -}}
+  {{- .Out.File $postgresPath -}}
+    {{- template "postgres" . -}}
+  {{- .Out.EOF -}}
+{{- end -}}

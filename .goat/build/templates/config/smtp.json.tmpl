@@ -1,4 +1,4 @@
-{{define "smtp"}}
+{{- define "smtp" -}}
 {
   "sender": {
     "smtpAddr": "{{index .Properties.Project "test.smtp.url"}}",
@@ -9,4 +9,4 @@
   "fromAddress": "{{index .Properties.Project "test.smtp.fromAddress"}}",
   "toAddress": "{{index .Properties.Project "test.smtp.toAddress"}}"
 }
-{{end}}
+{{- end -}}
