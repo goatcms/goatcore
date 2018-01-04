@@ -81,3 +81,49 @@ func plainStringMapToJSON(prefix string, index int, keys []string, plainmap map[
 	}
 	return i, json, nil
 }
+
+func PlainStringMapToFormattedJSON(plainmap map[string]string) (json string, err error) {
+	// sort keys
+	keys := make([]string, len(plainmap))
+	i := 0
+	for k := range plainmap {
+		keys[i] = k
+		i++
+	}
+	sort.Strings(keys)
+	// prepare json
+	_, json, err = plainStringMapToFormattedJSON("", 0, keys, plainmap, "  ", "  ")
+	if err != nil {
+		return "", err
+	}
+	return "{" + json + "\n}", nil
+}
+
+func plainStringMapToFormattedJSON(prefix string, index int, keys []string, plainmap map[string]string, sep string, spaces string) (i int, json string, err error) {
+	for i = index; i < len(keys); {
+		fullkey := keys[i]
+		if !strings.HasPrefix(fullkey, prefix) {
+			return i, json, nil
+		}
+		diff := fullkey[len(prefix):]
+		doti := strings.Index(diff, ".")
+		if doti != -1 {
+			var prejson string
+			i, prejson, err = plainStringMapToFormattedJSON(fullkey[:len(prefix)+doti+1], i, keys, plainmap, sep, spaces+sep)
+			if err != nil {
+				return 0, "", err
+			}
+			if json != "" {
+				json += ","
+			}
+			json += "\n" + spaces + formatStringJSON(diff[:doti]) + ": {" + prejson + "\n" + spaces + "}"
+		} else {
+			if json != "" {
+				json += ","
+			}
+			json += "\n" + spaces + formatStringJSON(diff) + ": " + formatStringJSON(plainmap[fullkey])
+			i++
+		}
+	}
+	return i, json, nil
+}
