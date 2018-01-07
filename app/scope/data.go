@@ -1,6 +1,8 @@
 package scope
 
 import (
+	"fmt"
+
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/injector"
 )
@@ -24,8 +26,12 @@ func (ds *DataScope) Set(key string, v interface{}) error {
 }
 
 // Get get value from context
-func (ds *DataScope) Get(key string) (interface{}, error) {
-	return ds.Data[key], nil
+func (ds *DataScope) Get(key string) (value interface{}, err error) {
+	var ok bool
+	if value, ok = ds.Data[key]; !ok {
+		return nil, fmt.Errorf("Unknow value for key %v", key)
+	}
+	return value, nil
 }
 
 // Keys get map data
