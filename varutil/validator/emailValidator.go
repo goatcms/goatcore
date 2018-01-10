@@ -6,11 +6,6 @@ import (
 	"github.com/goatcms/goatcore/messages"
 )
 
-const (
-	// InvalidEmail is key of invalid email message
-	InvalidEmail = "email"
-)
-
 var (
 	// emailRegexp is regullar expression for email
 	emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$")
