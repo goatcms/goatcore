@@ -30,7 +30,7 @@ func (loader *TemplateLoader) Load(fs filesystem.Filespace, subPath string) erro
 		return fmt.Errorf("empty file")
 	}
 	if _, err := loader.template.Parse(string(bytes)); err != nil {
-		return err
+		return fmt.Errorf("%v: %v", subPath, err)
 	}
 	return nil
 }
