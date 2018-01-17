@@ -15,8 +15,10 @@ const (
 	CommitEvent = iota
 	// RollbackEvent is a action run when data is restore
 	RollbackEvent = iota
-	// BeforeCloseEvent is a action run during application close
+	// BeforeCloseEvent is a action run before application/scope close
 	BeforeCloseEvent = iota
+	// CloseEvent is a action run to close application/scope
+	CloseEvent = iota
 
 	// Error is key for error value
 	Error = "error"
