@@ -1,6 +1,10 @@
 package msgcollection
 
-import "github.com/goatcms/goatcore/messages"
+import (
+	"strings"
+
+	"github.com/goatcms/goatcore/messages"
+)
 
 // MessageList represent a list of messages
 type MessageList struct {
@@ -22,4 +26,8 @@ func (ml *MessageList) Add(msg string) {
 // GetAll return all messages
 func (ml *MessageList) GetAll() []string {
 	return ml.list
+}
+
+func (ml *MessageList) String() string {
+	return "MessageList<" + strings.Join(ml.list, ", ") + ">"
 }

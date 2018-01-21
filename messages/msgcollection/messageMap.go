@@ -1,6 +1,11 @@
 package msgcollection
 
-import "github.com/goatcms/goatcore/messages"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/goatcms/goatcore/messages"
+)
 
 // MessageMap represent messages for object
 type MessageMap struct {
@@ -32,4 +37,12 @@ func (mm *MessageMap) GetAll() map[string]messages.MessageList {
 // Add add new message
 func (mm *MessageMap) Add(key, msg string) {
 	mm.Get(key).Add(msg)
+}
+
+func (mm *MessageMap) String() string {
+	var list = []string{}
+	for k, v := range mm.m {
+		list = append(list, fmt.Sprintf("%v:%v", k, v))
+	}
+	return "MessageMap<" + strings.Join(list, ", ") + ">"
 }
