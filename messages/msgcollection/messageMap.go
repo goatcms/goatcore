@@ -2,6 +2,7 @@ package msgcollection
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/goatcms/goatcore/messages"
@@ -45,4 +46,15 @@ func (mm *MessageMap) String() string {
 		list = append(list, fmt.Sprintf("%v:%v", k, v))
 	}
 	return "MessageMap<" + strings.Join(list, ", ") + ">"
+}
+
+// ToJSON return MessageMap as json object
+func (mm *MessageMap) ToJSON() (json string) {
+	tmp := make([]string, len(mm.m))
+	i := 0
+	for key, msg := range mm.m {
+		tmp[i] = strconv.Quote(key) + ":" + msg.ToJSON()
+		i++
+	}
+	return "{}" + strings.Join(tmp, ",") + "}"
 }

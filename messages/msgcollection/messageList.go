@@ -1,6 +1,7 @@
 package msgcollection
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/goatcms/goatcore/messages"
@@ -30,4 +31,13 @@ func (ml *MessageList) GetAll() []string {
 
 func (ml *MessageList) String() string {
 	return "MessageList<" + strings.Join(ml.list, ", ") + ">"
+}
+
+// ToJSON return MessageList as json object
+func (ml *MessageList) ToJSON() (json string) {
+	tmp := make([]string, len(ml.list))
+	for i, msg := range ml.list {
+		tmp[i] = strconv.Quote(msg)
+	}
+	return "[" + strings.Join(tmp, ",") + "]"
 }
