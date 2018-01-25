@@ -42,7 +42,7 @@ func TestLoadDefaultLayout(t *testing.T) {
 	}
 	// test loop
 	for ti := 0; ti < workers.AsyncTestReapeat; ti++ {
-		provider := NewProvider(fs, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs)
+		provider := NewProvider(fs, goathtml.HelpersPath, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs)
 		view, err := provider.Layout(goathtml.DefaultLayout, nil)
 		if err != nil {
 			t.Errorf("Errors: %v", err)
@@ -90,7 +90,7 @@ func TestLoadViewWithDefaultLayout(t *testing.T) {
 	}
 	// test loop
 	for ti := 0; ti < workers.AsyncTestReapeat; ti++ {
-		provider := NewProvider(fs, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs)
+		provider := NewProvider(fs, goathtml.HelpersPath, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs)
 		view, err := provider.View(goathtml.DefaultLayout, "myview", nil)
 		if err != nil {
 			t.Errorf("Errors: %v", err)
@@ -150,7 +150,55 @@ func TestLoadManyFiles(t *testing.T) {
 	}
 	// test loop
 	for ti := 0; ti < workers.AsyncTestReapeat; ti++ {
-		provider := NewProvider(fs, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs)
+		provider := NewProvider(fs, goathtml.HelpersPath, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs)
+		view, errs := provider.View(goathtml.DefaultLayout, "myview", nil)
+		if errs != nil {
+			t.Errorf("Errors: %v", errs)
+			return
+		}
+		buf := new(bytes.Buffer)
+		if err := view.Execute(buf, guardians); err != nil {
+			t.Error(err)
+			return
+		}
+		result := buf.String()
+		if !strings.Contains(result, "Gamora,") {
+			t.Errorf("layout template should be overwrited. Result is: %v", result)
+			return
+		}
+	}
+}
+
+func TestHelperLoad(t *testing.T) {
+	t.Parallel()
+	var (
+		funcs     = template.FuncMap{"join": strings.Join}
+		guardians = []string{"Gamora", "Groot", "Nebula", "Rocket", "Star-Lord"}
+	)
+	fs, err := memfs.NewFilespace()
+	if err != nil {
+		t.Error(err)
+	}
+	// create test data
+	if err := fs.MkdirAll("helpers/", 0777); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := fs.MkdirAll("views/", 0777); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := fs.WriteFile("helpers/default/main.gohtml", []byte(masterTemplate), 0777); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := fs.WriteFile("views/myview/main.gohtml", []byte(overlayTemplate), 0777); err != nil {
+		t.Error(err)
+		return
+	}
+	// test loop
+	for ti := 0; ti < workers.AsyncTestReapeat; ti++ {
+		provider := NewProvider(fs, goathtml.HelpersPath, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs)
 		view, errs := provider.View(goathtml.DefaultLayout, "myview", nil)
 		if errs != nil {
 			t.Errorf("Errors: %v", errs)
