@@ -56,5 +56,5 @@ func (mm *MessageMap) ToJSON() (json string) {
 		tmp[i] = strconv.Quote(key) + ":" + msg.ToJSON()
 		i++
 	}
-	return "{}" + strings.Join(tmp, ",") + "}"
+	return "{" + strings.Join(tmp, ",") + "}"
 }
