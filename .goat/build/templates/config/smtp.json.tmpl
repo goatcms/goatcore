@@ -1,12 +1,12 @@
 {{- define "smtp" -}}
 {
   "sender": {
-    "smtpAddr": "{{index .Properties.Project "test.smtp.url"}}",
-    "authUsername": "{{index .Properties.Project "test.smtp.username"}}",
-    "authPassword": "{{index .Properties.Project "test.smtp.password"}}",
-    "authIdentity": "{{index .Properties.Project "test.smtp.identity"}}"
+    "smtpAddr": "{{index .Properties.Secrets "test.smtp.url"}}",
+    "authUsername": "{{index .Properties.Secrets "test.smtp.username"}}",
+    "authPassword": "{{index .Properties.Secrets "test.smtp.password"}}",
+    "authIdentity": "{{index .Properties.Secrets "test.smtp.identity"}}"
   },
-  "fromAddress": "{{index .Properties.Project "test.smtp.fromAddress"}}",
-  "toAddress": "{{index .Properties.Project "test.smtp.toAddress"}}"
+  "fromAddress": "{{index .Properties.Secrets "test.smtp.fromAddress"}}",
+  "toAddress": "{{index .Properties.Secrets "test.smtp.toAddress"}}"
 }
 {{- end -}}

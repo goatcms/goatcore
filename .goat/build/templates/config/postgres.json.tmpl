@@ -1,8 +1,8 @@
 {{- define "postgres" -}}
-{{- $host := (index .Properties.Project "test.postgres.host") -}}
-{{- $username := (index .Properties.Project "test.postgres.username") -}}
-{{- $password := (index .Properties.Project "test.postgres.password") -}}
-{{- $database := (index .Properties.Project "test.postgres.database") -}}
+{{- $host := (index .Properties.Secrets "test.postgres.host") -}}
+{{- $username := (index .Properties.Secrets "test.postgres.username") -}}
+{{- $password := (index .Properties.Secrets "test.postgres.password") -}}
+{{- $database := (index .Properties.Secrets "test.postgres.database") -}}
 
 {
   "url":"postgres://{{$username}}:{{$password}}@{{$host}}/{{$database}}?sslmode=disable",
