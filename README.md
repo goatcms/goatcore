@@ -1,8 +1,6 @@
 # GoatCore
 [![Go Report Card](https://goreportcard.com/badge/github.com/goatcms/goatcore)](https://goreportcard.com/report/github.com/goatcms/goatcore)
 [![GoDoc](https://godoc.org/github.com/goatcms/goatcore?status.svg)](https://godoc.org/github.com/goatcms/goatcore)
-[comment]: <> TODO [![codecov.io](https://codecov.io/github/goatcms/goatcore/coverage.svg?branch=master)](https://codecov.io/github/goatcms/goatcore?branch=master)
-[comment]: <> TODO [![CircleCI](https://circleci.com/gh/goatcms/goatcore.svg?style=svg)](https://circleci.com/gh/goatcms/goatcore)
 
 GoatCore is a set od main goat packages. It includes interfaces, basic libraries and startup types.
 
