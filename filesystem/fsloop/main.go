@@ -21,7 +21,7 @@ type Chans struct {
 	fileChan   chan string
 }
 
-// LoopData is loop data contianer
+// LoopData is loop data container
 type LoopData struct {
 	chans      Chans
 	Filespace  filesystem.Filespace

@@ -43,6 +43,7 @@ func (mail Mail) ToAddrs() []string {
 	return arr
 }
 
+// MailSender provide dial send stream api
 type MailSender interface {
 	Send(*Mail)
 }

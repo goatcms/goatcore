@@ -21,10 +21,7 @@ func CopyDirectory(src, dest string) error {
 	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
 		subPath := path + "/" + info.Name()
 		if info.IsDir() {
-			if err := MkdirAll(subPath, filesystem.DefaultUnixDirMode); err != nil {
-				return err
-			}
-			return nil
+			return MkdirAll(subPath, filesystem.DefaultUnixDirMode)
 		}
 		return CopyFile(src+subPath, dest+subPath)
 	})

@@ -11,7 +11,7 @@ import (
 	"github.com/goatcms/goatcore/varutil/plainmap"
 )
 
-// Load read and set translations from direcotry
+// Load read and set translations from directory
 func Load(fs filesystem.Filespace, basePath string, i18 i18n.I18N, scope app.Scope) error {
 	loop := fsloop.NewLoop(&fsloop.LoopData{
 		Filespace: fs,

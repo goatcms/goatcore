@@ -8,10 +8,12 @@ import (
 	"github.com/goatcms/goatcore/filesystem"
 )
 
+// FileDefer provide defer api to remove multi files on remvoe
 type FileDefer struct {
 	files []filesystem.File
 }
 
+// Remove delete files
 func (d *FileDefer) Remove(interface{}) error {
 	var errors []error
 	for _, file := range d.files {
@@ -26,10 +28,12 @@ func (d *FileDefer) Remove(interface{}) error {
 	return nil
 }
 
+// Add append file to remove on error
 func (d *FileDefer) Add(file filesystem.File) {
 	d.files = append(d.files, file)
 }
 
+// RemoveOn bind scope event  with file to remove on error
 func RemoveOn(scope app.Scope, eventID int, file filesystem.File) error {
 	var def *FileDefer
 	insKey := "_scopedefer.FileDefer:" + strconv.Itoa(eventID)
