@@ -1,4 +1,7 @@
 # GoatCore
+[![Go Report Card](https://goreportcard.com/badge/github.com/goatcms/goatcore)](https://goreportcard.com/report/github.com/goatcms/goatcore)
+[![GoDoc](https://godoc.org/github.com/goatcms/goatcore?status.svg)](https://godoc.org/github.com/goatcms/goatcore)
+
 GoatCore is a set od main goat packages. It includes interfaces, basic libraries and startup types.
 
 ## Improve golang compilation speed
