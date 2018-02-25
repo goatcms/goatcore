@@ -1,4 +1,3 @@
-
 {{- $path := (print .To "/bin/docker.sh") -}}
 {{- if not (.Filesystem.IsFile $path) -}}
   {{- .Out.File $path -}}

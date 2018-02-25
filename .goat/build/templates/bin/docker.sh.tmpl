@@ -1,12 +1,4 @@
 {{- define "bin.docker_sh" -}}
-{{- $pghost := (index .Properties.Secrets "test.postgres.host") -}}
-{{- $pgusername := (index .Properties.Secrets "test.postgres.username") -}}
-{{- $pgpassword := (index .Properties.Secrets "test.postgres.password") -}}
-{{- $pgdatabase := (index .Properties.Secrets "test.postgres.database") -}}
-
-# local postgres server
-docker run --name goatcore-test-postgres -e POSTGRES_PASSWORD={{$pgpassword}} -e POSTGRES_DB={{$pgdatabase}} -e POSTGRES_USER={{$pgusername}} -p 5432:5432 -d postgres:latest
-
 # local mail server
 docker container run -d -p 1080:80 -p 25:25 djfarrelly/maildev
 {{- end -}}
