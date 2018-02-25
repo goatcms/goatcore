@@ -12,10 +12,12 @@ const (
 	currentDir = "."
 )
 
+// Filespace is memory filespace
 type Filespace struct {
 	root *Dir
 }
 
+// NewFilespace create new memory filespace instance
 func NewFilespace() (*Filespace, error) {
 	return &Filespace{
 		root: &Dir{
@@ -24,6 +26,7 @@ func NewFilespace() (*Filespace, error) {
 	}, nil
 }
 
+// Copy duplicate a file or directory
 func (fs *Filespace) Copy(src, dest string) error {
 	srcNode, err := fs.root.GetByPath(src)
 	if err != nil {
@@ -31,11 +34,11 @@ func (fs *Filespace) Copy(src, dest string) error {
 	}
 	if srcNode.IsDir() {
 		return fs.CopyDirectory(src, dest)
-	} else {
-		return fs.CopyFile(src, dest)
 	}
+	return fs.CopyFile(src, dest)
 }
 
+// CopyDirectory duplicate a directory
 func (fs *Filespace) CopyDirectory(src, dest string) error {
 	srcNode, err := fs.root.GetByPath(src)
 	if err != nil {
@@ -62,11 +65,12 @@ func (fs *Filespace) CopyDirectory(src, dest string) error {
 		return fmt.Errorf("Destination path exist and there is a file " + dest)
 	}
 	copiedDir.name = path.Base(dest)
-	var destDir *Dir = destNode.(*Dir)
+	var destDir = destNode.(*Dir)
 	destDir.AddNode(copiedDir)
 	return nil
 }
 
+// CopyFile duplicate a file
 func (fs *Filespace) CopyFile(src, dest string) error {
 	srcNode, err := fs.root.GetByPath(src)
 	if err != nil {
@@ -93,11 +97,12 @@ func (fs *Filespace) CopyFile(src, dest string) error {
 		return fmt.Errorf("Destination path exist and there is a file " + dest)
 	}
 	copiedFile.name = path.Base(dest)
-	var destDir *Dir = destNode.(*Dir)
+	var destDir = destNode.(*Dir)
 	destDir.AddNode(copiedFile)
 	return nil
 }
 
+// ReadDir return directory nodes
 func (fs *Filespace) ReadDir(subPath string) ([]os.FileInfo, error) {
 	srcNode, err := fs.root.GetByPath(subPath)
 	if err != nil {
@@ -106,10 +111,11 @@ func (fs *Filespace) ReadDir(subPath string) ([]os.FileInfo, error) {
 	if !srcNode.IsDir() {
 		return nil, fmt.Errorf(subPath + " is not a directory")
 	}
-	var dir *Dir = srcNode.(*Dir)
+	var dir = srcNode.(*Dir)
 	return dir.GetNodes(), nil
 }
 
+// IsExist return true if node exist
 func (fs *Filespace) IsExist(subPath string) bool {
 	srcNode, err := fs.root.GetByPath(subPath)
 	if err != nil || srcNode == nil {
@@ -118,6 +124,7 @@ func (fs *Filespace) IsExist(subPath string) bool {
 	return true
 }
 
+// IsFile return true if node exist and is a file
 func (fs *Filespace) IsFile(subPath string) bool {
 	srcNode, err := fs.root.GetByPath(subPath)
 	if err != nil || srcNode == nil {
@@ -126,6 +133,7 @@ func (fs *Filespace) IsFile(subPath string) bool {
 	return !srcNode.IsDir()
 }
 
+// IsDir return true if node exist and is a directory
 func (fs *Filespace) IsDir(subPath string) bool {
 	srcNode, err := fs.root.GetByPath(subPath)
 	if err != nil || srcNode == nil {
@@ -134,10 +142,12 @@ func (fs *Filespace) IsDir(subPath string) bool {
 	return srcNode.IsDir()
 }
 
+// MkdirAll create directory recursively
 func (fs *Filespace) MkdirAll(subPath string, filemode os.FileMode) error {
 	return fs.root.MkdirAll(subPath, filemode)
 }
 
+// Writer return a file node writer
 func (fs *Filespace) Writer(subPath string) (filesystem.Writer, error) {
 	if err := fs.root.WriteFile(subPath, []byte{}, filesystem.DefaultUnixFileMode); err != nil {
 		return nil, err
@@ -152,6 +162,7 @@ func (fs *Filespace) Writer(subPath string) (filesystem.Writer, error) {
 	return node.(filesystem.Writer), nil
 }
 
+// Reader return a file node reader
 func (fs *Filespace) Reader(subPath string) (filesystem.Reader, error) {
 	node, err := fs.root.GetByPath(subPath)
 	if err != nil {
@@ -165,14 +176,17 @@ func (fs *Filespace) Reader(subPath string) (filesystem.Reader, error) {
 	return filesystem.Reader(file), nil
 }
 
+// ReadFile return file data
 func (fs *Filespace) ReadFile(subPath string) ([]byte, error) {
 	return fs.root.ReadFile(subPath)
 }
 
+// WriteFile write file data
 func (fs *Filespace) WriteFile(subPath string, data []byte, perm os.FileMode) error {
 	return fs.root.WriteFile(subPath, data, perm)
 }
 
+// Filespace get directory node and return it as filespace
 func (fs *Filespace) Filespace(subPath string) (filesystem.Filespace, error) {
 	node, err := fs.root.GetByPath(subPath)
 	if err != nil {
@@ -186,14 +200,17 @@ func (fs *Filespace) Filespace(subPath string) (filesystem.Filespace, error) {
 	}), nil
 }
 
+// Remove delete node by path
 func (fs *Filespace) Remove(subPath string) error {
 	return fs.root.Remove(subPath, true)
 }
 
+// RemoveAll delete node by path recursively
 func (fs *Filespace) RemoveAll(subPath string) error {
 	return fs.root.Remove(subPath, false)
 }
 
+// DebugPrint print filespace tree
 func (fs *Filespace) DebugPrint() {
 	debugPrint("", fs.root)
 }
@@ -204,7 +221,7 @@ func debugPrint(basePath string, d *Dir) {
 			debugPrint(basePath+"/"+node.Name(), node.(*Dir))
 		} else {
 			fmt.Println("### ", basePath+"/"+node.Name(), ":")
-			var file *File = node.(*File)
+			var file = node.(*File)
 			fmt.Println(string(file.GetData()))
 		}
 	}

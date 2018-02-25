@@ -67,10 +67,7 @@ func (c *ChanConverter) Go() {
 func (c *ChanConverter) close() error {
 	c.kill = true
 	close(c.Chan)
-	if err := c.Rows.Close(); err != nil {
-		return err
-	}
-	return nil
+	return c.Rows.Close()
 }
 
 // Kill thread

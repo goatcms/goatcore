@@ -14,6 +14,7 @@ type Loop struct {
 	consumerPool *jobsync.Pool
 }
 
+// NewLoop create new loop instance
 func NewLoop(loopData *LoopData, scope app.EventScope) *Loop {
 	loop := &Loop{
 		scope:    scope,
@@ -81,11 +82,13 @@ func (loop *Loop) Wait() {
 	loop.consumerPool.Wait()
 }
 
+// KillSlot is function implement event listeenr. It is use to kill lifecycle on scope kill and error event.
 func (loop *Loop) KillSlot(interface{}) error {
 	loop.lifecycle.Kill()
 	return nil
 }
 
+// Errors return loop errors
 func (loop *Loop) Errors() []error {
 	return loop.lifecycle.Errors()
 }

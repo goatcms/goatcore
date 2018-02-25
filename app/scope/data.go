@@ -38,7 +38,7 @@ func (ds *DataScope) Get(key string) (value interface{}, err error) {
 func (ds *DataScope) Keys() ([]string, error) {
 	keys := make([]string, len(ds.Data))
 	i := 0
-	for key, _ := range ds.Data {
+	for key := range ds.Data {
 		keys[i] = key
 		i++
 	}

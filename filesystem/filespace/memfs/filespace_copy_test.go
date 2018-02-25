@@ -38,7 +38,7 @@ func TestCopy(t *testing.T) {
 		t.Error("can not read file1 after write data ", err)
 	} else {
 		if !testbase.ByteArrayEq(testData1, readData1) {
-			t.Error("read1 and test1 data are diffrent ", testData1, readData1)
+			t.Error("read1 and test1 data are different ", testData1, readData1)
 		}
 	}
 	readData2, err := fs.ReadFile(destPath + file2Path)
@@ -46,7 +46,7 @@ func TestCopy(t *testing.T) {
 		t.Error("can not read file2 after write data ", err)
 	} else {
 		if !testbase.ByteArrayEq(testData2, readData2) {
-			t.Error("read2 and test2 data are diffrent ", testData2, readData2)
+			t.Error("read2 and test2 data are different ", testData2, readData2)
 		}
 	}
 }
@@ -75,7 +75,7 @@ func TestCopySingleFile(t *testing.T) {
 		t.Error("can not read file1 after write data ", err)
 	} else {
 		if !testbase.ByteArrayEq(testData1, readData1) {
-			t.Error("read1 and test1 data are diffrent ", testData1, readData1)
+			t.Error("read1 and test1 data are different ", testData1, readData1)
 		}
 	}
 }

@@ -30,7 +30,7 @@ func (q InsertContext) Insert(tx db.TX, entity interface{}) (int64, error) {
 	return id, nil
 }
 
-// InsertContext create new dao function instance
+// NewInsert create new Insert instance
 func NewInsert(table db.Table, dsql db.DSQL) (db.Insert, error) {
 	query, err := dsql.NewInsertSQL(table.Name(), table.Fields())
 	if err != nil {

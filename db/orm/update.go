@@ -12,7 +12,7 @@ type UpdateContext struct {
 	query string
 }
 
-// Insert create new record
+// Update update record
 func (q UpdateContext) Update(tx db.TX, entity interface{}) error {
 	var (
 		res   sql.Result

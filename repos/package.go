@@ -9,6 +9,7 @@ import (
 	"github.com/goatcms/goatcore/varutil"
 )
 
+// RepositoryPackage represent repository package
 type RepositoryPackage struct {
 	Url string `json:"url"`
 	Rev string `json:"rev"`

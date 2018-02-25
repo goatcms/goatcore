@@ -46,6 +46,6 @@ func TestWriteAndReader(t *testing.T) {
 		return
 	}
 	if !testbase.ByteArrayEq(buf[:n], testData) {
-		t.Error("read data are diffrent ", buf, testData)
+		t.Error("read data are different ", buf, testData)
 	}
 }

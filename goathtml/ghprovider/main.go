@@ -13,6 +13,7 @@ import (
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
+// Provider provide templates api
 type Provider struct {
 	fs           filesystem.Filespace
 	helpersPath  string
@@ -28,6 +29,7 @@ type Provider struct {
 	funcs        template.FuncMap
 }
 
+// NewProvider create Provider instance
 func NewProvider(fs filesystem.Filespace, helpersPath, layoutPath, viewPath, extension string, funcs template.FuncMap) *Provider {
 	return &Provider{
 		fs:          fs,
@@ -41,6 +43,7 @@ func NewProvider(fs filesystem.Filespace, helpersPath, layoutPath, viewPath, ext
 	}
 }
 
+// Base return base template (with loaded helpers)
 func (provider *Provider) Base(eventScope app.EventScope) (*template.Template, error) {
 	if provider.baseTemplate != nil {
 		return provider.baseTemplate, nil
@@ -78,6 +81,7 @@ func (provider *Provider) base(eventScope app.EventScope) (*template.Template, e
 	return baseTemplate, nil
 }
 
+// Layout return template for named layout (with loaded helpers and layout definitions)
 func (provider *Provider) Layout(name string, eventScope app.EventScope) (*template.Template, error) {
 	if name == "" {
 		name = goathtml.DefaultLayout
@@ -123,6 +127,7 @@ func (provider *Provider) layout(name string, eventScope app.EventScope) (*templ
 	return layoutTemplate, nil
 }
 
+// View return template for view by name. It contains selected layout definitions and helpers
 func (provider *Provider) View(layoutName, viewName string, eventScope app.EventScope) (*template.Template, error) {
 	if layoutName == "" {
 		layoutName = goathtml.DefaultLayout

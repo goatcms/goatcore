@@ -14,7 +14,7 @@ func Close(a app.App) (err error) {
 	return nil
 }
 
-// Emit a event to all aplication scopes
+// Emit a event to all application scopes
 func Emit(a app.App, event int, data interface{}) {
 	a.ArgsScope().Trigger(event, nil)
 	a.ConfigScope().Trigger(event, nil)

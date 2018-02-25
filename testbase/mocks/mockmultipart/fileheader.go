@@ -11,6 +11,7 @@ type FileHeader struct {
 	data []byte
 }
 
+// NewFileHeader create FileHeader instance
 func NewFileHeader(data []byte) *FileHeader {
 	return &FileHeader{
 		data: data,

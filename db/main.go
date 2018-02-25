@@ -1,3 +1,5 @@
+// Package db provide database access interface
+// Deprecated: Use generate orm with goatcli
 package db
 
 import (
@@ -7,6 +9,7 @@ import (
 )
 
 const (
+	// SQLTypeTagName is a tag name for database injection
 	SQLTypeTagName = "sqltype"
 )
 
@@ -15,10 +18,17 @@ type FindByID func(TX, int64) (Row, error)
 type Insert func(TX, interface{}) (int64, error)
 type InsertWithID func(TX, interface{}) error
 type Update func(TX, interface{}) error
+
+// Delete remove a row
 type Delete func(TX, int64) error
+
+// CreateTable is a create table function
 type CreateTable func(TX) error
+
+// DropTable is a drop table function
 type DropTable func(TX) error
 
+// Database represent database
 type Database struct {
 	DSQL     DSQL
 	instance *sqlx.DB
@@ -74,6 +84,7 @@ type Rows interface {
 	StructScan(dest interface{}) error
 }
 
+// Rows represent a single row query response
 type Row interface {
 	Scan(...interface{}) error
 	StructScan(interface{}) error

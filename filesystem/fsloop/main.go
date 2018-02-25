@@ -7,11 +7,13 @@ import (
 )
 
 const (
+	// ChanSize is default channel size
 	ChanSize = 1000
-
-	StepClose = 1
+	// StepClose is close step id
+	StepClose = 999
 )
 
+// Chans contains channels and mutex for loop
 type Chans struct {
 	muDirChan  sync.Mutex
 	dirChan    chan string
@@ -19,6 +21,7 @@ type Chans struct {
 	fileChan   chan string
 }
 
+// LoopData is loop data contianer
 type LoopData struct {
 	chans      Chans
 	Filespace  filesystem.Filespace

@@ -64,9 +64,9 @@ func TestStringPlainmapToFormattedJSON(t *testing.T) {
 	if len(expectedLines) != len(resultLines) {
 		t.Errorf("expected the same line numbers (result has %v lines, expected is %v", len(resultLines), len(expectedLines))
 	}
-	for i, _ := range resultLines {
+	for i := range resultLines {
 		if expectedLines[i] != resultLines[i] {
-			t.Errorf("line %v is diffrent expected '%v' and take '%v'", i, expectedLines[i], resultLines[i])
+			t.Errorf("line %v is different expected '%v' and take '%v'", i, expectedLines[i], resultLines[i])
 		}
 	}
 }

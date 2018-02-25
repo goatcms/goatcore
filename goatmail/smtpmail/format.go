@@ -12,6 +12,7 @@ import (
 	"github.com/goatcms/goatcore/workers/jobsync"
 )
 
+// FormatMail prepare SMTP message
 func FormatMail(mail *goatmail.Mail, lc *jobsync.Lifecycle) (io.Reader, error) {
 	boundary := varutil.RandString(20, varutil.AlphaNumericBytes)
 	header := ""
@@ -83,6 +84,7 @@ func FormatMail(mail *goatmail.Mail, lc *jobsync.Lifecycle) (io.Reader, error) {
 	return io.MultiReader(readers...), nil
 }
 
+// EscepeSubject remove incorrect characters
 func EscepeSubject(s string) string {
 	s = strings.Replace(s, "\n", "", -1)
 	return s

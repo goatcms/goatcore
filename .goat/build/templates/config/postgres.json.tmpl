@@ -5,6 +5,6 @@
 {{- $database := (index .Properties.Secrets "test.postgres.database") -}}
 
 {
-  "url":"postgres://{{$username}}:{{$password}}@{{$host}}/{{$database}}?sslmode=disable",
+  "url":"postgres://{{$username}}:{{$password}}@{{$host}}/{{$database}}?sslmode=disable"
 }
 {{- end -}}

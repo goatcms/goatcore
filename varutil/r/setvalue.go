@@ -7,6 +7,7 @@ import (
 	"github.com/goatcms/goatcore/varutil/totype"
 )
 
+// SetValueFromString convert string to reflect.Value type and set it.
 func SetValueFromString(valueField reflect.Value, value string) error {
 	if !valueField.IsValid() {
 		return fmt.Errorf("r.SetValueFromString: %s is not valid", valueField)

@@ -7,7 +7,7 @@ type IDContainer struct {
 	ID int64 `db:"id"`
 }
 
-// IDContainer is simple struct to contains id
+// QueryDependency is simple struct to contains dependencies
 type QueryDependency struct {
 	DSQL db.DSQL
 }

@@ -75,6 +75,7 @@ func (m *Module) Run() error {
 	return command(m.app)
 }
 
+// Help show help message
 func (m *Module) Help(app.App) error {
 	keys, err := m.deps.CommandScope.Keys()
 	if err != nil {

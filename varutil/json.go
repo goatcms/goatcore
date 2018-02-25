@@ -9,10 +9,7 @@ import (
 // ObjectFromJSON decode json data to object
 func ObjectFromJSON(object interface{}, data string) error {
 	jsonParser := json.NewDecoder(strings.NewReader(data))
-	if err := jsonParser.Decode(object); err != nil {
-		return err
-	}
-	return nil
+	return jsonParser.Decode(object)
 }
 
 // DataFromJSON decode json data to object

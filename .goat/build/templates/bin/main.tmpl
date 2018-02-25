@@ -1,0 +1,7 @@
+
+{{- $path := (print .To "/bin/docker.sh") -}}
+{{- if not (.Filesystem.IsFile $path) -}}
+  {{- .Out.File $path -}}
+    {{- template "bin.docker_sh" . -}}
+  {{- .Out.EOF -}}
+{{- end -}}

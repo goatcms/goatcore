@@ -11,7 +11,7 @@ type InsertWithIDContext struct {
 	query string
 }
 
-// Insert create new record
+// InsertWithID insert new row with defined id
 func (q InsertWithIDContext) InsertWithID(tx db.TX, entity interface{}) error {
 	if _, err := tx.NamedExec(q.query, entity); err != nil {
 		return fmt.Errorf("%s: %s", err.Error(), q.query)
@@ -19,7 +19,7 @@ func (q InsertWithIDContext) InsertWithID(tx db.TX, entity interface{}) error {
 	return nil
 }
 
-// NewInsertWithID create new dao function instance
+// NewInsertWithID create new InsertWithID instance
 func NewInsertWithID(table db.Table, dsql db.DSQL) (db.InsertWithID, error) {
 	query, err := dsql.NewInsertSQL(table.Name(), table.Fields())
 	if err != nil {

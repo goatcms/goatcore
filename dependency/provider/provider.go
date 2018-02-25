@@ -42,7 +42,7 @@ func NewProvider(tagname string) dependency.Provider {
 func NewStaticProvider(tagname string, factories map[string]dependency.Factory, instances map[string]interface{}, injectors []dependency.Injector) dependency.Provider {
 	keys := make([]string, len(factories))
 	i := 0
-	for key, _ := range factories {
+	for key := range factories {
 		keys[i] = key
 		i++
 	}
@@ -150,7 +150,7 @@ func (d *Provider) Set(name string, instance interface{}) error {
 	return nil
 }
 
-// Set defult instance
+// SetDefault set default dependency instance by name
 func (d *Provider) SetDefault(name string, instance interface{}) error {
 	if d.blocked {
 		return fmt.Errorf("goatcore/dependency/provider.SetDefault: can not add default instance after got dependency (for %s)", name)

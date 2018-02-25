@@ -6,6 +6,7 @@ import (
 	"github.com/goatcms/goatcore/workers/jobsync"
 )
 
+// Producer produce data for loop
 type Producer struct {
 	lifecycle *jobsync.Lifecycle
 	pool      *jobsync.Pool
@@ -13,6 +14,7 @@ type Producer struct {
 	path      string
 }
 
+// Loop start data produce (use "go Loop()" to run it in new goroutine)
 func (producer *Producer) Loop() {
 	defer producer.pool.Done()
 	readDir, err := producer.loopData.Filespace.ReadDir(producer.path)

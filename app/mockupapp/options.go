@@ -6,7 +6,7 @@ import (
 	"github.com/goatcms/goatcore/filesystem"
 )
 
-// MockupOptions contains settins for MockupApp
+// MockupOptions contains settings for MockupApp
 type MockupOptions struct {
 	Name    string
 	Version string

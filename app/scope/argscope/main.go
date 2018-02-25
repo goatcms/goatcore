@@ -11,12 +11,14 @@ import (
 	"github.com/goatcms/goatcore/varutil/r"
 )
 
+// ArgScope is application arguments scope
 type ArgScope struct {
 	app.EventScope
 	data    map[string]string
 	tagname string
 }
 
+// NewScope create new ArgScope instance
 func NewScope(args []string, tagname string) (app.Scope, error) {
 	scope := &ArgScope{
 		EventScope: scope.NewEventScope(),
@@ -37,7 +39,7 @@ func NewScope(args []string, tagname string) (app.Scope, error) {
 		index := strings.Index(value, "=")
 		if index != -1 {
 			key := value[:index]
-			value := value[index+1:]
+			value = value[index+1:]
 			scope.data[key] = value
 		} else {
 			scope.data[value] = "true"
@@ -46,6 +48,7 @@ func NewScope(args []string, tagname string) (app.Scope, error) {
 	return scope, nil
 }
 
+// InjectTo inject arguments to object
 func (scope *ArgScope) InjectTo(obj interface{}) error {
 	structValue := reflect.ValueOf(obj).Elem()
 	for i := 0; i < structValue.NumField(); i++ {
@@ -103,7 +106,7 @@ func (scope *ArgScope) Get(key string) (interface{}, error) {
 func (scope *ArgScope) Keys() ([]string, error) {
 	keys := make([]string, len(scope.data))
 	i := 0
-	for key, _ := range scope.data {
+	for key := range scope.data {
 		keys[i] = key
 		i++
 	}

@@ -36,6 +36,7 @@ func jsonToPlainStringMap(resultKey string, result map[string]string, data []byt
 	})
 }
 
+// PlainStringMapToJSON convert plain map (which all valueas are string) to JSON
 func PlainStringMapToJSON(plainmap map[string]string) (json string, err error) {
 	// sort keys
 	keys := make([]string, len(plainmap))
@@ -82,6 +83,7 @@ func plainStringMapToJSON(prefix string, index int, keys []string, plainmap map[
 	return i, json, nil
 }
 
+// PlainStringMapToFormattedJSON convert plain map (which all valueas are string) to formatted JSON
 func PlainStringMapToFormattedJSON(plainmap map[string]string) (json string, err error) {
 	// sort keys
 	keys := make([]string, len(plainmap))

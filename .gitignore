@@ -1,7 +1,12 @@
-
+# patterns
 npm-debug.log
 *.test
 *~
+
+# generated files
 tests/smtp.json
 tests/db_postgres.json
+/bin
+
+# security (very important)
 .goat/secrets.json

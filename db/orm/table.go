@@ -13,14 +13,17 @@ type Table struct {
 	types  map[string]string
 }
 
+// Name return table name
 func (t Table) Name() string {
 	return t.name
 }
 
+// Fields return table fields array
 func (t Table) Fields() []string {
 	return t.fields
 }
 
+// Types return table fields types map
 func (t Table) Types() map[string]string {
 	return t.types
 }

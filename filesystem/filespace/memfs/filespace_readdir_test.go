@@ -1,6 +1,7 @@
 package memfs_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
@@ -8,24 +9,28 @@ import (
 
 func TestReadDir(t *testing.T) {
 	t.Parallel()
-	var dir1 bool
-	var dir2 bool
+	var (
+		dir1 bool
+		dir2 bool
+		list []os.FileInfo
+		err  error
+	)
 	// init
 	fs, err := memfs.NewFilespace()
 	if err != nil {
 		t.Error(err)
 	}
 	// prepare data
-	if err := fs.MkdirAll("dir1", 0777); err != nil {
+	if err = fs.MkdirAll("dir1", 0777); err != nil {
 		t.Error(err)
 		return
 	}
-	if err := fs.MkdirAll("dir2", 0777); err != nil {
+	if err = fs.MkdirAll("dir2", 0777); err != nil {
 		t.Error(err)
 		return
 	}
 	//testing
-	list, err := fs.ReadDir("./")
+	list, err = fs.ReadDir("./")
 	if err != nil {
 		t.Error(err)
 		return

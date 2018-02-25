@@ -28,6 +28,7 @@ func NewGlobalScope(tagname string, scopes []app.Scope) app.Scope {
 	return globalScope
 }
 
+// Trigger send event to all scopes
 func (gs GlobalScope) Trigger(key int, data interface{}) error {
 	if err := gs.EventScope.Trigger(key, data); err != nil {
 		return err

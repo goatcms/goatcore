@@ -2,6 +2,7 @@ package jobsync
 
 import "sync"
 
+// Pool is goroutines group quantity controller
 type Pool struct {
 	mutex   sync.Mutex
 	wg      sync.WaitGroup
@@ -9,6 +10,7 @@ type Pool struct {
 	max     int
 }
 
+// NewPool create new instance of Poll
 func NewPool(max int) *Pool {
 	return &Pool{
 		counter: 0,
@@ -16,18 +18,20 @@ func NewPool(max int) *Pool {
 	}
 }
 
-func (p *Pool) Add(v int) int {
+// Add reserve a amount of goroutines. If amount is greater than max, reserve and return max available amount.
+func (p *Pool) Add(amount int) int {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 	max := p.max - p.counter
-	if max < v {
-		v = max
+	if max < amount {
+		amount = max
 	}
-	p.wg.Add(v)
-	p.counter += v
-	return v
+	p.wg.Add(amount)
+	p.counter += amount
+	return amount
 }
 
+// Done is signal that mean a goroutine is finish.
 func (p *Pool) Done() {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
@@ -35,6 +39,7 @@ func (p *Pool) Done() {
 	p.counter--
 }
 
+// Wait is function stop current goroutine to finish all goroutine in the Pool.
 func (p *Pool) Wait() {
 	p.wg.Wait()
 }

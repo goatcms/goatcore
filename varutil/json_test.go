@@ -33,10 +33,10 @@ func TestObjectToJSON(t *testing.T) {
 		return
 	}
 	if obj1.Value1 != obj2.Value1 {
-		t.Error("Value1 is diffrent")
+		t.Error("Value1 is different")
 	}
 	if obj1.Value2 != obj2.Value2 {
-		t.Error("Value2 is diffrent")
+		t.Error("Value2 is different")
 	}
 }
 

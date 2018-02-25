@@ -13,7 +13,7 @@ type FindByIDContext struct {
 	query string
 }
 
-// FindByIDContext return row by id
+// FindByID return row by id
 func (q FindByIDContext) FindByID(tx db.TX, id int64) (db.Row, error) {
 	row, err := tx.QueryRowx(strings.Replace(q.query, ":id", strconv.FormatInt(id, 10), -1))
 	if err != nil {

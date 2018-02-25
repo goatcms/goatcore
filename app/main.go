@@ -99,10 +99,10 @@ const (
 	// DefaultUInt64Value is a default value for undefined env, configs etc
 	DefaultUInt64Value = 0
 
-	// ENVArg is name default enviroment application argument
+	// ENVArg is name default environment application argument
 	ENVArg = "env"
 
-	// DefaultEnv is name of default system enviroment
+	// DefaultEnv is name of default system environment
 	DefaultEnv = "prod"
 )
 

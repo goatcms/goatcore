@@ -11,22 +11,25 @@ import (
 	"github.com/goatcms/goatcore/workers/jobsync"
 )
 
+// MailSender provide dial send stream api
 type MailSender struct {
 	config Config
 }
 
+// NewMailSender create new MailSender isntance
 func NewMailSender(config Config) *MailSender {
 	return &MailSender{
 		config: config,
 	}
 }
 
+// Send transmit email to server. Use Lifecycle for communication streams.
 func (ms *MailSender) Send(mail *goatmail.Mail, lc *jobsync.Lifecycle) error {
 	if len(mail.To) < 1 {
 		return fmt.Errorf("must define one or more recipient")
 	}
 
-	host, _, _ := net.SplitHostPort(ms.config.SmtpAddr)
+	host, _, _ := net.SplitHostPort(ms.config.SMTPAddr)
 	auth := smtp.PlainAuth(ms.config.AuthIdentity, ms.config.AuthUsername, ms.config.AuthPassword, host)
 
 	tlsconfig := &tls.Config{
@@ -37,7 +40,7 @@ func (ms *MailSender) Send(mail *goatmail.Mail, lc *jobsync.Lifecycle) error {
 	// Here is the key, you need to call tls.Dial instead of smtp.Dial
 	// for smtp servers running on 465 that require an ssl connection
 	// from the very beginning (no starttls)
-	conn, err := tls.Dial("tcp", ms.config.SmtpAddr, tlsconfig)
+	conn, err := tls.Dial("tcp", ms.config.SMTPAddr, tlsconfig)
 	if err != nil {
 		return err
 	}

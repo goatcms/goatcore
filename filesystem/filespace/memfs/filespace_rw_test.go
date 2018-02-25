@@ -25,6 +25,6 @@ func TestWriteAndRead(t *testing.T) {
 		t.Error("can not read file after write data ", err)
 	}
 	if !testbase.ByteArrayEq(readData, testData) {
-		t.Error("read data are diffrent ", readData, testData)
+		t.Error("read data are different ", readData, testData)
 	}
 }

@@ -12,7 +12,7 @@ type DeleteContext struct {
 	query string
 }
 
-// Insert create new record
+// Delete remove a record by id
 func (q DeleteContext) Delete(tx db.TX, id int64) error {
 	var (
 		res   sql.Result

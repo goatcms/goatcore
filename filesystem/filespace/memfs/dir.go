@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// Dir is single directory
 type Dir struct {
 	name     string
 	filemode os.FileMode
@@ -15,34 +16,42 @@ type Dir struct {
 	nodes    []os.FileInfo
 }
 
+// Name is a directory name
 func (d *Dir) Name() string {
 	return d.name
 }
 
+// Mode is a unix file/directory mode
 func (d *Dir) Mode() os.FileMode {
 	return d.filemode
 }
 
+// ModTime is modification time
 func (d *Dir) ModTime() time.Time {
 	return d.time
 }
 
+// Sys return native system object
 func (d *Dir) Sys() interface{} {
 	return nil
 }
 
+// Size is length in bytes for regular files; system-dependent for others
 func (d *Dir) Size() int64 {
 	return int64(len(d.nodes))
 }
 
+// IsDir return true if node is a directory
 func (d *Dir) IsDir() bool {
 	return true
 }
 
+// GetNodes return nodes for directory
 func (d *Dir) GetNodes() []os.FileInfo {
 	return d.nodes
 }
 
+// GetNode return single node by name
 func (d *Dir) GetNode(nodeName string) (os.FileInfo, error) {
 	for _, node := range d.nodes {
 		if nodeName == node.Name() {
@@ -52,6 +61,7 @@ func (d *Dir) GetNode(nodeName string) (os.FileInfo, error) {
 	return nil, fmt.Errorf("No find node with name " + nodeName)
 }
 
+// AddNode add new node to directory (name must be unique in directory)
 func (d *Dir) AddNode(newNode os.FileInfo) error {
 	for _, node := range d.nodes {
 		if newNode.Name() == node.Name() {
@@ -62,6 +72,7 @@ func (d *Dir) AddNode(newNode os.FileInfo) error {
 	return nil
 }
 
+// RemoveNodeByName remove a node by name
 func (d *Dir) RemoveNodeByName(name string) error {
 	for i := 0; i < len(d.nodes); i++ {
 		if d.nodes[i].Name() == name {
@@ -72,6 +83,7 @@ func (d *Dir) RemoveNodeByName(name string) error {
 	return fmt.Errorf("Con not find node to remove (by name " + name + ")")
 }
 
+// Remove remove a node by path
 func (d *Dir) Remove(nodePath string, emptyOnly bool) error {
 	var currentNode os.FileInfo = d
 	if nodePath == "." || nodePath == "./" || nodePath == "" {
@@ -84,7 +96,7 @@ func (d *Dir) Remove(nodePath string, emptyOnly bool) error {
 		if currentNode.IsDir() != true {
 			return fmt.Errorf("memfs.Dir.Remove: Node by name %v must be dir to get sub node (path %v )", currentNode.Name(), nodePath)
 		}
-		var dir *Dir = currentNode.(*Dir)
+		var dir = currentNode.(*Dir)
 		newNode, err := dir.GetNode(nodeName)
 		if err != nil {
 			return err
@@ -112,6 +124,7 @@ func (d *Dir) Remove(nodePath string, emptyOnly bool) error {
 	return fmt.Errorf("memfs.Dir.Remove: Con not find node to remove (by name %v)", removeNodeName)
 }
 
+// GetByPath return node by path
 func (d *Dir) GetByPath(nodePath string) (os.FileInfo, error) {
 	var currentNode os.FileInfo = d
 	if nodePath == "." || nodePath == "./" {
@@ -122,7 +135,7 @@ func (d *Dir) GetByPath(nodePath string) (os.FileInfo, error) {
 		if currentNode.IsDir() != true {
 			return nil, fmt.Errorf("Node by name " + currentNode.Name() + " must be dir to get sub node (path " + nodePath + " )")
 		}
-		var dir *Dir = currentNode.(*Dir)
+		var dir = currentNode.(*Dir)
 		newNode, err := dir.GetNode(nodeName)
 		if err != nil {
 			return nil, err
@@ -132,18 +145,19 @@ func (d *Dir) GetByPath(nodePath string) (os.FileInfo, error) {
 	return currentNode, nil
 }
 
+// Copy copy directory and return new directories and files tree
 func (d *Dir) Copy() (*Dir, error) {
 	var err error
 	var nodescopy = make([]os.FileInfo, len(d.nodes))
 	for i := 0; i < len(d.nodes); i++ {
 		if d.nodes[i].IsDir() {
-			var dir *Dir = d.nodes[i].(*Dir)
+			var dir = d.nodes[i].(*Dir)
 			nodescopy[i], err = dir.Copy()
 			if err != nil {
 				return nil, err
 			}
 		} else {
-			var file *File = d.nodes[i].(*File)
+			var file = d.nodes[i].(*File)
 			nodescopy[i], err = file.Copy()
 			if err != nil {
 				return nil, err
@@ -158,6 +172,7 @@ func (d *Dir) Copy() (*Dir, error) {
 	}, nil
 }
 
+// MkdirAll crete directories recursive
 func (d *Dir) MkdirAll(subPath string, filemode os.FileMode) error {
 	pathNodes := strings.Split(path.Clean(subPath), "/")
 	currentNode := d
@@ -191,6 +206,7 @@ func (d *Dir) MkdirAll(subPath string, filemode os.FileMode) error {
 	return nil
 }
 
+// ReadFile read file by path
 func (d *Dir) ReadFile(subPath string) ([]byte, error) {
 	node, err := d.GetByPath(subPath)
 	if err != nil {
@@ -199,10 +215,11 @@ func (d *Dir) ReadFile(subPath string) ([]byte, error) {
 	if node.IsDir() {
 		return nil, fmt.Errorf("Use ReadFile on directory ")
 	}
-	var fileNode *File = node.(*File)
+	var fileNode = node.(*File)
 	return fileNode.GetData(), nil
 }
 
+// WriteFile write file by path
 func (d *Dir) WriteFile(subPath string, data []byte, perm os.FileMode) error {
 	dirPath := path.Dir(subPath)
 	d.MkdirAll(dirPath, perm)
@@ -216,7 +233,7 @@ func (d *Dir) WriteFile(subPath string, data []byte, perm os.FileMode) error {
 		if !node.IsDir() {
 			return fmt.Errorf("There is a file on path " + dirPath)
 		}
-		var baseDir *Dir = node.(*Dir)
+		var baseDir = node.(*Dir)
 		baseDir.AddNode(&File{
 			name:     path.Base(subPath),
 			filemode: perm,
@@ -229,7 +246,7 @@ func (d *Dir) WriteFile(subPath string, data []byte, perm os.FileMode) error {
 	if node.IsDir() {
 		return fmt.Errorf("Use WriteFile on directory")
 	}
-	var file *File = node.(*File)
+	var file = node.(*File)
 	file.SetData(data)
 	return nil
 }

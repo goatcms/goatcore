@@ -7,13 +7,13 @@ type CreateTableContext struct {
 	query string
 }
 
-// Insert create new record
+// CreateTable create new table
 func (q CreateTableContext) CreateTable(tx db.TX) error {
 	tx.MustExec(q.query)
 	return nil
 }
 
-// CreateTableContext create new CreateTable function
+// NewCreateTable create new CreateTable instance
 func NewCreateTable(table db.Table, dsql db.DSQL) (db.CreateTable, error) {
 	query, err := dsql.NewCreateSQL(table.Name(), table.Types())
 	if err != nil {
