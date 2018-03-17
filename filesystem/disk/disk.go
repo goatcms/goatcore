@@ -4,11 +4,10 @@ import "os"
 
 // IsExist return true if file or directory exists
 func IsExist(path string) bool {
-	_, err := os.Stat(path)
-	if err != nil && os.IsNotExist(err) {
-		return false
+	if _, err := os.Stat(path); err == nil {
+		return true
 	}
-	return true
+	return false
 }
 
 // IsDir return true if directory exists
