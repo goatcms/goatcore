@@ -34,7 +34,10 @@ func (connector *Connector) Clone(url, version, destPath string) (repo repositor
 		out  bytes.Buffer
 		args []string
 	)
-	args = []string{"clone", url, destPath}
+	if version == "" {
+		version = "master"
+	}
+	args = []string{"clone", "--branch", version, url, destPath}
 	cmd := exec.Command("git", args...)
 	cmd.Stdout = &out
 	cmd.Stderr = &out
