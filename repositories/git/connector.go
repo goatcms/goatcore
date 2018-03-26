@@ -29,16 +29,30 @@ func (connector *Connector) IsSupportRepo(path string) bool {
 }
 
 // Clone clone repository to local directory
-func (connector *Connector) Clone(url, version, destPath string) (repo repositories.Repository, err error) {
+func (connector *Connector) Clone(url string, version repositories.Version, destPath string) (repo repositories.Repository, err error) {
 	var (
 		out  bytes.Buffer
 		args []string
 	)
-	if version == "" {
-		version = "master"
+	if version.Branch == "" {
+		version.Branch = "master"
 	}
-	args = []string{"clone", "--branch", version, url, destPath}
+	// clone
+	args = []string{"clone", "--branch", version.Branch, url, destPath}
 	cmd := exec.Command("git", args...)
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+	if err = cmd.Run(); err != nil {
+		return nil, fmt.Errorf("external git app fail %v: %v %v", args, err, string(out.Bytes()))
+	}
+	// checkout
+	if version.Revision == "" {
+		return &Repository{
+			path: destPath,
+		}, nil
+	}
+	args = []string{"checkout", "-C", destPath, version.Branch}
+	cmd = exec.Command("git", args...)
 	cmd.Stdout = &out
 	cmd.Stderr = &out
 	if err = cmd.Run(); err != nil {

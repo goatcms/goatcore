@@ -15,7 +15,7 @@ func NewMultiConnector(conns []ConnectorAdapter) *MultiConnector {
 }
 
 // Clone clone repository to local directory
-func (connector *MultiConnector) Clone(url, version, destPath string) (repo Repository, err error) {
+func (connector *MultiConnector) Clone(url string, version Version, destPath string) (repo Repository, err error) {
 	for _, adapter := range connector.conns {
 		if adapter.IsSupportURL(url) {
 			return adapter.Clone(url, version, destPath)

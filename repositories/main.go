@@ -1,9 +1,15 @@
 package repositories
 
+// Version is a struct to storage repository branch and revision
+type Version struct {
+	Branch   string
+	Revision string
+}
+
 // Connector is repositories controll access interface
 type Connector interface {
 	// Clone clone repository to local directory
-	Clone(url, version, destPath string) (repo Repository, err error)
+	Clone(url string, version Version, destPath string) (repo Repository, err error)
 	// Open open repository from local filesystem
 	Open(path string) (repo Repository, err error)
 }
