@@ -82,7 +82,7 @@ func (fs *Filespace) ReadFile(subPath string) ([]byte, error) {
 // WriteFile write file data
 func (fs *Filespace) WriteFile(subPath string, data []byte, perm os.FileMode) (err error) {
 	path := fs.path + subPath
-	if err = fs.MkdirAll(filepath.Dir(path), perm); err != nil {
+	if err = disk.MkdirAll(filepath.Dir(path), perm); err != nil {
 		return err
 	}
 	return ioutil.WriteFile(path, data, perm)
