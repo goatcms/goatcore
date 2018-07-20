@@ -12,7 +12,7 @@ const (
 	// DefaultUnixFileMode is a default file mode for unix base filesystems
 	DefaultUnixFileMode = 0644
 	// DefaultUnixDirMode is a default dir mode for unix base filesystems
-	DefaultUnixDirMode = 0644
+	DefaultUnixDirMode = 0777
 )
 
 // Writer is a Writer stream
