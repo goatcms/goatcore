@@ -23,11 +23,12 @@ func (repo *Repository) Pull() (err error) {
 	var (
 		out bytes.Buffer
 	)
-	cmd := exec.Command("git", "-C", repo.path, "pull")
+	cmd := exec.Command("git", "pull")
+	cmd.Dir = repo.path
 	cmd.Stdout = &out
 	cmd.Stderr = &out
 	if err = cmd.Run(); err != nil {
-		return fmt.Errorf("fail execute command git -C %v pull: %v %v", repo.path, err, string(out.Bytes()))
+		return fmt.Errorf("fail execute command git pull (cwd: %v): %v %v", repo.path, err, string(out.Bytes()))
 	}
 	return nil
 }

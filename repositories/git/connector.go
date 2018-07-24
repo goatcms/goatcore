@@ -51,8 +51,9 @@ func (connector *Connector) Clone(url string, version repositories.Version, dest
 			path: destPath,
 		}, nil
 	}
-	args = []string{"checkout", "-C", destPath, version.Branch}
+	args = []string{"checkout", version.Branch}
 	cmd = exec.Command("git", args...)
+	cmd.Dir = destPath
 	cmd.Stdout = &out
 	cmd.Stderr = &out
 	if err = cmd.Run(); err != nil {
