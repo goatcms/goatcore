@@ -8,5 +8,8 @@ tests/smtp.json
 tests/db_postgres.json
 /bin
 
+# vendors
+/vendor
+
 # security (very important)
 .goat/secrets.json
