@@ -13,8 +13,12 @@ const (
 	ErrorEvent = iota
 	// CommitEvent is a action run when data is persist
 	CommitEvent = iota
+	// AfterCommitEvent is a action run after data persist
+	AfterCommitEvent = iota
 	// RollbackEvent is a action run when data is restore
 	RollbackEvent = iota
+	// AfterRollbackEvent is a action run when after restore
+	AfterRollbackEvent = iota
 	// BeforeCloseEvent is a action run before application/scope close
 	BeforeCloseEvent = iota
 	// CloseEvent is a action run to close application/scope
