@@ -82,6 +82,13 @@ func (m *Module) Help(app.App) error {
 		return err
 	}
 	isFirstCommand := true
+	maxLength := 0
+	for _, key := range keys {
+		if len(key) > maxLength {
+			maxLength = len(key)
+		}
+	}
+	maxLength = maxLength - len(commandPrefix) + 1
 	for _, key := range keys {
 		if strings.HasPrefix(key, commandPrefix) {
 			if isFirstCommand {
@@ -92,7 +99,7 @@ func (m *Module) Help(app.App) error {
 			if err != nil {
 				return err
 			}
-			m.deps.Output.Printf("%11s  %s\n", key[len(commandPrefix):], helpStr)
+			m.deps.Output.Printf("%s  %s\n", fixSpace(key[len(commandPrefix):], maxLength), helpStr)
 		}
 	}
 	isFirstArgument := true
@@ -106,9 +113,18 @@ func (m *Module) Help(app.App) error {
 			if err != nil {
 				return err
 			}
-			m.deps.Output.Printf("%11s  %s\n", key[len(argumentPrefix):], helpStr)
+			m.deps.Output.Printf("%11s  %s\n", fixSpace(key[len(argumentPrefix):], maxLength), helpStr)
 		}
 	}
 	m.deps.Output.Printf("\n")
 	return nil
+}
+
+func fixSpace(s string, l int) string {
+	ll := l - len(s)
+	prefix := make([]rune, ll)
+	for i := range prefix {
+		prefix[i] = ' '
+	}
+	return string(prefix) + s
 }
