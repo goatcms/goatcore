@@ -27,10 +27,11 @@ type Provider struct {
 	viewMutex    sync.Mutex
 	views        map[string]*template.Template
 	funcs        template.FuncMap
+	isCached     bool
 }
 
 // NewProvider create Provider instance
-func NewProvider(fs filesystem.Filespace, helpersPath, layoutPath, viewPath, extension string, funcs template.FuncMap) *Provider {
+func NewProvider(fs filesystem.Filespace, helpersPath, layoutPath, viewPath, extension string, funcs template.FuncMap, isCached bool) *Provider {
 	return &Provider{
 		fs:          fs,
 		layoutPath:  layoutPath,
@@ -40,6 +41,7 @@ func NewProvider(fs filesystem.Filespace, helpersPath, layoutPath, viewPath, ext
 		layouts:     map[string]*template.Template{},
 		views:       map[string]*template.Template{},
 		funcs:       funcs,
+		isCached:    isCached,
 	}
 }
 
@@ -77,7 +79,9 @@ func (provider *Provider) base(eventScope app.EventScope) (*template.Template, e
 	if len(loop.Errors()) != 0 {
 		return nil, goaterr.NewErrors(loop.Errors())
 	}
-	provider.baseTemplate = baseTemplate
+	if provider.isCached {
+		provider.baseTemplate = baseTemplate
+	}
 	return baseTemplate, nil
 }
 
@@ -123,7 +127,9 @@ func (provider *Provider) layout(name string, eventScope app.EventScope) (*templ
 	if len(loop.Errors()) != 0 {
 		return nil, goaterr.NewErrors(loop.Errors())
 	}
-	provider.layouts[name] = layoutTemplate
+	if provider.isCached {
+		provider.layouts[name] = layoutTemplate
+	}
 	return layoutTemplate, nil
 }
 
@@ -179,6 +185,8 @@ func (provider *Provider) view(layoutName, viewName, key string, eventScope app.
 		return nil, goaterr.NewErrors(loop.Errors())
 	}
 	tmpl = templateLoader.Template()
-	provider.views[key] = tmpl
+	if provider.isCached {
+		provider.views[key] = tmpl
+	}
 	return tmpl, nil
 }
