@@ -16,10 +16,20 @@ func StreamCopy(sourcefs, destfs filesystem.Filespace, subPath string) (err erro
 		return err
 	}
 	if writer, err = destfs.Writer(subPath); err != nil {
+		reader.Close()
 		return err
 	}
 	if _, err = io.Copy(writer, reader); err != nil {
+		writer.Close()
+		reader.Close()
 		return err
 	}
-	return writer.Close()
+	if err = writer.Close(); err != nil {
+		reader.Close()
+		return err
+	}
+	if err = reader.Close(); err != nil {
+		return err
+	}
+	return nil
 }

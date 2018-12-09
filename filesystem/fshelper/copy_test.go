@@ -37,7 +37,7 @@ func TestModulesFromFile(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if err = Copy(srcFS, destFS, "", nil); err != nil {
+	if err = Copy(srcFS, destFS, nil); err != nil {
 		t.Error(err)
 		return
 	}
