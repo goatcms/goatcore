@@ -20,7 +20,7 @@ func NewConnector() *Connector {
 
 // IsSupportURL check if repository URL is supported
 func (connector *Connector) IsSupportURL(url string) bool {
-	return strings.HasPrefix(url, "git://") || strings.HasSuffix(url, ".git")
+	return strings.HasPrefix(url, "git+") || strings.HasPrefix(url, "git://") || strings.HasSuffix(url, ".git")
 }
 
 // IsSupportRepo check if local repository is supported
@@ -36,6 +36,9 @@ func (connector *Connector) Clone(url string, version repositories.Version, dest
 	)
 	if version.Branch == "" {
 		version.Branch = "master"
+	}
+	if strings.HasPrefix(url, "git+") {
+		url = url[len("git+"):]
 	}
 	// clone
 	args = []string{"clone", "--branch", version.Branch, url, destPath}
