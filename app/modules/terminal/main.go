@@ -2,6 +2,7 @@ package terminal
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/goatcms/goatcore/app"
@@ -53,15 +54,6 @@ func (m *Module) InitDependencies(a app.App) error {
 
 // Run start command line loop
 func (m *Module) Run() error {
-	// header
-	m.deps.Output.Printf("%s %s\n", m.deps.Name, m.deps.Version)
-	if m.deps.Company != "" {
-		m.deps.Output.Printf("Develop by @%s all rights reserved\n", m.deps.Company)
-	}
-	m.deps.Output.Printf("Powered by GoatCore %s (%s)\n", m.deps.GoatVersion, "https://github.com/goatcms/goatcore")
-	if m.deps.Welcome != "" {
-		m.deps.Output.Printf("\n%s\n", m.deps.Welcome)
-	}
 	// content
 	if m.deps.CommandName == "" {
 		return m.Help(m.app)
@@ -77,6 +69,16 @@ func (m *Module) Run() error {
 
 // Help show help message
 func (m *Module) Help(app.App) error {
+	// header
+	m.deps.Output.Printf("%s %s\n", m.deps.Name, m.deps.Version)
+	if m.deps.Company != "" {
+		m.deps.Output.Printf("Develop by @%s all rights reserved\n", m.deps.Company)
+	}
+	m.deps.Output.Printf("Powered by GoatCore %s (%s)\n", m.deps.GoatVersion, "https://github.com/goatcms/goatcore")
+	if m.deps.Welcome != "" {
+		m.deps.Output.Printf("\n%s\n", m.deps.Welcome)
+	}
+	// content
 	keys, err := m.deps.CommandScope.Keys()
 	if err != nil {
 		return err
@@ -89,6 +91,7 @@ func (m *Module) Help(app.App) error {
 		}
 	}
 	maxLength = maxLength - len(commandPrefix) + 1
+	sort.Strings(keys)
 	for _, key := range keys {
 		if strings.HasPrefix(key, commandPrefix) {
 			if isFirstCommand {
