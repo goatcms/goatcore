@@ -210,6 +210,11 @@ func (fs *Filespace) RemoveAll(subPath string) error {
 	return fs.root.Remove(subPath, false)
 }
 
+// Lstat returns a FileInfo describing the named file.
+func (fs *Filespace) Lstat(subPath string) (os.FileInfo, error) {
+	return fs.root.GetByPath(subPath)
+}
+
 // DebugPrint print filespace tree
 func (fs *Filespace) DebugPrint() {
 	debugPrint("", fs.root)

@@ -105,3 +105,8 @@ func (fs *Filespace) Filespace(subPath string) (filesystem.Filespace, error) {
 	}
 	return NewFilespace(fs.path + subPath)
 }
+
+// Lstat returns a FileInfo describing the named file.
+func (fs *Filespace) Lstat(subPath string) (os.FileInfo, error) {
+	return os.Lstat(fs.path + subPath)
+}

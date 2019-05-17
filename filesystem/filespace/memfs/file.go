@@ -52,10 +52,12 @@ func (f *File) GetData() []byte {
 
 // SetData set new file data bytes
 func (f *File) SetData(data []byte) {
+	f.time = time.Now()
 	f.data = data
 }
 
 func (f *File) Write(p []byte) (n int, err error) {
+	f.time = time.Now()
 	f.data = append(f.data, p...)
 	return len(p), nil
 }

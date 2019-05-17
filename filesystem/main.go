@@ -44,6 +44,7 @@ type Filespace interface {
 	Writer(subPath string) (Writer, error)
 	Remove(subPath string) error
 	RemoveAll(subPath string) error
+	Lstat(subPath string) (os.FileInfo, error)
 }
 
 // LoopOn is a callback type trigged on a file or directory
