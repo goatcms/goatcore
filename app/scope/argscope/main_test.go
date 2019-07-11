@@ -64,10 +64,38 @@ func TestGet(t *testing.T) {
 	if value, _ := scope.Get("$0"); value != "v1" {
 		t.Errorf("$0 must be equal to position value %v != %v", value, "v1")
 	}
-	if value, _ := scope.Get("$0"); value != "v1" {
+	if value, _ := scope.Get("$1"); value != "path=my/path" {
 		t.Errorf("$1 must be equal to position value %v != %v", value, "path=my/path")
 	}
-	if value, _ := scope.Get("$0"); value != "v1" {
+	if value, _ := scope.Get("$2"); value != "number=12" {
 		t.Errorf("$2 must be equal to position value %v != %v", value, "number=12")
+	}
+}
+
+func TestNewScopeFromString(t *testing.T) {
+	t.Parallel()
+	scope, err := NewScopeFromString(`v1 path=my/path number="12 12" "--some=true true"`, app.ArgsTagName)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	checkTestValue(t, scope, "$0", "v1")
+	checkTestValue(t, scope, "$1", "path=my/path")
+	checkTestValue(t, scope, "$2", "number=12 12")
+	checkTestValue(t, scope, "$3", "--some=true true")
+	checkTestValue(t, scope, "number", "12 12")
+}
+
+func checkTestValue(t *testing.T, scope app.Scope, index, expected string) {
+	var (
+		have interface{}
+		err  error
+	)
+	if have, err = scope.Get(index); err != nil {
+		t.Error(err)
+		return
+	}
+	if have != expected {
+		t.Errorf(`%s must be equal to "%v" and take "%v"`, index, expected, have)
 	}
 }

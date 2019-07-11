@@ -59,6 +59,7 @@ func NewApp(options MockupOptions) (app.App, error) {
 		mapp.options.ArgsScope,
 		mapp.options.EngineScope,
 	})
+	mapp.options.DP.SetDefault(app.AppService, app.App(mapp))
 	return mapp, nil
 }
 

@@ -8,6 +8,7 @@ import (
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/scope"
+	"github.com/goatcms/goatcore/varutil"
 	"github.com/goatcms/goatcore/varutil/r"
 )
 
@@ -46,6 +47,15 @@ func NewScope(args []string, tagname string) (app.Scope, error) {
 		}
 	}
 	return scope, nil
+}
+
+// NewScopeFromString create argument scope from string
+func NewScopeFromString(line, tagname string) (s app.Scope, err error) {
+	var args []string
+	if args, err = varutil.SplitArguments(line); err != nil {
+		return nil, err
+	}
+	return NewScope(args, tagname)
 }
 
 // InjectTo inject arguments to object

@@ -2,8 +2,10 @@ package bootstrap
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // Bootstrap is default boot sequence
@@ -49,13 +51,15 @@ func (b *Bootstrap) Init() error {
 			return err
 		}
 	}
-	// clean unused dependencies
-	b.gapp = nil
 	return nil
 }
 
 // Run all modules
-func (b *Bootstrap) Run() error {
+func (b *Bootstrap) Run() (err error) {
+	var (
+		waitGroup = &sync.WaitGroup{}
+		errs      []error
+	)
 	if !b.inited {
 		return fmt.Errorf("Bootstrap.Run must be run after modules init")
 	}
@@ -63,10 +67,15 @@ func (b *Bootstrap) Run() error {
 		return fmt.Errorf("Bootstrap.Run can not be run twice")
 	}
 	b.runed = true
+	waitGroup.Add(len(b.modules))
 	for _, module := range b.modules {
-		if err := module.Run(); err != nil {
-			return err
-		}
+		go func(module app.Module) {
+			defer waitGroup.Done()
+			if err = module.Run(b.gapp); err != nil {
+				errs = append(errs, err)
+			}
+		}(module)
 	}
-	return nil
+	waitGroup.Wait()
+	return goaterr.ToErrors(errs)
 }

@@ -90,6 +90,7 @@ func NewGoatApp(name, version, basePath string) (app.App, error) {
 		gapp.engineScope,
 	})
 
+	gapp.dp.SetDefault(app.AppService, app.App(gapp))
 	return gapp, nil
 }
 

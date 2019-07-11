@@ -76,6 +76,8 @@ const (
 	// GlobalScope is a scope for global events and data
 	GlobalScope = "GlobalScope"
 
+	// AppService is a default application service
+	AppService = "App"
 	// InputService is a default input service
 	InputService = "InputService"
 	// OutputService is a default output service
@@ -119,6 +121,9 @@ type EventCallback func(interface{}) error
 // Callback is a callback function
 type Callback func() error
 
+// CommandCallback is function call to run user command
+type CommandCallback func(App, Scope) (err error)
+
 // Injector inject data/dependencies to object
 type Injector interface {
 	InjectTo(obj interface{}) error
@@ -148,7 +153,7 @@ type Scope interface {
 type Module interface {
 	RegisterDependencies(App) error
 	InitDependencies(App) error
-	Run() error
+	Run(App) error
 }
 
 // Bootstrap represent bootstrap of a app
