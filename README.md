@@ -14,6 +14,26 @@ Right now, you likely have an older version installed under $GOPATH/pkg/ and the
 ## Improve test execution time
 You can set *AsyncTestReapeat* at workers\\main.go to lower value like 200 or 500. Tests will less-restrictic for simultaneously processing errors. A good site is faster tests execution.
 
+## Run test
+To run test define system environment
+
+ * GOATCORE_TEST_SMTP_FROM_ADDRESS - sender email
+ * GOATCORE_TEST_SMTP_TO_ADDRESS - reciver email
+ * GOATCORE_TEST_SMTP_SERVER - SMTP server URL
+ * GOATCORE_TEST_SMTP_USERNAME - SMTP server username
+ * GOATCORE_TEST_SMTP_PASSWORD - SMTP server password
+ * GOATCORE_TEST_SMTP_IDENTITY - SMTP server identity
+
+On linux/unix/mac add envs by
+```
+export GOATCORE_TEST_SMTP_FROM_ADDRESS=some@email.pl
+```
+
+Run tests:
+```
+go run test ./...
+```
+
 ## About
 * GoatCore - Szybki Start. https://youtu.be/tqVxzNiJT5g (PL) [Slides](https://docs.google.com/presentation/d/1S0UoP-Js6r7FJxglgSql9kLkRjwFCm7D-ossH4Lz4UA/edit#slide=id.p)
 * https://www.youtube.com/watch?v=DUKq5WMz4Y8 (PL) [Slides](https://docs.google.com/presentation/d/1i6e8XM8zZ5FsxIAEqxYjYziafBZt7N-ADYtKY5ENsVc/edit#slide=id.p)

@@ -13,9 +13,10 @@ import (
 )
 
 func TestSendEmail(t *testing.T) {
-	config, err := LoadTestConfig()
-	if err != nil {
-		t.Error(err)
+	var (
+		config *TestConfig
+	)
+	if config = LoadTestConfig(t); config == nil {
 		return
 	}
 
