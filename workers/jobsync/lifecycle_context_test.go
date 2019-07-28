@@ -17,8 +17,6 @@ func TestCancelContextWhenKill(t *testing.T) {
 				t.Errorf("expected closed context after kill")
 				return
 			}
-		default:
-			// it is ok
 		}
 	}
 }
