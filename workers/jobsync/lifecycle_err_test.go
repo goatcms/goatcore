@@ -49,8 +49,10 @@ func TestStrictErr(t *testing.T) {
 			t.Errorf("must break before finish")
 			return
 		}
-		if len(lifecycle.Errors()) != jobCounter {
-			t.Errorf("each job should return one error (it return %v errors and it expect %v)", len(lifecycle.Errors()), jobCounter)
+		// jobCounter + 1 since it contains one error for each job and one context cancel error
+		expectedErrCounter := jobCounter + 1
+		if len(lifecycle.Errors()) != expectedErrCounter {
+			t.Errorf("each job should return one error and it chould contains context cancel error (it return %v errors and it expect %v)", len(lifecycle.Errors()), expectedErrCounter)
 			return
 		}
 	}
