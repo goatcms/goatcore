@@ -14,6 +14,8 @@ type TestDeps struct {
 	Optional      int    `argument:"?optional"`
 }
 
+/*
+Important: We don't support types conversion any more. - 26.07.2019
 func TestInjectTo(t *testing.T) {
 	t.Parallel()
 	var deps TestDeps
@@ -39,6 +41,7 @@ func TestInjectTo(t *testing.T) {
 		t.Errorf("Flag must be equal to first true %v != %v", deps.Flag, true)
 	}
 }
+*/
 
 func TestInjectToFail(t *testing.T) {
 	t.Parallel()
