@@ -6,10 +6,6 @@ import (
 	"github.com/goatcms/goatcore/workers/jobsync"
 )
 
-const (
-	insKey = "_scopesync.lifecycle"
-)
-
 // Lifecycle return jobsync.Lifecycle object connected to scope. If Lifecycle object doesn't exist, create new one and return it.
 func Lifecycle(scope app.Scope) *jobsync.Lifecycle {
 	var (
