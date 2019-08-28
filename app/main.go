@@ -1,6 +1,9 @@
 package app
 
 import (
+	"context"
+	"time"
+
 	"github.com/goatcms/goatcore/dependency"
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/messages"
@@ -112,6 +115,12 @@ const (
 	DefaultEnv = "prod"
 )
 
+const (
+	// DefaultDeadline is default dedline for application, scopes and lifecycles (it is 3 years)
+	// It is maximum time we declared the application can work correctly
+	DefaultDeadline = time.Hour * 24 * 365 * 3
+)
+
 // TypeConverter convert from type to other (string->int etc)
 type TypeConverter func(interface{}) (interface{}, error)
 
@@ -142,10 +151,31 @@ type EventScope interface {
 	On(int, EventCallback)
 }
 
+// ErrorScope provide error interface
+type ErrorScope interface {
+	Errors() []error
+	ToError() error
+	AppendError(err error)
+	AppendErrors(err ...error)
+}
+
+// SyncScope provide sync interface
+type SyncScope interface {
+	ErrorScope
+
+	Context() context.Context
+	Kill()
+	IsKilled() bool
+	Wait() error
+	AddTasks(delta int)
+	DoneTask()
+}
+
 // Scope is global scope interface
 type Scope interface {
 	DataScope
 	EventScope
+	SyncScope
 	dependency.Injector
 }
 

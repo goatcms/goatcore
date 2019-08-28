@@ -3,13 +3,17 @@ package scopesync
 import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/varutil/goaterr"
+	"github.com/goatcms/goatcore/workers/jobsync"
 )
 
 // AppendError add error to scope
 func AppendError(scope app.Scope, err error) {
-	var lifecycle = Lifecycle(scope)
+	var lifecycle *jobsync.Lifecycle
+	if err == nil {
+		return
+	}
+	lifecycle = Lifecycle(scope)
 	lifecycle.Error(err)
-	lifecycle.Kill()
 	scope.Trigger(app.ErrorEvent, err)
 }
 

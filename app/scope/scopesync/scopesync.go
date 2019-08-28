@@ -2,7 +2,6 @@ package scopesync
 
 import (
 	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/workers"
 	"github.com/goatcms/goatcore/workers/jobsync"
 )
 
@@ -15,7 +14,7 @@ func Lifecycle(scope app.Scope) *jobsync.Lifecycle {
 	)
 	lifecycleIns, err = scope.Get(insKey)
 	if err != nil || lifecycleIns == nil {
-		lifecycle = jobsync.NewLifecycle(workers.DefaultTimeout, true)
+		lifecycle = jobsync.NewLifecycle(app.DefaultDeadline, true)
 		scope.Set(insKey, lifecycle)
 	} else {
 		lifecycle = lifecycleIns.(*jobsync.Lifecycle)

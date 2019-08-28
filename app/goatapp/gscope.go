@@ -9,6 +9,7 @@ import (
 type GlobalScope struct {
 	app.EventScope
 	app.DataScope
+	app.SyncScope
 	app.Injector
 
 	scopes []app.Scope
@@ -22,6 +23,7 @@ func NewGlobalScope(tagname string, scopes []app.Scope) app.Scope {
 	globalScope := GlobalScope{
 		EventScope: scope.NewEventScope(),
 		DataScope:  dataScope,
+		SyncScope:  scope.NewSyncScope(),
 		Injector:   dataScope.Injector(tagname),
 		scopes:     scopes,
 	}

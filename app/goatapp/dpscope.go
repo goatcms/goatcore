@@ -9,6 +9,7 @@ import (
 // DependencyScope represent dependency scope lvl
 type DependencyScope struct {
 	app.EventScope
+	app.SyncScope
 	dependency.Provider
 }
 
@@ -16,6 +17,7 @@ type DependencyScope struct {
 func NewDependencyScope(dp dependency.Provider) app.Scope {
 	return DependencyScope{
 		EventScope: scope.NewEventScope(),
+		SyncScope:  scope.NewSyncScope(),
 		Provider:   dp,
 	}
 }
