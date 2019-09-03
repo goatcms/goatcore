@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/goatcms/goatcore/varutil"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -15,6 +16,22 @@ type Dir struct {
 	filemode os.FileMode
 	time     time.Time
 	nodes    []os.FileInfo
+	index    map[string]os.FileInfo
+}
+
+// NewDir create new directory with nodes
+func NewDir(name string, filemode os.FileMode, t time.Time, nodes []os.FileInfo) *Dir {
+	dir := &Dir{
+		name:     name,
+		filemode: filemode,
+		time:     t,
+		nodes:    nodes,
+		index:    map[string]os.FileInfo{},
+	}
+	for _, node := range dir.nodes {
+		dir.index[node.Name()] = node
+	}
+	return dir
 }
 
 // Name is a directory name
@@ -53,23 +70,22 @@ func (d *Dir) GetNodes() []os.FileInfo {
 }
 
 // GetNode return single node by name
-func (d *Dir) GetNode(nodeName string) (os.FileInfo, error) {
-	for _, node := range d.nodes {
-		if nodeName == node.Name() {
-			return node, nil
-		}
+func (d *Dir) GetNode(nodeName string) (node os.FileInfo, err error) {
+	var ok bool
+	if node, ok = d.index[nodeName]; !ok {
+		return nil, goaterr.Errorf("No find node with name " + nodeName)
 	}
-	return nil, goaterr.Errorf("No find node with name " + nodeName)
+	return node, nil
 }
 
 // AddNode add new node to directory (name must be unique in directory)
 func (d *Dir) AddNode(newNode os.FileInfo) error {
-	for _, node := range d.nodes {
-		if newNode.Name() == node.Name() {
-			return goaterr.Errorf("node named  " + newNode.Name() + " exists")
-		}
+	nodeName := newNode.Name()
+	if _, ok := d.index[nodeName]; ok {
+		return goaterr.Errorf("node named  " + newNode.Name() + " exists")
 	}
 	d.nodes = append(d.nodes, newNode)
+	d.index[nodeName] = newNode
 	return nil
 }
 
@@ -78,6 +94,7 @@ func (d *Dir) RemoveNodeByName(name string) error {
 	for i := 0; i < len(d.nodes); i++ {
 		if d.nodes[i].Name() == name {
 			d.nodes = append(d.nodes[:i], d.nodes[i+1:]...)
+			delete(d.index, name)
 			return nil
 		}
 	}
@@ -88,9 +105,9 @@ func (d *Dir) RemoveNodeByName(name string) error {
 func (d *Dir) Remove(nodePath string, emptyOnly bool) error {
 	var currentNode os.FileInfo = d
 	if nodePath == "." || nodePath == "./" || nodePath == "" {
-		return goaterr.Errorf("memfs.Dir.Remove: It is not possible to delete myself")
+		return goaterr.Errorf("memfs.Dir.Remove: It is not possible to delete itself")
 	}
-	pathNodes := strings.Split(path.Clean(nodePath), "/")
+	pathNodes := strings.Split(varutil.CleanPath(nodePath), "/")
 	lastDirNode := len(pathNodes) - 1
 	for i := 0; i < lastDirNode; i++ {
 		nodeName := pathNodes[i]
@@ -120,6 +137,7 @@ func (d *Dir) Remove(nodePath string, emptyOnly bool) error {
 			}
 		}
 		currentDir.nodes = append(currentDir.nodes[:key], currentDir.nodes[key+1:]...)
+		delete(currentDir.index, removeNodeName)
 		return nil
 	}
 	return goaterr.Errorf("memfs.Dir.Remove: Con not find node to remove (by name %v)", removeNodeName)
@@ -131,7 +149,7 @@ func (d *Dir) GetByPath(nodePath string) (os.FileInfo, error) {
 	if nodePath == "." || nodePath == "./" {
 		return currentNode, nil
 	}
-	pathNodes := strings.Split(path.Clean(nodePath), "/")
+	pathNodes := strings.Split(varutil.CleanPath(nodePath), "/")
 	for _, nodeName := range pathNodes {
 		if currentNode.IsDir() != true {
 			return nil, goaterr.Errorf("Node by name " + currentNode.Name() + " must be dir to get sub node (path " + nodePath + " )")
@@ -165,17 +183,12 @@ func (d *Dir) Copy() (*Dir, error) {
 			}
 		}
 	}
-	return &Dir{
-		name:     d.name,
-		filemode: d.filemode,
-		time:     d.time,
-		nodes:    nodescopy,
-	}, nil
+	return NewDir(d.name, d.filemode, d.time, nodescopy), nil
 }
 
 // MkdirAll crete directories recursive
 func (d *Dir) MkdirAll(subPath string, filemode os.FileMode) error {
-	pathNodes := strings.Split(path.Clean(subPath), "/")
+	pathNodes := strings.Split(varutil.CleanPath(subPath), "/")
 	currentNode := d
 	for i, nodeName := range pathNodes {
 		newCurrentNode, err := currentNode.GetNode(nodeName)
@@ -195,6 +208,7 @@ func (d *Dir) MkdirAll(subPath string, filemode os.FileMode) error {
 				filemode: filemode,
 				time:     time.Now(),
 				nodes:    []os.FileInfo{},
+				index:    map[string]os.FileInfo{},
 			}
 			if subDir != nil {
 				newSubDir.AddNode(subDir)

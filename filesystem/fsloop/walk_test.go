@@ -19,23 +19,23 @@ func TestWalk(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if err = fs.WriteFile("f1.int", []byte(f1Content), 0777); err != nil {
+	if err = fs.WriteFile("f1.int", []byte(`1`), 0777); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = fs.WriteFile("f2.int", []byte(f2Content), 0777); err != nil {
+	if err = fs.WriteFile("f2.int", []byte(`2`), 0777); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = fs.WriteFile("dir/f3.int", []byte(f3Content), 0777); err != nil {
+	if err = fs.WriteFile("dir/f3.int", []byte(`3`), 0777); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = fs.WriteFile("dir/f4.json", []byte(f4Content), 0777); err != nil {
+	if err = fs.WriteFile("dir/f4.json", []byte(`4`), 0777); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = WalkFS(fs, ".", func(path string, info os.FileInfo) (err error) {
+	if err = WalkFS(fs, "", func(path string, info os.FileInfo) (err error) {
 		files = append(files, path)
 		return nil
 	}, func(path string, info os.FileInfo) (err error) {

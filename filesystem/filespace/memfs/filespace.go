@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"time"
 
 	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/varutil"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -21,14 +23,14 @@ type Filespace struct {
 // NewFilespace create new memory filespace instance
 func NewFilespace() (*Filespace, error) {
 	return &Filespace{
-		root: &Dir{
-			nodes: []os.FileInfo{},
-		},
+		root: NewDir("", filesystem.DefaultUnixDirMode, time.Now(), []os.FileInfo{}),
 	}, nil
 }
 
 // Copy duplicate a file or directory
 func (fs *Filespace) Copy(src, dest string) error {
+	src = varutil.CleanPath(src)
+	dest = varutil.CleanPath(dest)
 	srcNode, err := fs.root.GetByPath(src)
 	if err != nil {
 		return err
@@ -41,6 +43,8 @@ func (fs *Filespace) Copy(src, dest string) error {
 
 // CopyDirectory duplicate a directory
 func (fs *Filespace) CopyDirectory(src, dest string) error {
+	src = varutil.CleanPath(src)
+	dest = varutil.CleanPath(dest)
 	srcNode, err := fs.root.GetByPath(src)
 	if err != nil {
 		return err
@@ -73,6 +77,8 @@ func (fs *Filespace) CopyDirectory(src, dest string) error {
 
 // CopyFile duplicate a file
 func (fs *Filespace) CopyFile(src, dest string) error {
+	src = varutil.CleanPath(src)
+	dest = varutil.CleanPath(dest)
 	srcNode, err := fs.root.GetByPath(src)
 	if err != nil {
 		return err
@@ -105,6 +111,7 @@ func (fs *Filespace) CopyFile(src, dest string) error {
 
 // ReadDir return directory nodes
 func (fs *Filespace) ReadDir(subPath string) ([]os.FileInfo, error) {
+	subPath = varutil.CleanPath(subPath)
 	srcNode, err := fs.root.GetByPath(subPath)
 	if err != nil {
 		return nil, err
@@ -127,6 +134,7 @@ func (fs *Filespace) IsExist(subPath string) bool {
 
 // IsFile return true if node exist and is a file
 func (fs *Filespace) IsFile(subPath string) bool {
+	subPath = varutil.CleanPath(subPath)
 	srcNode, err := fs.root.GetByPath(subPath)
 	if err != nil || srcNode == nil {
 		return false
@@ -136,6 +144,7 @@ func (fs *Filespace) IsFile(subPath string) bool {
 
 // IsDir return true if node exist and is a directory
 func (fs *Filespace) IsDir(subPath string) bool {
+	subPath = varutil.CleanPath(subPath)
 	srcNode, err := fs.root.GetByPath(subPath)
 	if err != nil || srcNode == nil {
 		return false
@@ -145,11 +154,13 @@ func (fs *Filespace) IsDir(subPath string) bool {
 
 // MkdirAll create directory recursively
 func (fs *Filespace) MkdirAll(subPath string, filemode os.FileMode) error {
+	subPath = varutil.CleanPath(subPath)
 	return fs.root.MkdirAll(subPath, filemode)
 }
 
 // Writer return a file node writer
 func (fs *Filespace) Writer(subPath string) (filesystem.Writer, error) {
+	subPath = varutil.CleanPath(subPath)
 	if err := fs.root.WriteFile(subPath, []byte{}, filesystem.DefaultUnixFileMode); err != nil {
 		return nil, err
 	}
@@ -165,6 +176,7 @@ func (fs *Filespace) Writer(subPath string) (filesystem.Writer, error) {
 
 // Reader return a file node reader
 func (fs *Filespace) Reader(subPath string) (filesystem.Reader, error) {
+	subPath = varutil.CleanPath(subPath)
 	node, err := fs.root.GetByPath(subPath)
 	if err != nil {
 		return nil, err
@@ -179,16 +191,19 @@ func (fs *Filespace) Reader(subPath string) (filesystem.Reader, error) {
 
 // ReadFile return file data
 func (fs *Filespace) ReadFile(subPath string) ([]byte, error) {
+	subPath = varutil.CleanPath(subPath)
 	return fs.root.ReadFile(subPath)
 }
 
 // WriteFile write file data
 func (fs *Filespace) WriteFile(subPath string, data []byte, perm os.FileMode) error {
+	subPath = varutil.CleanPath(subPath)
 	return fs.root.WriteFile(subPath, data, perm)
 }
 
 // Filespace get directory node and return it as filespace
 func (fs *Filespace) Filespace(subPath string) (filesystem.Filespace, error) {
+	subPath = varutil.CleanPath(subPath)
 	node, err := fs.root.GetByPath(subPath)
 	if err != nil {
 		return nil, err
@@ -203,16 +218,19 @@ func (fs *Filespace) Filespace(subPath string) (filesystem.Filespace, error) {
 
 // Remove delete node by path
 func (fs *Filespace) Remove(subPath string) error {
+	subPath = varutil.CleanPath(subPath)
 	return fs.root.Remove(subPath, true)
 }
 
 // RemoveAll delete node by path recursively
 func (fs *Filespace) RemoveAll(subPath string) error {
+	subPath = varutil.CleanPath(subPath)
 	return fs.root.Remove(subPath, false)
 }
 
 // Lstat returns a FileInfo describing the named file.
 func (fs *Filespace) Lstat(subPath string) (os.FileInfo, error) {
+	subPath = varutil.CleanPath(subPath)
 	return fs.root.GetByPath(subPath)
 }
 

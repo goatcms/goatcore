@@ -2,11 +2,11 @@ package fscache
 
 import (
 	"os"
-	"path"
 
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
 	"github.com/goatcms/goatcore/filesystem/fshelper"
+	"github.com/goatcms/goatcore/varutil"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -94,7 +94,7 @@ func (c Cache) Commit() (err error) {
 
 // Copy duplicate a file or directory
 func (c Cache) srcFS(p string) (srcFS filesystem.Filespace, src string) {
-	src = path.Clean(p)
+	src = varutil.CleanPath(p)
 	if c.bufferFS.IsExist(src) {
 		srcFS = c.bufferFS
 	} else {
@@ -107,7 +107,7 @@ func (c Cache) srcFS(p string) (srcFS filesystem.Filespace, src string) {
 func (c Cache) Copy(src, dest string) error {
 	var srcFS filesystem.Filespace
 	srcFS, src = c.srcFS(src)
-	dest = path.Clean(dest)
+	dest = varutil.CleanPath(dest)
 	c.changes.write[dest] = true
 	return (fshelper.Copier{
 		SrcFS:    srcFS,
@@ -121,7 +121,7 @@ func (c Cache) Copy(src, dest string) error {
 func (c Cache) CopyDirectory(src, dest string) error {
 	var srcFS filesystem.Filespace
 	srcFS, src = c.srcFS(src)
-	dest = path.Clean(dest)
+	dest = varutil.CleanPath(dest)
 	if !srcFS.IsDir(src) {
 		return goaterr.Errorf("Source node must be a directory")
 	}
@@ -133,7 +133,7 @@ func (c Cache) CopyDirectory(src, dest string) error {
 func (c Cache) CopyFile(src, dest string) error {
 	var srcFS filesystem.Filespace
 	srcFS, src = c.srcFS(src)
-	dest = path.Clean(dest)
+	dest = varutil.CleanPath(dest)
 	if !srcFS.IsFile(src) {
 		return goaterr.Errorf("Source node must be a file")
 	}
@@ -144,19 +144,19 @@ func (c Cache) CopyFile(src, dest string) error {
 // ReadDir return directory nodes
 func (c Cache) ReadDir(src string) (result []os.FileInfo, err error) {
 	var (
-		cacheDirs, bufforDirs []os.FileInfo
+		remoteDirs, bufferDirs []os.FileInfo
+		remoteErr, bufferErr   error
 	)
-	src = path.Clean(src)
-	if cacheDirs, err = c.remoteFS.ReadDir(src); err != nil {
-		return nil, err
+	src = varutil.CleanPath(src)
+	remoteDirs, remoteErr = c.remoteFS.ReadDir(src)
+	bufferDirs, bufferErr = c.bufferFS.ReadDir(src)
+	if remoteErr != nil && bufferErr != nil {
+		return nil, goaterr.ToErrors(goaterr.AppendError(nil, remoteErr, bufferErr))
 	}
-	if bufforDirs, err = c.bufferFS.ReadDir(src); err != nil {
-		return nil, err
-	}
-	result = cacheDirs
+	result = remoteDirs
 ReadDirLoop:
-	for _, bnode := range bufforDirs {
-		for _, cnode := range cacheDirs {
+	for _, bnode := range bufferDirs {
+		for _, cnode := range remoteDirs {
 			if bnode.Name() == cnode.Name() {
 				continue ReadDirLoop
 			}
@@ -168,32 +168,32 @@ ReadDirLoop:
 
 // IsExist return true if node exist
 func (c Cache) IsExist(src string) bool {
-	src = path.Clean(src)
+	src = varutil.CleanPath(src)
 	return c.bufferFS.IsExist(src) || c.remoteFS.IsExist(src)
 }
 
 // IsFile return true if node exist and is a file
 func (c Cache) IsFile(src string) bool {
-	src = path.Clean(src)
+	src = varutil.CleanPath(src)
 	return c.bufferFS.IsFile(src) || c.remoteFS.IsFile(src)
 }
 
 // IsDir return true if node exist and is a directory
 func (c Cache) IsDir(src string) bool {
-	src = path.Clean(src)
+	src = varutil.CleanPath(src)
 	return c.bufferFS.IsDir(src) || c.remoteFS.IsDir(src)
 }
 
 // MkdirAll create directory recursively
 func (c Cache) MkdirAll(dest string, filemode os.FileMode) error {
-	dest = path.Clean(dest)
+	dest = varutil.CleanPath(dest)
 	c.changes.mkdirAll[dest] = filemode
 	return c.bufferFS.MkdirAll(dest, filemode)
 }
 
 // Writer return a file node writer
 func (c Cache) Writer(dest string) (filesystem.Writer, error) {
-	dest = path.Clean(dest)
+	dest = varutil.CleanPath(dest)
 	c.changes.write[dest] = true
 	return c.bufferFS.Writer(dest)
 }
@@ -225,7 +225,7 @@ func (c Cache) Filespace(subPath string) (filesystem.Filespace, error) {
 
 // Remove delete node by path
 func (c Cache) Remove(dest string) (err error) {
-	dest = path.Clean(dest)
+	dest = varutil.CleanPath(dest)
 	if c.bufferFS.IsExist(dest) {
 		err = c.bufferFS.Remove(dest)
 	}
@@ -235,7 +235,7 @@ func (c Cache) Remove(dest string) (err error) {
 
 // RemoveAll delete node by path recursively
 func (c Cache) RemoveAll(dest string) (err error) {
-	dest = path.Clean(dest)
+	dest = varutil.CleanPath(dest)
 	if c.bufferFS.IsExist(dest) {
 		err = c.bufferFS.RemoveAll(dest)
 	}
