@@ -106,3 +106,40 @@ func SplitArguments(src string) ([]string, error) {
 	}
 	return args, nil
 }
+
+// UnescapeString convert '\\' to single '\', '\n' to new line, '\t', '\"' to double quote to tab to new line
+func UnescapeString(src string) string {
+	var (
+		buf     []byte
+		c       byte
+		in, out int
+	)
+	if !strings.Contains(src, "\\") {
+		return src
+	}
+	buf = make([]byte, len(src))
+	for in = 0; in < len(src); in++ {
+		c = src[in]
+		if c != '\\' {
+			buf[out] = c
+			out++
+			continue
+		}
+		in++
+		c = src[in]
+		switch c {
+		case 'n':
+			buf[out] = '\n'
+		case 't':
+			buf[out] = '\t'
+		case '"':
+			buf[out] = '"'
+		case '\'':
+			buf[out] = '\''
+		default:
+			buf[out] = c
+		}
+		out++
+	}
+	return string(buf[:out])
+}
