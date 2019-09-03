@@ -1,16 +1,21 @@
 package goaterr
 
-import "fmt"
+import (
+	"fmt"
+	"runtime/debug"
+)
 
 // ErrorCollection is a basic Errors interface implementation
 type ErrorCollection struct {
-	errs []error
+	errs       []error
+	stackTrace string
 }
 
 // NewErrors create a new errors instance
 func NewErrors(errs []error) Errors {
 	return ErrorCollection{
-		errs: errs,
+		errs:       errs,
+		stackTrace: string(debug.Stack()),
 	}
 }
 
@@ -43,8 +48,11 @@ func (e ErrorCollection) Error() string {
 }
 
 // String method convert object to string
-func (e ErrorCollection) String() string {
-	return fmt.Sprintf("errors: %v", e.errs)
+func (e ErrorCollection) String() (out string) {
+	for _, err := range e.errs {
+		out += fmt.Sprintf("   %s\n", err.Error())
+	}
+	return fmt.Sprintf("\n%s {\n%s\n}\n", e.stackTrace, out)
 }
 
 // Errors return sub error collection
