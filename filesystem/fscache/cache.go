@@ -27,8 +27,8 @@ type cacheHistory struct {
 }
 
 // newCache create new chache for remoteFS (use exists buffer filespace)
-func newCache(bufferFS, remoteFS filesystem.Filespace) Cache {
-	return Cache{
+func newCache(bufferFS, remoteFS filesystem.Filespace) *Cache {
+	return &Cache{
 		bufferFS: bufferFS,
 		bufferRO: fshelper.NewReadonlyFS(bufferFS),
 		remoteFS: remoteFS,
@@ -42,7 +42,7 @@ func newCache(bufferFS, remoteFS filesystem.Filespace) Cache {
 }
 
 // NewMemCache create new chache for remote filespace (storage changes into memory)
-func NewMemCache(remoteFS filesystem.Filespace) (c Cache, err error) {
+func NewMemCache(remoteFS filesystem.Filespace) (c *Cache, err error) {
 	var bufferFS filesystem.Filespace
 	if bufferFS, err = memfs.NewFilespace(); err != nil {
 		return c, err

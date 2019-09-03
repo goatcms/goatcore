@@ -11,7 +11,7 @@ import (
 func TestReadFile(t *testing.T) {
 	var (
 		remoteFS filesystem.Filespace
-		cache    Cache
+		cache    *Cache
 		err      error
 		result   []byte
 		testData = []byte("Content of test file")

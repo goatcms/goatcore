@@ -10,7 +10,7 @@ import (
 func TestMkdirStory(t *testing.T) {
 	var (
 		remoteFS filesystem.Filespace
-		cache    Cache
+		cache    *Cache
 		err      error
 	)
 	t.Parallel()

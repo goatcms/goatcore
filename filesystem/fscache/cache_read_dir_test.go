@@ -11,7 +11,7 @@ import (
 func TestReadDirStory(t *testing.T) {
 	var (
 		remoteFS filesystem.Filespace
-		cache    Cache
+		cache    *Cache
 		list     []os.FileInfo
 		err      error
 	)
@@ -56,7 +56,7 @@ func TestReadDirStory(t *testing.T) {
 func TestReadDirWithCachedDuplicateStory(t *testing.T) {
 	var (
 		remoteFS filesystem.Filespace
-		cache    Cache
+		cache    *Cache
 		list     []os.FileInfo
 		err      error
 	)

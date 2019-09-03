@@ -10,7 +10,7 @@ import (
 func TestRemoveStory(t *testing.T) {
 	var (
 		remoteFS filesystem.Filespace
-		cache    Cache
+		cache    *Cache
 		err      error
 	)
 	t.Parallel()
@@ -50,7 +50,7 @@ func TestRemoveStory(t *testing.T) {
 func TestRemoveAndCreateStory(t *testing.T) {
 	var (
 		remoteFS filesystem.Filespace
-		cache    Cache
+		cache    *Cache
 		err      error
 	)
 	t.Parallel()
@@ -98,7 +98,7 @@ func TestRemoveAndCreateStory(t *testing.T) {
 func TestRemoveAndCreateAndRemoveStory(t *testing.T) {
 	var (
 		remoteFS filesystem.Filespace
-		cache    Cache
+		cache    *Cache
 		err      error
 	)
 	t.Parallel()
