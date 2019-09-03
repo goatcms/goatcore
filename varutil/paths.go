@@ -1,6 +1,9 @@
 package varutil
 
-import "strings"
+import (
+	"path"
+	"strings"
+)
 
 // GOPath return golang path like host.com/user/repo
 // for example: github.com/goatcms/goatcore
@@ -26,4 +29,13 @@ func FullGOPath(repourl string) (w string) {
 		repourl = repourl[0 : len(repourl)-4]
 	}
 	return repourl
+}
+
+// CleanPath clean path
+func CleanPath(p string) (w string) {
+	p = path.Clean(p)
+	if strings.HasPrefix(p, "/") {
+		p = p[1:]
+	}
+	return p
 }
