@@ -1,11 +1,12 @@
 package memfs
 
 import (
-	"fmt"
 	"os"
 	"path"
 	"strings"
 	"time"
+
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // Dir is single directory
@@ -58,14 +59,14 @@ func (d *Dir) GetNode(nodeName string) (os.FileInfo, error) {
 			return node, nil
 		}
 	}
-	return nil, fmt.Errorf("No find node with name " + nodeName)
+	return nil, goaterr.Errorf("No find node with name " + nodeName)
 }
 
 // AddNode add new node to directory (name must be unique in directory)
 func (d *Dir) AddNode(newNode os.FileInfo) error {
 	for _, node := range d.nodes {
 		if newNode.Name() == node.Name() {
-			return fmt.Errorf("node named  " + newNode.Name() + " exists")
+			return goaterr.Errorf("node named  " + newNode.Name() + " exists")
 		}
 	}
 	d.nodes = append(d.nodes, newNode)
@@ -80,21 +81,21 @@ func (d *Dir) RemoveNodeByName(name string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("Con not find node to remove (by name " + name + ")")
+	return goaterr.Errorf("Con not find node to remove (by name " + name + ")")
 }
 
 // Remove remove a node by path
 func (d *Dir) Remove(nodePath string, emptyOnly bool) error {
 	var currentNode os.FileInfo = d
 	if nodePath == "." || nodePath == "./" || nodePath == "" {
-		return fmt.Errorf("memfs.Dir.Remove: It is not possible to delete myself")
+		return goaterr.Errorf("memfs.Dir.Remove: It is not possible to delete myself")
 	}
 	pathNodes := strings.Split(path.Clean(nodePath), "/")
 	lastDirNode := len(pathNodes) - 1
 	for i := 0; i < lastDirNode; i++ {
 		nodeName := pathNodes[i]
 		if currentNode.IsDir() != true {
-			return fmt.Errorf("memfs.Dir.Remove: Node by name %v must be dir to get sub node (path %v )", currentNode.Name(), nodePath)
+			return goaterr.Errorf("memfs.Dir.Remove: Node by name %v must be dir to get sub node (path %v )", currentNode.Name(), nodePath)
 		}
 		var dir = currentNode.(*Dir)
 		newNode, err := dir.GetNode(nodeName)
@@ -104,7 +105,7 @@ func (d *Dir) Remove(nodePath string, emptyOnly bool) error {
 		currentNode = newNode
 	}
 	if currentNode.IsDir() != true {
-		return fmt.Errorf("memfs.Dir.Remove: Node by name %v must be dir to get sub node (path %v )", currentNode.Name(), nodePath)
+		return goaterr.Errorf("memfs.Dir.Remove: Node by name %v must be dir to get sub node (path %v )", currentNode.Name(), nodePath)
 	}
 	currentDir := currentNode.(*Dir)
 	removeNodeName := pathNodes[len(pathNodes)-1]
@@ -115,13 +116,13 @@ func (d *Dir) Remove(nodePath string, emptyOnly bool) error {
 		if emptyOnly && removedNode.IsDir() {
 			removedDir := removedNode.(*Dir)
 			if len(removedDir.nodes) != 0 {
-				return fmt.Errorf("memfs.Dir.Remove: Prevent remove no empty directory %v", nodePath)
+				return goaterr.Errorf("memfs.Dir.Remove: Prevent remove no empty directory %v", nodePath)
 			}
 		}
 		currentDir.nodes = append(currentDir.nodes[:key], currentDir.nodes[key+1:]...)
 		return nil
 	}
-	return fmt.Errorf("memfs.Dir.Remove: Con not find node to remove (by name %v)", removeNodeName)
+	return goaterr.Errorf("memfs.Dir.Remove: Con not find node to remove (by name %v)", removeNodeName)
 }
 
 // GetByPath return node by path
@@ -133,7 +134,7 @@ func (d *Dir) GetByPath(nodePath string) (os.FileInfo, error) {
 	pathNodes := strings.Split(path.Clean(nodePath), "/")
 	for _, nodeName := range pathNodes {
 		if currentNode.IsDir() != true {
-			return nil, fmt.Errorf("Node by name " + currentNode.Name() + " must be dir to get sub node (path " + nodePath + " )")
+			return nil, goaterr.Errorf("Node by name " + currentNode.Name() + " must be dir to get sub node (path " + nodePath + " )")
 		}
 		var dir = currentNode.(*Dir)
 		newNode, err := dir.GetNode(nodeName)
@@ -181,7 +182,7 @@ func (d *Dir) MkdirAll(subPath string, filemode os.FileMode) error {
 		if err == nil {
 			// get exist path node
 			if !newCurrentNode.IsDir() {
-				return fmt.Errorf(nodeName + " exists and is not dir in path " + subPath)
+				return goaterr.Errorf(nodeName + " exists and is not dir in path " + subPath)
 			}
 			currentNode = newCurrentNode.(*Dir)
 			continue
@@ -213,7 +214,7 @@ func (d *Dir) ReadFile(subPath string) ([]byte, error) {
 		return nil, err
 	}
 	if node.IsDir() {
-		return nil, fmt.Errorf("Use ReadFile on directory ")
+		return nil, goaterr.Errorf("Use ReadFile on directory ")
 	}
 	var fileNode = node.(*File)
 	return fileNode.GetData(), nil
@@ -231,7 +232,7 @@ func (d *Dir) WriteFile(subPath string, data []byte, perm os.FileMode) error {
 			return err
 		}
 		if !node.IsDir() {
-			return fmt.Errorf("There is a file on path " + dirPath)
+			return goaterr.Errorf("There is a file on path " + dirPath)
 		}
 		var baseDir = node.(*Dir)
 		baseDir.AddNode(&File{
@@ -244,7 +245,7 @@ func (d *Dir) WriteFile(subPath string, data []byte, perm os.FileMode) error {
 	}
 	//overwrite file
 	if node.IsDir() {
-		return fmt.Errorf("Use WriteFile on directory")
+		return goaterr.Errorf("Use WriteFile on directory")
 	}
 	var file = node.(*File)
 	file.SetData(data)

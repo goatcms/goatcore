@@ -1,11 +1,11 @@
 package gtprovider
 
 import (
-	"fmt"
-	"text/template"
 	"sync"
+	"text/template"
 
 	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // TemplateLoader provide method to load templates from filesystem
@@ -30,10 +30,10 @@ func (loader *TemplateLoader) Load(fs filesystem.Filespace, subPath string) erro
 	loader.muTemplate.Lock()
 	defer loader.muTemplate.Unlock()
 	if len(bytes) == 0 {
-		return fmt.Errorf("empty file")
+		return goaterr.Errorf("empty file")
 	}
 	if _, err := loader.template.Parse(string(bytes)); err != nil {
-		return fmt.Errorf("%v: %v", subPath, err)
+		return goaterr.Errorf("%v: %v", subPath, err)
 	}
 	return nil
 }

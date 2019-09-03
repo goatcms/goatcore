@@ -1,7 +1,6 @@
 package fsstandalone
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -12,6 +11,7 @@ import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/varutil"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // StandaloneFile is a standalone file (it cointains its filesystem handler)
@@ -63,7 +63,7 @@ func NewTMPStandaloneFile(filespace filesystem.Filespace, name, mime string) (fi
 // OpenStandaloneFile open file and create its standalone file instance
 func OpenStandaloneFile(filespace filesystem.Filespace, path string) (filesystem.File, error) {
 	if !filespace.IsFile(path) {
-		return nil, fmt.Errorf("%v is not a file", path)
+		return nil, goaterr.Errorf("%v is not a file", path)
 	}
 	parts := strings.Split(path, ".")
 	createTimeUnix, err := strconv.ParseInt(parts[0], 36, 64)

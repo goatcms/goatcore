@@ -1,7 +1,6 @@
 package terminal
 
 import (
-	"fmt"
 	"strings"
 	"sync"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/goatcms/goatcore/app/scope/argscope"
 	"github.com/goatcms/goatcore/dependency"
 	"github.com/goatcms/goatcore/varutil"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // IOTerminal is user communication interface
@@ -43,7 +43,7 @@ func (terminal *IOTerminal) RunLoop() (err error) {
 	)
 	terminal.loopModeMutex.Lock()
 	if terminal.isLoopMode {
-		return fmt.Errorf("terminal.IOTerminal: terminal loop is run many times")
+		return goaterr.Errorf("terminal.IOTerminal: terminal loop is run many times")
 	}
 	terminal.isLoopMode = true
 	terminal.loopModeMutex.Unlock()
@@ -95,7 +95,7 @@ func (terminal *IOTerminal) RunCommand(args []string) (err error) {
 		return HelpComamnd(terminal.deps.App, nil)
 	}
 	if cbIns, err = commandScope.Get("command." + commandName); err != nil || cbIns == nil {
-		return fmt.Errorf("Error: unknown command %s", commandName)
+		return goaterr.Errorf("Error: unknown command %s", commandName)
 	}
 	if ctxScope, err = argscope.NewScope(args, "command"); err != nil {
 		return err

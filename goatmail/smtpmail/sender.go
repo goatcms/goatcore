@@ -2,12 +2,12 @@ package smtpmail
 
 import (
 	"crypto/tls"
-	"fmt"
 	"io"
 	"net"
 	"net/smtp"
 
 	"github.com/goatcms/goatcore/goatmail"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 	"github.com/goatcms/goatcore/workers/jobsync"
 )
 
@@ -26,7 +26,7 @@ func NewMailSender(config Config) *MailSender {
 // Send transmit email to server. Use Lifecycle for communication streams.
 func (ms *MailSender) Send(mail *goatmail.Mail, lc *jobsync.Lifecycle) error {
 	if len(mail.To) < 1 {
-		return fmt.Errorf("must define one or more recipient")
+		return goaterr.Errorf("must define one or more recipient")
 	}
 
 	host, _, _ := net.SplitHostPort(ms.config.SMTPAddr)

@@ -6,6 +6,7 @@ import (
 	"path"
 
 	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 const (
@@ -45,7 +46,7 @@ func (fs *Filespace) CopyDirectory(src, dest string) error {
 		return err
 	}
 	if !srcNode.IsDir() {
-		return fmt.Errorf("Source node must be a directory")
+		return goaterr.Errorf("Source node must be a directory")
 	}
 	dir := srcNode.(*Dir)
 	copiedDir, err := dir.Copy()
@@ -62,7 +63,7 @@ func (fs *Filespace) CopyDirectory(src, dest string) error {
 		return err
 	}
 	if !destNode.IsDir() {
-		return fmt.Errorf("Destination path exist and there is a file " + dest)
+		return goaterr.Errorf("Destination path exist and there is a file " + dest)
 	}
 	copiedDir.name = path.Base(dest)
 	var destDir = destNode.(*Dir)
@@ -77,7 +78,7 @@ func (fs *Filespace) CopyFile(src, dest string) error {
 		return err
 	}
 	if srcNode.IsDir() {
-		return fmt.Errorf("Source node must be a file")
+		return goaterr.Errorf("Source node must be a file")
 	}
 	file := srcNode.(*File)
 	copiedFile, err := file.Copy()
@@ -94,7 +95,7 @@ func (fs *Filespace) CopyFile(src, dest string) error {
 		return err
 	}
 	if !destNode.IsDir() {
-		return fmt.Errorf("Destination path exist and there is a file " + dest)
+		return goaterr.Errorf("Destination path exist and there is a file " + dest)
 	}
 	copiedFile.name = path.Base(dest)
 	var destDir = destNode.(*Dir)
@@ -109,7 +110,7 @@ func (fs *Filespace) ReadDir(subPath string) ([]os.FileInfo, error) {
 		return nil, err
 	}
 	if !srcNode.IsDir() {
-		return nil, fmt.Errorf(subPath + " is not a directory")
+		return nil, goaterr.Errorf(subPath + " is not a directory")
 	}
 	var dir = srcNode.(*Dir)
 	return dir.GetNodes(), nil
@@ -157,7 +158,7 @@ func (fs *Filespace) Writer(subPath string) (filesystem.Writer, error) {
 		return nil, err
 	}
 	if node.IsDir() {
-		return nil, fmt.Errorf("node is a dir %v", node)
+		return nil, goaterr.Errorf("node is a dir %v", node)
 	}
 	return node.(filesystem.Writer), nil
 }
@@ -169,7 +170,7 @@ func (fs *Filespace) Reader(subPath string) (filesystem.Reader, error) {
 		return nil, err
 	}
 	if node.IsDir() {
-		return nil, fmt.Errorf("node is a dir %v", node)
+		return nil, goaterr.Errorf("node is a dir %v", node)
 	}
 	file := node.(*File)
 	file.ResetPointer()
@@ -193,7 +194,7 @@ func (fs *Filespace) Filespace(subPath string) (filesystem.Filespace, error) {
 		return nil, err
 	}
 	if !node.IsDir() {
-		return nil, fmt.Errorf("Path is not a directory " + subPath)
+		return nil, goaterr.Errorf("Path is not a directory " + subPath)
 	}
 	return filesystem.Filespace(&Filespace{
 		root: node.(*Dir),

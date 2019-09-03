@@ -1,10 +1,10 @@
 package provider
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/goatcms/goatcore/dependency"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 const (
@@ -69,10 +69,10 @@ func (injector *TestInjector) InjectTo(obj interface{}) error {
 		valueField := structValue.Field(i)
 		structField := structValue.Type().Field(i)
 		if !valueField.IsValid() {
-			return fmt.Errorf("goatcore/dependency/TestInjector.InjectTo: %s is invalid", structField.Name)
+			return goaterr.Errorf("goatcore/dependency/TestInjector.InjectTo: %s is invalid", structField.Name)
 		}
 		if !valueField.CanSet() {
-			return fmt.Errorf("goatcore/dependency/TestInjector.InjectTo: Cannot set %s field value", structField.Name)
+			return goaterr.Errorf("goatcore/dependency/TestInjector.InjectTo: Cannot set %s field value", structField.Name)
 		}
 		switch valueField.Interface().(type) {
 		case int:

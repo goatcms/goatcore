@@ -1,9 +1,10 @@
 package workers
 
 import (
-	"fmt"
 	"runtime"
 	"time"
+
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 const (
@@ -19,7 +20,7 @@ var (
 	// MaxJob is default max goroutines for task
 	MaxJob = runtime.NumCPU()
 	// ErrTimeout is timeout error
-	ErrTimeout = fmt.Errorf("JobGroup timeout")
+	ErrTimeout = goaterr.Errorf("JobGroup timeout")
 	// ErrKill is job/goroutines kill error
-	ErrKill = fmt.Errorf("JobGroup was killed")
+	ErrKill = goaterr.Errorf("JobGroup was killed")
 )

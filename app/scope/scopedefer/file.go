@@ -1,11 +1,11 @@
 package scopedefer
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // FileDefer provide defer api to remove multi files on remvoe
@@ -23,7 +23,7 @@ func (d *FileDefer) Remove(interface{}) error {
 	}
 	if len(errors) > 0 {
 		// TODO: Add suport to containing multiple errors
-		return fmt.Errorf("%v", errors)
+		return goaterr.Errorf("%v", errors)
 	}
 	return nil
 }

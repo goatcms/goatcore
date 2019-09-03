@@ -2,8 +2,9 @@ package varutil
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
+
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // GetField return a field value as interface
@@ -18,11 +19,11 @@ func SetField(obj interface{}, name string, value interface{}) error {
 	structFieldValue := structValue.FieldByName(name)
 
 	if !structFieldValue.IsValid() {
-		return fmt.Errorf("No such field: %s in obj", name)
+		return goaterr.Errorf("No such field: %s in obj", name)
 	}
 
 	if !structFieldValue.CanSet() {
-		return fmt.Errorf("Cannot set %s field value", name)
+		return goaterr.Errorf("Cannot set %s field value", name)
 	}
 
 	structFieldType := structFieldValue.Type()
@@ -59,20 +60,20 @@ func LoadStruct(obj interface{}, m map[string]interface{}, tagname string, ignor
 			dest = structField.Name
 		}
 		if !valueField.IsValid() {
-			return fmt.Errorf("No such field: %s in obj", structField.Name)
+			return goaterr.Errorf("No such field: %s in obj", structField.Name)
 		}
 		if !valueField.CanSet() {
-			return fmt.Errorf("Cannot set %s field value", structField.Name)
+			return goaterr.Errorf("Cannot set %s field value", structField.Name)
 		}
 		importedValue, ok := m[dest]
 		if !ok && !ignoreUndefined {
-			return fmt.Errorf("input map[%v] is undefined", dest)
+			return goaterr.Errorf("input map[%v] is undefined", dest)
 		}
 		if importedValue == nil {
 			if ignoreUndefined {
 				continue
 			}
-			return fmt.Errorf("set value (named %v) can not be nil", dest)
+			return goaterr.Errorf("set value (named %v) can not be nil", dest)
 		}
 		newValue := reflect.ValueOf(importedValue)
 		if structField.Type != newValue.Type() {

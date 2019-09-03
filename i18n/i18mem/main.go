@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/goatcms/goatcore/i18n"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // I18Mem contains translation storaged in memory
@@ -51,7 +52,7 @@ func (i18 *I18Mem) Translate(key string, values ...interface{}) (string, error) 
 	defer i18.muTranlsates.RUnlock()
 	format, ok := i18.translates[key]
 	if !ok {
-		return "", fmt.Errorf("Unknown translate for %s key", key)
+		return "", goaterr.Errorf("Unknown translate for %s key", key)
 	}
 	return fmt.Sprintf(format, values...), nil
 }

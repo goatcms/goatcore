@@ -2,12 +2,12 @@ package git
 
 import (
 	"bytes"
-	"fmt"
 	"os/exec"
 	"strings"
 
 	"github.com/goatcms/goatcore/filesystem/disk"
 	"github.com/goatcms/goatcore/repositories"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // Connector is wrapper for many repositories connector adapters
@@ -46,7 +46,7 @@ func (connector *Connector) Clone(url string, version repositories.Version, dest
 	cmd.Stdout = &out
 	cmd.Stderr = &out
 	if err = cmd.Run(); err != nil {
-		return nil, fmt.Errorf("external git app fail %v: %v %v", args, err, string(out.Bytes()))
+		return nil, goaterr.Errorf("external git app fail %v: %v %v", args, err, string(out.Bytes()))
 	}
 	// checkout
 	if version.Revision == "" {
@@ -60,7 +60,7 @@ func (connector *Connector) Clone(url string, version repositories.Version, dest
 	cmd.Stdout = &out
 	cmd.Stderr = &out
 	if err = cmd.Run(); err != nil {
-		return nil, fmt.Errorf("external git app fail %v: %v %v", args, err, string(out.Bytes()))
+		return nil, goaterr.Errorf("external git app fail %v: %v %v", args, err, string(out.Bytes()))
 	}
 	return &Repository{
 		path: destPath,

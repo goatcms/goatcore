@@ -1,11 +1,11 @@
 package scope
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/injector"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // DataScope represent scope data
@@ -35,7 +35,7 @@ func (ds *DataScope) Get(key string) (value interface{}, err error) {
 	defer ds.mu.RUnlock()
 	var ok bool
 	if value, ok = ds.Data[key]; !ok {
-		return nil, fmt.Errorf("Unknow value for key %v", key)
+		return nil, goaterr.Errorf("Unknow value for key %v", key)
 	}
 	return value, nil
 }

@@ -2,8 +2,9 @@ package git
 
 import (
 	"bytes"
-	"fmt"
 	"os/exec"
+
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // Repository represent single git repository
@@ -28,7 +29,7 @@ func (repo *Repository) Pull() (err error) {
 	cmd.Stdout = &out
 	cmd.Stderr = &out
 	if err = cmd.Run(); err != nil {
-		return fmt.Errorf("fail execute command git pull (cwd: %v): %v %v", repo.path, err, string(out.Bytes()))
+		return goaterr.Errorf("fail execute command git pull (cwd: %v): %v %v", repo.path, err, string(out.Bytes()))
 	}
 	return nil
 }

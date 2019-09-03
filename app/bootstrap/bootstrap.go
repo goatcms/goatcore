@@ -1,7 +1,6 @@
 package bootstrap
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/goatcms/goatcore/app"
@@ -29,7 +28,7 @@ func NewBootstrap(gapp app.App) app.Bootstrap {
 // Register add new module
 func (b *Bootstrap) Register(m app.Module) error {
 	if b.inited {
-		return fmt.Errorf("Can not add module after inited")
+		return goaterr.Errorf("Can not add module after inited")
 	}
 	b.modules = append(b.modules, m)
 	return nil
@@ -38,7 +37,7 @@ func (b *Bootstrap) Register(m app.Module) error {
 // Init all modules
 func (b *Bootstrap) Init() error {
 	if b.inited {
-		return fmt.Errorf("Bootstrap can not be inited twice")
+		return goaterr.Errorf("Bootstrap can not be inited twice")
 	}
 	b.inited = true
 	for _, module := range b.modules {
@@ -61,10 +60,10 @@ func (b *Bootstrap) Run() (err error) {
 		errs      []error
 	)
 	if !b.inited {
-		return fmt.Errorf("Bootstrap.Run must be run after modules init")
+		return goaterr.Errorf("Bootstrap.Run must be run after modules init")
 	}
 	if b.runed {
-		return fmt.Errorf("Bootstrap.Run can not be run twice")
+		return goaterr.Errorf("Bootstrap.Run can not be run twice")
 	}
 	b.runed = true
 	waitGroup.Add(len(b.modules))

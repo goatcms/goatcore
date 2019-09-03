@@ -1,10 +1,10 @@
 package fshelper
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // Copier is helper to copy data bettwent two filesystem
@@ -56,7 +56,7 @@ func (c Copier) copyDirectory() (err error) {
 		destFS filesystem.Filespace
 	)
 	if !c.SrcFS.IsDir(c.SrcPath) {
-		return fmt.Errorf("%s is not a directory", c.SrcPath)
+		return goaterr.Errorf("%s is not a directory", c.SrcPath)
 	}
 	if srcFS, err = c.SrcFS.Filespace(c.SrcPath); err != nil {
 		return err

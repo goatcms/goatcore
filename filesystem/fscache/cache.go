@@ -1,13 +1,13 @@
 package fscache
 
 import (
-	"fmt"
 	"os"
 	"path"
 
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
 	"github.com/goatcms/goatcore/filesystem/fshelper"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // Cache synchronise buffer filesystem to remote filesystem
@@ -123,7 +123,7 @@ func (c Cache) CopyDirectory(src, dest string) error {
 	srcFS, src = c.srcFS(src)
 	dest = path.Clean(dest)
 	if !srcFS.IsDir(src) {
-		return fmt.Errorf("Source node must be a directory")
+		return goaterr.Errorf("Source node must be a directory")
 	}
 	c.changes.write[dest] = true
 	return c.Copy(src, dest)
@@ -135,7 +135,7 @@ func (c Cache) CopyFile(src, dest string) error {
 	srcFS, src = c.srcFS(src)
 	dest = path.Clean(dest)
 	if !srcFS.IsFile(src) {
-		return fmt.Errorf("Source node must be a file")
+		return goaterr.Errorf("Source node must be a file")
 	}
 	c.changes.write[dest] = true
 	return c.Copy(src, dest)

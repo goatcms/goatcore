@@ -1,7 +1,6 @@
 package diskfs
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -9,6 +8,7 @@ import (
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/filesystem/disk"
 	"github.com/goatcms/goatcore/varutil"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // Filespace is a files set on local filesystem
@@ -101,7 +101,7 @@ func (fs *Filespace) RemoveAll(subPath string) error {
 // Filespace get directory node and return it as filespace
 func (fs *Filespace) Filespace(subPath string) (filesystem.Filespace, error) {
 	if !fs.IsDir(subPath) {
-		return nil, fmt.Errorf("Path is not a directory " + fs.path + subPath)
+		return nil, goaterr.Errorf("Path is not a directory " + fs.path + subPath)
 	}
 	return NewFilespace(fs.path + subPath)
 }

@@ -1,9 +1,10 @@
 package varutil
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // HasOneSuffix checks any element of array has suffix
@@ -39,7 +40,7 @@ func FixDirPath(path *string) {
 // FixURL fix url to start with http://
 func FixURL(url *string) error {
 	if *url == "" {
-		return fmt.Errorf("Incorrect url '%v'", url)
+		return goaterr.Errorf("Incorrect url '%v'", url)
 	}
 	if strings.HasPrefix(*url, "http://") || strings.HasPrefix(*url, "https://") {
 		return nil

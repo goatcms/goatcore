@@ -1,10 +1,10 @@
 package scope
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 func TestEventStory(t *testing.T) {
@@ -33,7 +33,7 @@ func TestErrorStory(t *testing.T) {
 	t.Parallel()
 	c := NewEventScope()
 	c.On(app.KillEvent, func(interface{}) error {
-		return fmt.Errorf("something is wrong")
+		return goaterr.Errorf("something is wrong")
 	})
 	if err := c.Trigger(app.KillEvent, nil); err == nil {
 		t.Errorf("Trigger should return error if a function is failed")

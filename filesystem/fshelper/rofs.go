@@ -1,10 +1,10 @@
 package fshelper
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // ROFilespace is a readonly filespace
@@ -21,17 +21,17 @@ func NewReadonlyFS(fs filesystem.Filespace) filesystem.Filespace {
 
 // Copy method is unavailable
 func (ro ROFilespace) Copy(src, dest string) error {
-	return fmt.Errorf("Copy is unavailable on readonly filespace")
+	return goaterr.Errorf("Copy is unavailable on readonly filespace")
 }
 
 // CopyDirectory is unavailable
 func (ro ROFilespace) CopyDirectory(src, dest string) error {
-	return fmt.Errorf("CopyDirectory is unavailable on readonly filespace")
+	return goaterr.Errorf("CopyDirectory is unavailable on readonly filespace")
 }
 
 // CopyFile method is unavailable
 func (ro ROFilespace) CopyFile(src, dest string) error {
-	return fmt.Errorf("CopyFile is unavailable on readonly filespace")
+	return goaterr.Errorf("CopyFile is unavailable on readonly filespace")
 }
 
 // ReadDir method run ReadDir method of parent filespace
@@ -56,7 +56,7 @@ func (ro ROFilespace) IsDir(src string) bool {
 
 // MkdirAll method is unavailable
 func (ro ROFilespace) MkdirAll(dest string, filemode os.FileMode) error {
-	return fmt.Errorf("MkdirAll is unavailable on readonly filespace")
+	return goaterr.Errorf("MkdirAll is unavailable on readonly filespace")
 }
 
 // ReadFile method run ReadFile method of parent filespace
@@ -66,7 +66,7 @@ func (ro ROFilespace) ReadFile(src string) ([]byte, error) {
 
 // WriteFile method is unavailable
 func (ro ROFilespace) WriteFile(dest string, data []byte, perm os.FileMode) error {
-	return fmt.Errorf("WriteFile is unavailable on readonly filespace")
+	return goaterr.Errorf("WriteFile is unavailable on readonly filespace")
 }
 
 // Filespace create new filespace
@@ -81,17 +81,17 @@ func (ro ROFilespace) Reader(src string) (filesystem.Reader, error) {
 
 // Writer method is unavailable
 func (ro ROFilespace) Writer(dest string) (filesystem.Writer, error) {
-	return nil, fmt.Errorf("Writer is unavailable on readonly filespace")
+	return nil, goaterr.Errorf("Writer is unavailable on readonly filespace")
 }
 
 // Remove method is unavailable
 func (ro ROFilespace) Remove(dest string) error {
-	return fmt.Errorf("Remove is unavailable on readonly filespace")
+	return goaterr.Errorf("Remove is unavailable on readonly filespace")
 }
 
 // RemoveAll method is unavailable
 func (ro ROFilespace) RemoveAll(dest string) error {
-	return fmt.Errorf("RemoveAll is unavailable on readonly filespace")
+	return goaterr.Errorf("RemoveAll is unavailable on readonly filespace")
 }
 
 // Lstat method run Lstat method of parent filespace

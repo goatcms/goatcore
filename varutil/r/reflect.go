@@ -1,8 +1,9 @@
 package r
 
 import (
-	"fmt"
 	"reflect"
+
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // UnpackValue skip pointers, interfaces etc and return a finish structure or a simple value
@@ -18,7 +19,7 @@ func UnpackValue(v reflect.Value) (reflect.Value, error) {
 	} else if k == reflect.Interface {
 		return UnpackValue(v.Elem())
 	}
-	return v, fmt.Errorf("Unsupported type")
+	return v, goaterr.Errorf("Unsupported type")
 }
 
 /*
@@ -34,6 +35,6 @@ func IsNilable(v reflect.Value) bool {
 	} else if k == reflect.Interface {
 		return unpackValue(v.Elem())
 	} else {
-		return v, fmt.Errorf("Unsupported type")
+		return v, goaterr.Errorf("Unsupported type")
 	}
 }*/

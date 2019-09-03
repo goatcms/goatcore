@@ -1,7 +1,6 @@
 package smtpmail_test
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -33,7 +32,7 @@ func LoadTestConfig(t *testing.T) (config *TestConfig) {
 
 func InjectEnv(name string, dest *string) (err error) {
 	if *dest = os.Getenv(name); *dest == "" {
-		return fmt.Errorf("%v operating environment is required", name)
+		return goaterr.Errorf("%v operating environment is required", name)
 	}
 	return nil
 }

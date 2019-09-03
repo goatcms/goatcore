@@ -1,11 +1,11 @@
 package injector
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 
 	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // MapInjector is map data injector
@@ -38,20 +38,20 @@ func (mi MapInjector) InjectTo(obj interface{}) error {
 			key = key[1:]
 		}
 		if !valueField.IsValid() {
-			return fmt.Errorf("MapInjector.InjectTo: %s is not valid", structField.Name)
+			return goaterr.Errorf("MapInjector.InjectTo: %s is not valid", structField.Name)
 		}
 		if !valueField.CanSet() {
-			return fmt.Errorf("MapInjector.InjectTo: Cannot set %s field value", structField.Name)
+			return goaterr.Errorf("MapInjector.InjectTo: Cannot set %s field value", structField.Name)
 		}
 		newValue, ok := mi.data[key]
 		if !ok {
 			if !isRequired {
 				continue
 			}
-			return fmt.Errorf("value for %s is unknown", key)
+			return goaterr.Errorf("value for %s is unknown", key)
 		}
 		if newValue == nil {
-			return fmt.Errorf("MapInjector.InjectTo: dependency instance can not be nil (%s)", key)
+			return goaterr.Errorf("MapInjector.InjectTo: dependency instance can not be nil (%s)", key)
 		}
 		refValue := reflect.ValueOf(newValue)
 		valueField.Set(refValue)

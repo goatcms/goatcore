@@ -1,6 +1,6 @@
 package repositories
 
-import "fmt"
+import "github.com/goatcms/goatcore/varutil/goaterr"
 
 // MultiConnector is wrapper for many repositories connector adapters
 type MultiConnector struct {
@@ -21,7 +21,7 @@ func (connector *MultiConnector) Clone(url string, version Version, destPath str
 			return adapter.Clone(url, version, destPath)
 		}
 	}
-	return nil, fmt.Errorf("Unsupported url %v (no match any ConnectorAdapter for it)", url)
+	return nil, goaterr.Errorf("Unsupported url %v (no match any ConnectorAdapter for it)", url)
 }
 
 // Open open repository from local filesystem
@@ -31,5 +31,5 @@ func (connector *MultiConnector) Open(path string) (repo Repository, err error) 
 			return adapter.Open(path)
 		}
 	}
-	return nil, fmt.Errorf("Unsupported repository in path %v (no match any ConnectorAdapter for it)", path)
+	return nil, goaterr.Errorf("Unsupported repository in path %v (no match any ConnectorAdapter for it)", path)
 }

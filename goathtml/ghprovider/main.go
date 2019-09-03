@@ -1,7 +1,6 @@
 package ghprovider
 
 import (
-	"fmt"
 	"html/template"
 	"strings"
 	"sync"
@@ -139,7 +138,7 @@ func (provider *Provider) View(layoutName, viewName string, eventScope app.Event
 		layoutName = goathtml.DefaultLayout
 	}
 	if viewName == "" {
-		return nil, fmt.Errorf("goathtml.Provider: A view name is required")
+		return nil, goaterr.Errorf("goathtml.Provider: A view name is required")
 	}
 	key := layoutName + ":" + viewName
 	// check without lock (preformence feature)

@@ -1,11 +1,11 @@
 package provider
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 
 	"github.com/goatcms/goatcore/dependency"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // Provider is default dependency distributor
@@ -63,7 +63,7 @@ func NewStaticProvider(tagname string, factories map[string]dependency.Factory, 
 // AddInjectors add new injector to dependency provider
 func (d *Provider) AddInjectors(injectors []dependency.Injector) error {
 	if d.blocked {
-		return fmt.Errorf("goatcore/dependency/provider.AddInjectors: can not add new injector after got dependency")
+		return goaterr.Errorf("goatcore/dependency/provider.AddInjectors: can not add new injector after got dependency")
 	}
 	d.injectors = append(d.injectors, injectors...)
 	return nil
@@ -96,7 +96,7 @@ func (d *Provider) Block() {
 func (d *Provider) Get(name string) (interface{}, error) {
 	d.Block()
 	if d.isCalled(name) {
-		return nil, fmt.Errorf("%s is cyclic dependency (dependency callstack: %v)", name, append(d.callstack, name))
+		return nil, goaterr.Errorf("%s is cyclic dependency (dependency callstack: %v)", name, append(d.callstack, name))
 	}
 	if instance, exist := d.instances[name]; exist {
 		return instance, nil
@@ -105,10 +105,10 @@ func (d *Provider) Get(name string) (interface{}, error) {
 		d.callstack = append(d.callstack, name)
 		instance, err := factory(d)
 		if err != nil {
-			return nil, fmt.Errorf("%v (dependency callstack: %v)", err, d.callstack)
+			return nil, goaterr.Errorf("%v (dependency callstack: %v)", err, d.callstack)
 		}
 		if instance == nil {
-			return nil, fmt.Errorf("factory for %s return nil as instance", name)
+			return nil, goaterr.Errorf("factory for %s return nil as instance", name)
 		}
 		d.callstack = d.callstack[:len(d.callstack)-1]
 		d.clean(name)
@@ -119,10 +119,10 @@ func (d *Provider) Get(name string) (interface{}, error) {
 		d.callstack = append(d.callstack, name)
 		instance, err := factory(d)
 		if err != nil {
-			return nil, fmt.Errorf("%v (dependency callstack: %v)", err, d.callstack)
+			return nil, goaterr.Errorf("%v (dependency callstack: %v)", err, d.callstack)
 		}
 		if instance == nil {
-			return nil, fmt.Errorf("default factory for %s return nil as instance", name)
+			return nil, goaterr.Errorf("default factory for %s return nil as instance", name)
 		}
 		d.callstack = d.callstack[:len(d.callstack)-1]
 		if d.autoclean {
@@ -131,19 +131,19 @@ func (d *Provider) Get(name string) (interface{}, error) {
 		d.instances[name] = instance
 		return instance, nil
 	}
-	return nil, fmt.Errorf("goatcore/dependency/provider: dependency %s doesn't exist", name)
+	return nil, goaterr.Errorf("goatcore/dependency/provider: dependency %s doesn't exist", name)
 }
 
 // Set instance
 func (d *Provider) Set(name string, instance interface{}) error {
 	if d.blocked {
-		return fmt.Errorf("goatcore/dependency/provider.Set: can not add new instance after got dependency (for %s)", name)
+		return goaterr.Errorf("goatcore/dependency/provider.Set: can not add new instance after got dependency (for %s)", name)
 	}
 	if _, exist := d.instances[name]; exist {
-		return fmt.Errorf("goatcore/dependency/provider.Set: dependency %s exist (musn't be overwrited)", name)
+		return goaterr.Errorf("goatcore/dependency/provider.Set: dependency %s exist (musn't be overwrited)", name)
 	}
 	if _, exist := d.factories[name]; exist {
-		return fmt.Errorf("goatcore/dependency/provider.Set: dependency %s factory exists (value musn't be overwrited)", name)
+		return goaterr.Errorf("goatcore/dependency/provider.Set: dependency %s factory exists (value musn't be overwrited)", name)
 	}
 	d.instances[name] = instance
 	d.addKey(name)
@@ -153,13 +153,13 @@ func (d *Provider) Set(name string, instance interface{}) error {
 // SetDefault set default dependency instance by name
 func (d *Provider) SetDefault(name string, instance interface{}) error {
 	if d.blocked {
-		return fmt.Errorf("goatcore/dependency/provider.SetDefault: can not add default instance after got dependency (for %s)", name)
+		return goaterr.Errorf("goatcore/dependency/provider.SetDefault: can not add default instance after got dependency (for %s)", name)
 	}
 	if _, exist := d.defaultInstances[name]; exist {
-		return fmt.Errorf("goatcore/dependency/provider.SetDefault: dependency %s exist (musn't be overwrited)", name)
+		return goaterr.Errorf("goatcore/dependency/provider.SetDefault: dependency %s exist (musn't be overwrited)", name)
 	}
 	if _, exist := d.defaultFactories[name]; exist {
-		return fmt.Errorf("goatcore/dependency/provider.SetDefault: dependency %s factory exists (musn't be overwrited)", name)
+		return goaterr.Errorf("goatcore/dependency/provider.SetDefault: dependency %s factory exists (musn't be overwrited)", name)
 	}
 	d.defaultInstances[name] = instance
 	d.addKey(name)
@@ -169,10 +169,10 @@ func (d *Provider) SetDefault(name string, instance interface{}) error {
 // AddFactory define a factory for dependency
 func (d *Provider) AddFactory(name string, factory dependency.Factory) error {
 	if d.blocked {
-		return fmt.Errorf("goatcore/dependency/provider: can not add factory after first get dependency (for %s)", name)
+		return goaterr.Errorf("goatcore/dependency/provider: can not add factory after first get dependency (for %s)", name)
 	}
 	if _, exist := d.factories[name]; exist {
-		return fmt.Errorf("goatcore/dependency/provider: factory for '%s' double defined", name)
+		return goaterr.Errorf("goatcore/dependency/provider: factory for '%s' double defined", name)
 	}
 	d.clean(name)
 	d.factories[name] = factory
@@ -183,10 +183,10 @@ func (d *Provider) AddFactory(name string, factory dependency.Factory) error {
 // AddDefaultFactory define a default factory for dependency
 func (d *Provider) AddDefaultFactory(name string, factory dependency.Factory) error {
 	if d.blocked {
-		return fmt.Errorf("goatcore/dependency/provider: can not add factory after first get dependency (for %s)", name)
+		return goaterr.Errorf("goatcore/dependency/provider: can not add factory after first get dependency (for %s)", name)
 	}
 	if _, exist := d.defaultFactories[name]; exist {
-		return fmt.Errorf("goatcore/dependency/provider: default factory for '%s' double defined", name)
+		return goaterr.Errorf("goatcore/dependency/provider: default factory for '%s' double defined", name)
 	}
 	if _, exist := d.factories[name]; exist {
 		// when we have got defined factory for a field default factory wont be used
@@ -215,10 +215,10 @@ func (d *Provider) InjectTo(obj interface{}) error {
 			depID = depID[1:]
 		}
 		if !valueField.IsValid() {
-			return fmt.Errorf("goatcore/dependency/provider.InjectTo: %s is invalid", structField.Name)
+			return goaterr.Errorf("goatcore/dependency/provider.InjectTo: %s is invalid", structField.Name)
 		}
 		if !valueField.CanSet() {
-			return fmt.Errorf("goatcore/dependency/provider.InjectTo: Cannot set %s field value", structField.Name)
+			return goaterr.Errorf("goatcore/dependency/provider.InjectTo: Cannot set %s field value", structField.Name)
 		}
 		dep, err := d.Get(depID)
 		if err != nil {
@@ -228,7 +228,7 @@ func (d *Provider) InjectTo(obj interface{}) error {
 			return err
 		}
 		if dep == nil {
-			return fmt.Errorf("goatcore/dependency/provider.InjectTo: dependency instance can not be nil (%s)", depID)
+			return goaterr.Errorf("goatcore/dependency/provider.InjectTo: dependency instance can not be nil (%s)", depID)
 		}
 		depValue := reflect.ValueOf(dep)
 		valueField.Set(depValue)

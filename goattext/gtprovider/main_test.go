@@ -2,9 +2,9 @@ package gtprovider
 
 import (
 	"bytes"
-	"text/template"
 	"strings"
 	"testing"
+	"text/template"
 
 	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
 	"github.com/goatcms/goatcore/goathtml"

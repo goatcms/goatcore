@@ -1,19 +1,19 @@
 package r
 
 import (
-	"fmt"
 	"reflect"
 
+	"github.com/goatcms/goatcore/varutil/goaterr"
 	"github.com/goatcms/goatcore/varutil/totype"
 )
 
 // SetValueFromString convert string to reflect.Value type and set it.
 func SetValueFromString(valueField reflect.Value, value string) error {
 	if !valueField.IsValid() {
-		return fmt.Errorf("r.SetValueFromString: %s is not valid", valueField)
+		return goaterr.Errorf("r.SetValueFromString: %s is not valid", valueField)
 	}
 	if !valueField.CanSet() {
-		return fmt.Errorf("r.SetValueFromString: Cannot set %s field value", valueField)
+		return goaterr.Errorf("r.SetValueFromString: Cannot set %s field value", valueField)
 	}
 	switch valueField.Interface().(type) {
 	case string:
@@ -92,7 +92,7 @@ func SetValueFromString(valueField reflect.Value, value string) error {
 		refValue := reflect.ValueOf(&val)
 		valueField.Set(refValue)
 	default:
-		return fmt.Errorf("unsupported value type %v", valueField.Type().String())
+		return goaterr.Errorf("unsupported value type %v", valueField.Type().String())
 	}
 	return nil
 }

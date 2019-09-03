@@ -1,10 +1,10 @@
 package jobsync
 
 import (
-	"fmt"
 	"runtime"
 	"testing"
 
+	"github.com/goatcms/goatcore/varutil/goaterr"
 	"github.com/goatcms/goatcore/workers"
 )
 
@@ -17,7 +17,7 @@ type TestErrorBody struct {
 
 func (t *TestErrorBody) Loop() {
 	defer t.pool.Done()
-	t.lifecycle.Error(fmt.Errorf("test error"))
+	t.lifecycle.Error(goaterr.Errorf("test error"))
 	for i := 0; i < t.max; i++ {
 		t.acc.Add(1)
 		if t.lifecycle.IsKilled() {
