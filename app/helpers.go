@@ -17,8 +17,8 @@ func CloseApp(a App) error {
 	))
 }
 
-// RegisterComand add new command to application
-func RegisterComand(a App, name string, callback CommandCallback, help string) (err error) {
+// RegisterCommand add new command to application
+func RegisterCommand(a App, name string, callback CommandCallback, help string) (err error) {
 	commandScope := a.CommandScope()
 	commandScope.Set("help.command."+name, help)
 	commandScope.Set("command."+name, callback)
