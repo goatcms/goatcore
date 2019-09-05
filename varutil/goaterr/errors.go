@@ -1,22 +1,39 @@
 package goaterr
 
 import (
-	"fmt"
+	"encoding/json"
 	"runtime/debug"
 )
 
 // ErrorCollection is a basic Errors interface implementation
 type ErrorCollection struct {
 	errs       []error
-	stackTrace string
+	Errs       []string `json:"errors"`
+	Childs     []Errors `json:"childs"`
+	StackTrace string   `json:"stackTrace"`
+}
+
+// ErrorCollectionJSON represent errors json structure
+type ErrorCollectionJSON struct {
 }
 
 // NewErrors create a new errors instance
 func NewErrors(errs []error) Errors {
-	return ErrorCollection{
+	e := &ErrorCollection{
 		errs:       errs,
-		stackTrace: string(debug.Stack()),
+		Errs:       []string{},
+		Childs:     []Errors{},
+		StackTrace: string(debug.Stack()),
 	}
+	for _, err := range errs {
+		switch v := err.(type) {
+		case Errors:
+			e.Childs = append(e.Childs, v)
+		default:
+			e.Errs = append(e.Errs, v.Error())
+		}
+	}
+	return e
 }
 
 // ToErrors return error object if error list is not empty or nil.
@@ -31,31 +48,29 @@ func ToErrors(errs []error) error {
 	return NewErrors(errs)
 }
 
-// AppendError append error to error collection
-func AppendError(errs []error, newerrs ...error) []error {
-	for _, err := range newerrs {
-		if err == nil {
-			continue
-		}
-		errs = append(errs, err)
-	}
-	return errs
+// Errors return sub error collection
+func (e *ErrorCollection) Errors() []error {
+	return e.errs
 }
 
 // Error return error message
-func (e ErrorCollection) Error() string {
-	return e.String()
+func (e *ErrorCollection) Error() string {
+	return e.JSON()
 }
 
 // String method convert object to string
-func (e ErrorCollection) String() (out string) {
-	for _, err := range e.errs {
-		out += fmt.Sprintf("   %s\n", err.Error())
-	}
-	return fmt.Sprintf("\n%s {\n%s\n}\n", e.stackTrace, out)
+func (e *ErrorCollection) String() (out string) {
+	return e.JSON()
 }
 
-// Errors return sub error collection
-func (e ErrorCollection) Errors() []error {
-	return e.errs
+// JSON method convert object to JSON
+func (e *ErrorCollection) JSON() (out string) {
+	var (
+		jsonv []byte
+		err   error
+	)
+	if jsonv, err = json.MarshalIndent(e, "", "  "); err != nil {
+		panic(err)
+	}
+	return string(jsonv)
 }
