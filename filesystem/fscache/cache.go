@@ -2,6 +2,7 @@ package fscache
 
 import (
 	"os"
+	"path"
 
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
@@ -83,6 +84,9 @@ func (c Cache) Commit() (err error) {
 		}
 	}
 	for src = range c.changes.write {
+		if err = c.remoteFS.MkdirAll(path.Dir(src), filesystem.DefaultUnixDirMode); err != nil {
+			return err
+		}
 		if c.bufferFS.IsFile(src) {
 			if err = fshelper.StreamCopy(c.bufferFS, c.remoteFS, src); err != nil {
 				return err
