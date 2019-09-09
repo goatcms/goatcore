@@ -1,23 +1,23 @@
-package memfs_test
+package memfs
 
 import (
 	"os"
 	"testing"
 	"time"
 
-	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
+	"github.com/goatcms/goatcore/filesystem"
 )
 
 func TestModTime(t *testing.T) {
 	var (
-		fs       *memfs.Filespace
+		fs       filesystem.Filespace
 		err      error
 		fileInfo os.FileInfo
 		modTime  time.Time
 	)
 	t.Parallel()
 	// init
-	if fs, err = memfs.NewFilespace(); err != nil {
+	if fs, err = NewFilespace(); err != nil {
 		t.Error(err)
 	}
 	// Prepare test data

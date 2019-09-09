@@ -11,8 +11,8 @@ func TestIOCopy(t *testing.T) {
 	var (
 		err     error
 		fs      filesystem.Filespace
-		writer  io.Writer
-		reader  io.Reader
+		writer  filesystem.Writer
+		reader  filesystem.Reader
 		content []byte
 	)
 	t.Parallel()
@@ -35,6 +35,8 @@ func TestIOCopy(t *testing.T) {
 		t.Error(err)
 		return
 	}
+	reader.Close()
+	writer.Close()
 	if content, err = fs.ReadFile("file2.txt"); err != nil {
 		t.Error(err)
 		return

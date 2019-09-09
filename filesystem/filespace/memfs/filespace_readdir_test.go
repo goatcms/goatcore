@@ -1,10 +1,8 @@
-package memfs_test
+package memfs
 
 import (
 	"os"
 	"testing"
-
-	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
 )
 
 func TestReadDir(t *testing.T) {
@@ -16,7 +14,7 @@ func TestReadDir(t *testing.T) {
 		err  error
 	)
 	// init
-	fs, err := memfs.NewFilespace()
+	fs, err := NewFilespace()
 	if err != nil {
 		t.Error(err)
 	}

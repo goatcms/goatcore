@@ -1,17 +1,16 @@
-package memfs_test
+package memfs
 
 import (
 	"io"
 	"testing"
 
-	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
 	"github.com/goatcms/goatcore/testbase"
 )
 
 func TestEqualsPath(t *testing.T) {
 	t.Parallel()
 	// init
-	fs, err := memfs.NewFilespace()
+	fs, err := NewFilespace()
 	if err != nil {
 		t.Error(err)
 	}

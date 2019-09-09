@@ -2,21 +2,21 @@ package memfs
 
 import (
 	"os"
-	"path"
-	"strings"
+	"sync"
 	"time"
 
-	"github.com/goatcms/goatcore/varutil"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // Dir is single directory
 type Dir struct {
+	sync.RWMutex
 	name     string
 	filemode os.FileMode
 	time     time.Time
 	nodes    []os.FileInfo
 	index    map[string]os.FileInfo
+	mu       sync.RWMutex
 }
 
 // NewDir create new directory with nodes
@@ -64,33 +64,87 @@ func (d *Dir) IsDir() bool {
 	return true
 }
 
-// GetNodes return nodes for directory
-func (d *Dir) GetNodes() []os.FileInfo {
+// getNodes return nodes for directory
+func (d *Dir) getNodes() []os.FileInfo {
 	return d.nodes
 }
 
-// GetNode return single node by name
-func (d *Dir) GetNode(nodeName string) (node os.FileInfo, err error) {
+// getNodes return nodes for directory
+func (d *Dir) contains(name string) bool {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	_, ok := d.index[name]
+	return ok
+}
+
+// getNode return single node by name
+func (d *Dir) getNode(nodeName string) (node os.FileInfo, err error) {
 	var ok bool
+	d.mu.RLock()
+	defer d.mu.RUnlock()
 	if node, ok = d.index[nodeName]; !ok {
 		return nil, goaterr.Errorf("No find node with name " + nodeName)
 	}
 	return node, nil
 }
 
-// AddNode add new node to directory (name must be unique in directory)
-func (d *Dir) AddNode(newNode os.FileInfo) error {
+// getDir return single directory node by name
+func (d *Dir) getDir(nodeName string) (dir *Dir, err error) {
+	var (
+		ok   bool
+		node os.FileInfo
+	)
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	if node, ok = d.index[nodeName]; !ok {
+		return nil, goaterr.Errorf("No find directory node with name %s", nodeName)
+	}
+	if dir, ok = node.(*Dir); !ok {
+		return nil, goaterr.Errorf("%s is not a directory", nodeName)
+	}
+	return dir, nil
+}
+
+// addNode add new node to directory (name must be unique in directory)
+func (d *Dir) addNode(newNode os.FileInfo) error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
 	nodeName := newNode.Name()
 	if _, ok := d.index[nodeName]; ok {
-		return goaterr.Errorf("node named  " + newNode.Name() + " exists")
+		return goaterr.Errorf("node named %s exists", nodeName)
 	}
 	d.nodes = append(d.nodes, newNode)
 	d.index[nodeName] = newNode
 	return nil
 }
 
-// RemoveNodeByName remove a node by name
-func (d *Dir) RemoveNodeByName(name string) error {
+// addNode add new node to directory (name must be unique in directory)
+func (d *Dir) mkdir(name string, mode os.FileMode) (dir *Dir, err error) {
+	var (
+		node os.FileInfo
+		ok   bool
+	)
+	if dir, err = d.getDir(name); err == nil {
+		return dir, nil
+	}
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if node, ok = d.index[name]; ok {
+		if dir, ok = node.(*Dir); !ok {
+			return nil, goaterr.Errorf("Node named %s is not directory", name)
+		}
+		return dir, nil
+	}
+	dir = NewDir(name, mode, time.Now(), []os.FileInfo{})
+	d.nodes = append(d.nodes, dir)
+	d.index[name] = dir
+	return dir, nil
+}
+
+// removeNodeByName remove a node by name
+func (d *Dir) removeNodeByName(name string) error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
 	for i := 0; i < len(d.nodes); i++ {
 		if d.nodes[i].Name() == name {
 			d.nodes = append(d.nodes[:i], d.nodes[i+1:]...)
@@ -99,169 +153,4 @@ func (d *Dir) RemoveNodeByName(name string) error {
 		}
 	}
 	return goaterr.Errorf("Con not find node to remove (by name " + name + ")")
-}
-
-// Remove remove a node by path
-func (d *Dir) Remove(nodePath string, emptyOnly bool) error {
-	var currentNode os.FileInfo = d
-	if nodePath == "." || nodePath == "./" || nodePath == "" {
-		return goaterr.Errorf("memfs.Dir.Remove: It is not possible to delete itself")
-	}
-	pathNodes := strings.Split(varutil.CleanPath(nodePath), "/")
-	lastDirNode := len(pathNodes) - 1
-	for i := 0; i < lastDirNode; i++ {
-		nodeName := pathNodes[i]
-		if currentNode.IsDir() != true {
-			return goaterr.Errorf("memfs.Dir.Remove: Node by name %v must be dir to get sub node (path %v )", currentNode.Name(), nodePath)
-		}
-		var dir = currentNode.(*Dir)
-		newNode, err := dir.GetNode(nodeName)
-		if err != nil {
-			return err
-		}
-		currentNode = newNode
-	}
-	if currentNode.IsDir() != true {
-		return goaterr.Errorf("memfs.Dir.Remove: Node by name %v must be dir to get sub node (path %v )", currentNode.Name(), nodePath)
-	}
-	currentDir := currentNode.(*Dir)
-	removeNodeName := pathNodes[len(pathNodes)-1]
-	for key, removedNode := range currentDir.nodes {
-		if removedNode.Name() != removeNodeName {
-			continue
-		}
-		if emptyOnly && removedNode.IsDir() {
-			removedDir := removedNode.(*Dir)
-			if len(removedDir.nodes) != 0 {
-				return goaterr.Errorf("memfs.Dir.Remove: Prevent remove no empty directory %v", nodePath)
-			}
-		}
-		currentDir.nodes = append(currentDir.nodes[:key], currentDir.nodes[key+1:]...)
-		delete(currentDir.index, removeNodeName)
-		return nil
-	}
-	return goaterr.Errorf("memfs.Dir.Remove: Con not find node to remove (by name %v)", removeNodeName)
-}
-
-// GetByPath return node by path
-func (d *Dir) GetByPath(nodePath string) (os.FileInfo, error) {
-	var currentNode os.FileInfo = d
-	if nodePath == "." || nodePath == "./" {
-		return currentNode, nil
-	}
-	pathNodes := strings.Split(varutil.CleanPath(nodePath), "/")
-	for _, nodeName := range pathNodes {
-		if currentNode.IsDir() != true {
-			return nil, goaterr.Errorf("Node by name " + currentNode.Name() + " must be dir to get sub node (path " + nodePath + " )")
-		}
-		var dir = currentNode.(*Dir)
-		newNode, err := dir.GetNode(nodeName)
-		if err != nil {
-			return nil, err
-		}
-		currentNode = newNode
-	}
-	return currentNode, nil
-}
-
-// Copy copy directory and return new directories and files tree
-func (d *Dir) Copy() (*Dir, error) {
-	var err error
-	var nodescopy = make([]os.FileInfo, len(d.nodes))
-	for i := 0; i < len(d.nodes); i++ {
-		if d.nodes[i].IsDir() {
-			var dir = d.nodes[i].(*Dir)
-			nodescopy[i], err = dir.Copy()
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			var file = d.nodes[i].(*File)
-			nodescopy[i], err = file.Copy()
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	return NewDir(d.name, d.filemode, d.time, nodescopy), nil
-}
-
-// MkdirAll crete directories recursive
-func (d *Dir) MkdirAll(subPath string, filemode os.FileMode) error {
-	pathNodes := strings.Split(varutil.CleanPath(subPath), "/")
-	currentNode := d
-	for i, nodeName := range pathNodes {
-		newCurrentNode, err := currentNode.GetNode(nodeName)
-		if err == nil {
-			// get exist path node
-			if !newCurrentNode.IsDir() {
-				return goaterr.Errorf(nodeName + " exists and is not dir in path " + subPath)
-			}
-			currentNode = newCurrentNode.(*Dir)
-			continue
-		}
-		//create directories
-		var subDir *Dir
-		for i2 := len(pathNodes) - 1; i2 >= i; i2-- {
-			newSubDir := &Dir{
-				name:     pathNodes[i2],
-				filemode: filemode,
-				time:     time.Now(),
-				nodes:    []os.FileInfo{},
-				index:    map[string]os.FileInfo{},
-			}
-			if subDir != nil {
-				newSubDir.AddNode(subDir)
-			}
-			subDir = newSubDir
-		}
-		currentNode.AddNode(subDir)
-		return nil
-	}
-	return nil
-}
-
-// ReadFile read file by path
-func (d *Dir) ReadFile(subPath string) ([]byte, error) {
-	node, err := d.GetByPath(subPath)
-	if err != nil {
-		return nil, err
-	}
-	if node.IsDir() {
-		return nil, goaterr.Errorf("Use ReadFile on directory ")
-	}
-	var fileNode = node.(*File)
-	return fileNode.GetData(), nil
-}
-
-// WriteFile write file by path
-func (d *Dir) WriteFile(subPath string, data []byte, perm os.FileMode) error {
-	dirPath := path.Dir(subPath)
-	d.MkdirAll(dirPath, perm)
-	node, err := d.GetByPath(subPath)
-	if err != nil {
-		//create new file if not exist
-		node, err = d.GetByPath(dirPath)
-		if err != nil {
-			return err
-		}
-		if !node.IsDir() {
-			return goaterr.Errorf("There is a file on path " + dirPath)
-		}
-		var baseDir = node.(*Dir)
-		baseDir.AddNode(&File{
-			name:     path.Base(subPath),
-			filemode: perm,
-			time:     time.Now(),
-			data:     data,
-		})
-		return nil
-	}
-	//overwrite file
-	if node.IsDir() {
-		return goaterr.Errorf("Use WriteFile on directory")
-	}
-	var file = node.(*File)
-	file.SetData(data)
-	return nil
 }

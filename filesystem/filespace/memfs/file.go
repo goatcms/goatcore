@@ -1,18 +1,29 @@
 package memfs
 
 import (
-	"io"
 	"os"
+	"sync"
 	"time"
 )
 
 // File is a single file
 type File struct {
+	sync.RWMutex
 	name     string
 	filemode os.FileMode
 	time     time.Time
 	data     []byte
-	pointer  int
+	dataMU   sync.RWMutex
+}
+
+// NewFile create new File instance
+func NewFile(name string, filemode os.FileMode, t time.Time, data []byte) *File {
+	return &File{
+		name:     name,
+		filemode: filemode,
+		time:     t,
+		data:     data,
+	}
 }
 
 // Name is a file name
@@ -45,51 +56,17 @@ func (f *File) IsDir() bool {
 	return false
 }
 
-// GetData return file data bytes
-func (f *File) GetData() []byte {
+// getData return file data bytes
+func (f *File) getData() []byte {
+	f.dataMU.RLock()
+	defer f.dataMU.RUnlock()
 	return f.data
 }
 
-// SetData set new file data bytes
-func (f *File) SetData(data []byte) {
+// setData set new file data bytes
+func (f *File) setData(data []byte) {
+	f.dataMU.Lock()
+	defer f.dataMU.Unlock()
 	f.time = time.Now()
 	f.data = data
-}
-
-func (f *File) Write(p []byte) (n int, err error) {
-	f.time = time.Now()
-	f.data = append(f.data, p...)
-	return len(p), nil
-}
-
-// Close closes the File, rendering it unusable for I/O. It returns an error, if any.
-func (f *File) Close() error {
-	return nil
-}
-
-// Read a cupe of bytes
-func (f *File) Read(p []byte) (int, error) {
-	n := copy(p, f.data[f.pointer:])
-	f.pointer += n
-	if f.pointer == len(f.data) {
-		return n, io.EOF
-	}
-	return n, nil
-}
-
-// ResetPointer set file pointer to zero
-func (f *File) ResetPointer() {
-	f.pointer = 0
-}
-
-// Copy file and return new instance
-func (f *File) Copy() (*File, error) {
-	var datacopy = make([]byte, len(f.data))
-	copy(datacopy[:], f.data)
-	return &File{
-		name:     f.name,
-		filemode: f.filemode,
-		time:     f.time,
-		data:     datacopy,
-	}, nil
 }

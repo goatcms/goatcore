@@ -3,7 +3,6 @@ package memfs
 import (
 	"fmt"
 	"os"
-	"path"
 	"time"
 
 	"github.com/goatcms/goatcore/filesystem"
@@ -21,217 +20,238 @@ type Filespace struct {
 }
 
 // NewFilespace create new memory filespace instance
-func NewFilespace() (*Filespace, error) {
+func NewFilespace() (filesystem.Filespace, error) {
 	return &Filespace{
-		root: NewDir("", filesystem.DefaultUnixDirMode, time.Now(), []os.FileInfo{}),
+		root: NewDir("ROOT", filesystem.DefaultUnixDirMode, time.Now(), []os.FileInfo{}),
 	}, nil
 }
 
 // Copy duplicate a file or directory
-func (fs *Filespace) Copy(src, dest string) error {
+func (fs *Filespace) Copy(src, dest string) (err error) {
+	var (
+		destDirPath  []string
+		destNodeName string
+		destDir      *Dir
+		srcNode      os.FileInfo
+		copiedNode   os.FileInfo
+	)
 	src = varutil.CleanPath(src)
 	dest = varutil.CleanPath(dest)
-	srcNode, err := fs.root.GetByPath(src)
-	if err != nil {
+	if destDirPath, destNodeName, err = splitContainsPath(dest); err != nil {
 		return err
 	}
-	if srcNode.IsDir() {
-		return fs.CopyDirectory(src, dest)
+	if srcNode, err = getNodeByPath(fs.root, src); err != nil {
+		return err
 	}
-	return fs.CopyFile(src, dest)
+	if destDir, err = mkdirAllNodes(fs.root, destDirPath, filesystem.DefaultUnixDirMode); err != nil {
+		return err
+	}
+	if copiedNode, err = copyNode(srcNode, destNodeName); err != nil {
+		return err
+	}
+	return destDir.addNode(copiedNode)
 }
 
 // CopyDirectory duplicate a directory
-func (fs *Filespace) CopyDirectory(src, dest string) error {
+func (fs *Filespace) CopyDirectory(src, dest string) (err error) {
+	var (
+		destDirPath  []string
+		destNodeName string
+		destDir      *Dir
+		srcDir       *Dir
+		copiedDir    *Dir
+	)
 	src = varutil.CleanPath(src)
 	dest = varutil.CleanPath(dest)
-	srcNode, err := fs.root.GetByPath(src)
-	if err != nil {
+	if destDirPath, destNodeName, err = splitContainsPath(dest); err != nil {
 		return err
 	}
-	if !srcNode.IsDir() {
-		return goaterr.Errorf("Source node must be a directory")
-	}
-	dir := srcNode.(*Dir)
-	copiedDir, err := dir.Copy()
-	if err != nil {
+	if srcDir, err = getDirByPath(fs.root, src); err != nil {
 		return err
 	}
-	destDirName := path.Dir(dest)
-	err = fs.MkdirAll(destDirName, 0777)
-	if err != nil {
+	if destDir, err = mkdirAllNodes(fs.root, destDirPath, filesystem.DefaultUnixDirMode); err != nil {
 		return err
 	}
-	destNode, err := fs.root.GetByPath(destDirName)
-	if err != nil {
+	if copiedDir, err = copyDir(srcDir, destNodeName); err != nil {
 		return err
 	}
-	if !destNode.IsDir() {
-		return goaterr.Errorf("Destination path exist and there is a file " + dest)
-	}
-	copiedDir.name = path.Base(dest)
-	var destDir = destNode.(*Dir)
-	destDir.AddNode(copiedDir)
-	return nil
+	return destDir.addNode(copiedDir)
 }
 
 // CopyFile duplicate a file
-func (fs *Filespace) CopyFile(src, dest string) error {
+func (fs *Filespace) CopyFile(src, dest string) (err error) {
+	var (
+		destDirPath  []string
+		destNodeName string
+		destDir      *Dir
+		srcFile      *File
+		copiedFile   *File
+	)
 	src = varutil.CleanPath(src)
 	dest = varutil.CleanPath(dest)
-	srcNode, err := fs.root.GetByPath(src)
-	if err != nil {
+	if destDirPath, destNodeName, err = splitContainsPath(dest); err != nil {
 		return err
 	}
-	if srcNode.IsDir() {
-		return goaterr.Errorf("Source node must be a file")
-	}
-	file := srcNode.(*File)
-	copiedFile, err := file.Copy()
-	if err != nil {
+	if srcFile, err = getFileByPath(fs.root, src); err != nil {
 		return err
 	}
-	destDirName := path.Dir(dest)
-	err = fs.MkdirAll(destDirName, 0777)
-	if err != nil {
+	if destDir, err = mkdirAllNodes(fs.root, destDirPath, filesystem.DefaultUnixDirMode); err != nil {
 		return err
 	}
-	destNode, err := fs.root.GetByPath(destDirName)
-	if err != nil {
+	if copiedFile, err = copyFile(srcFile, destNodeName); err != nil {
 		return err
 	}
-	if !destNode.IsDir() {
-		return goaterr.Errorf("Destination path exist and there is a file " + dest)
-	}
-	copiedFile.name = path.Base(dest)
-	var destDir = destNode.(*Dir)
-	destDir.AddNode(copiedFile)
-	return nil
+	return destDir.addNode(copiedFile)
 }
 
 // ReadDir return directory nodes
-func (fs *Filespace) ReadDir(subPath string) ([]os.FileInfo, error) {
-	subPath = varutil.CleanPath(subPath)
-	srcNode, err := fs.root.GetByPath(subPath)
-	if err != nil {
+func (fs *Filespace) ReadDir(srcPath string) (nodes []os.FileInfo, err error) {
+	var srcDir *Dir
+	srcPath = varutil.CleanPath(srcPath)
+	if srcDir, err = getDirByPath(fs.root, srcPath); err != nil {
 		return nil, err
 	}
-	if !srcNode.IsDir() {
-		return nil, goaterr.Errorf(subPath + " is not a directory")
-	}
-	var dir = srcNode.(*Dir)
-	return dir.GetNodes(), nil
+	return srcDir.getNodes(), nil
 }
 
 // IsExist return true if node exist
-func (fs *Filespace) IsExist(subPath string) bool {
-	srcNode, err := fs.root.GetByPath(subPath)
-	if err != nil || srcNode == nil {
+func (fs *Filespace) IsExist(srcPath string) bool {
+	if srcNode, err := getNodeByPath(fs.root, srcPath); err != nil || srcNode == nil {
 		return false
 	}
 	return true
 }
 
 // IsFile return true if node exist and is a file
-func (fs *Filespace) IsFile(subPath string) bool {
-	subPath = varutil.CleanPath(subPath)
-	srcNode, err := fs.root.GetByPath(subPath)
-	if err != nil || srcNode == nil {
+func (fs *Filespace) IsFile(srcPath string) bool {
+	srcPath = varutil.CleanPath(srcPath)
+	if srcNode, err := getFileByPath(fs.root, srcPath); err != nil || srcNode == nil {
 		return false
 	}
-	return !srcNode.IsDir()
+	return true
 }
 
 // IsDir return true if node exist and is a directory
-func (fs *Filespace) IsDir(subPath string) bool {
-	subPath = varutil.CleanPath(subPath)
-	srcNode, err := fs.root.GetByPath(subPath)
-	if err != nil || srcNode == nil {
+func (fs *Filespace) IsDir(srcPath string) bool {
+	srcPath = varutil.CleanPath(srcPath)
+	if srcNode, err := getDirByPath(fs.root, srcPath); err != nil || srcNode == nil {
 		return false
 	}
-	return srcNode.IsDir()
+	return true
 }
 
 // MkdirAll create directory recursively
-func (fs *Filespace) MkdirAll(subPath string, filemode os.FileMode) error {
-	subPath = varutil.CleanPath(subPath)
-	return fs.root.MkdirAll(subPath, filemode)
+func (fs *Filespace) MkdirAll(destPath string, filemode os.FileMode) (err error) {
+	destPath = varutil.CleanPath(destPath)
+	_, err = mkdirAll(fs.root, destPath, filemode)
+	return err
 }
 
 // Writer return a file node writer
-func (fs *Filespace) Writer(subPath string) (filesystem.Writer, error) {
-	subPath = varutil.CleanPath(subPath)
-	if err := fs.root.WriteFile(subPath, []byte{}, filesystem.DefaultUnixFileMode); err != nil {
+func (fs *Filespace) Writer(destPath string) (writer filesystem.Writer, err error) {
+	var (
+		destDirPath  []string
+		destNodeName string
+		dir          *Dir
+		file         *File
+		node         os.FileInfo
+		ok           bool
+	)
+	destPath = varutil.CleanPath(destPath)
+	if destDirPath, destNodeName, err = splitContainsPath(destPath); err != nil {
 		return nil, err
 	}
-	node, err := fs.root.GetByPath(subPath)
-	if err != nil {
+	if dir, err = mkdirAllNodes(fs.root, destDirPath, filesystem.DefaultUnixDirMode); err != nil {
 		return nil, err
 	}
-	if node.IsDir() {
-		return nil, goaterr.Errorf("node is a dir %v", node)
+	dir.Lock()
+	defer dir.Unlock()
+	if node, err = dir.getNode(destNodeName); err != nil {
+		file = NewFile(destNodeName, filesystem.DefaultUnixFileMode, time.Now(), []byte{})
+		if err = dir.addNode(file); err != nil {
+			return nil, err
+		}
+	} else {
+		if file, ok = node.(*File); !ok {
+			return nil, goaterr.Errorf("Node %s must be a file", destPath)
+		}
+		file.time = time.Now()
 	}
-	return node.(filesystem.Writer), nil
+	return NewFileHandler(file), nil
 }
 
 // Reader return a file node reader
-func (fs *Filespace) Reader(subPath string) (filesystem.Reader, error) {
-	subPath = varutil.CleanPath(subPath)
-	node, err := fs.root.GetByPath(subPath)
-	if err != nil {
+func (fs *Filespace) Reader(srcPath string) (reader filesystem.Reader, err error) {
+	var file *File
+	srcPath = varutil.CleanPath(srcPath)
+	if file, err = getFileByPath(fs.root, srcPath); err != nil {
 		return nil, err
 	}
-	if node.IsDir() {
-		return nil, goaterr.Errorf("node is a dir %v", node)
-	}
-	file := node.(*File)
-	file.ResetPointer()
-	return filesystem.Reader(file), nil
+	return NewFileHandler(file), nil
 }
 
 // ReadFile return file data
-func (fs *Filespace) ReadFile(subPath string) ([]byte, error) {
-	subPath = varutil.CleanPath(subPath)
-	return fs.root.ReadFile(subPath)
+func (fs *Filespace) ReadFile(srcPath string) (data []byte, err error) {
+	var file *File
+	srcPath = varutil.CleanPath(srcPath)
+	if file, err = getFileByPath(fs.root, srcPath); err != nil {
+		return nil, err
+	}
+	return file.getData(), nil
 }
 
 // WriteFile write file data
-func (fs *Filespace) WriteFile(subPath string, data []byte, perm os.FileMode) error {
-	subPath = varutil.CleanPath(subPath)
-	return fs.root.WriteFile(subPath, data, perm)
+func (fs *Filespace) WriteFile(destPath string, data []byte, filemode os.FileMode) (err error) {
+	var (
+		destDirPath  []string
+		destNodeName string
+		dir          *Dir
+		file         *File
+		node         os.FileInfo
+		ok           bool
+	)
+	destPath = varutil.CleanPath(destPath)
+	if destDirPath, destNodeName, err = splitContainsPath(destPath); err != nil {
+		return err
+	}
+	if dir, err = mkdirAllNodes(fs.root, destDirPath, filemode); err != nil {
+		return err
+	}
+	dir.Lock()
+	defer dir.Unlock()
+	if node, err = dir.getNode(destNodeName); err != nil {
+		file = NewFile(destNodeName, filesystem.DefaultUnixFileMode, time.Now(), data)
+		return dir.addNode(file)
+	}
+	if file, ok = node.(*File); !ok {
+		return goaterr.Errorf("Node %s must be a file", destPath)
+	}
+	file.time = time.Now()
+	file.setData(data)
+	return nil
 }
 
 // Filespace get directory node and return it as filespace
-func (fs *Filespace) Filespace(subPath string) (filesystem.Filespace, error) {
-	subPath = varutil.CleanPath(subPath)
-	node, err := fs.root.GetByPath(subPath)
-	if err != nil {
-		return nil, err
-	}
-	if !node.IsDir() {
-		return nil, goaterr.Errorf("Path is not a directory " + subPath)
-	}
-	return filesystem.Filespace(&Filespace{
-		root: node.(*Dir),
-	}), nil
+func (fs *Filespace) Filespace(basePath string) (filesystem.Filespace, error) {
+	return NewFilespaceWrapper(fs, basePath), nil
 }
 
 // Remove delete node by path
-func (fs *Filespace) Remove(subPath string) error {
-	subPath = varutil.CleanPath(subPath)
-	return fs.root.Remove(subPath, true)
+func (fs *Filespace) Remove(nodePath string) error {
+	nodePath = varutil.CleanPath(nodePath)
+	return removeNodeByPath(fs.root, nodePath, true)
 }
 
 // RemoveAll delete node by path recursively
-func (fs *Filespace) RemoveAll(subPath string) error {
-	subPath = varutil.CleanPath(subPath)
-	return fs.root.Remove(subPath, false)
+func (fs *Filespace) RemoveAll(nodePath string) error {
+	nodePath = varutil.CleanPath(nodePath)
+	return removeNodeByPath(fs.root, nodePath, false)
 }
 
 // Lstat returns a FileInfo describing the named file.
-func (fs *Filespace) Lstat(subPath string) (os.FileInfo, error) {
-	subPath = varutil.CleanPath(subPath)
-	return fs.root.GetByPath(subPath)
+func (fs *Filespace) Lstat(nodePath string) (os.FileInfo, error) {
+	nodePath = varutil.CleanPath(nodePath)
+	return getNodeByPath(fs.root, nodePath)
 }
 
 // DebugPrint print filespace tree
@@ -240,13 +260,13 @@ func (fs *Filespace) DebugPrint() {
 }
 
 func debugPrint(basePath string, d *Dir) {
-	for _, node := range d.GetNodes() {
+	for _, node := range d.getNodes() {
 		if node.IsDir() {
 			debugPrint(basePath+"/"+node.Name(), node.(*Dir))
 		} else {
 			fmt.Println("### ", basePath+"/"+node.Name(), ":")
 			var file = node.(*File)
-			fmt.Println(string(file.GetData()))
+			fmt.Println(string(file.getData()))
 		}
 	}
 }

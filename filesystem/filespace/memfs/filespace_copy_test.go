@@ -1,9 +1,8 @@
-package memfs_test
+package memfs
 
 import (
 	"testing"
 
-	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
 	"github.com/goatcms/goatcore/testbase"
 )
 
@@ -17,7 +16,7 @@ func TestCopy(t *testing.T) {
 	)
 
 	// init
-	fs, err := memfs.NewFilespace()
+	fs, err := NewFilespace()
 	if err != nil {
 		t.Error(err)
 	}
@@ -59,7 +58,7 @@ func TestCopySingleFile(t *testing.T) {
 		file1Path = "/d1/d2/f1.ex"
 	)
 	// init
-	fs, err := memfs.NewFilespace()
+	fs, err := NewFilespace()
 	if err != nil {
 		t.Error(err)
 	}
