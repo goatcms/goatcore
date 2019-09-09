@@ -13,6 +13,9 @@ type WalkFunc func(path string, info os.FileInfo) (err error)
 // including root.
 func WalkFS(fs filesystem.Filespace, root string, fileFunc WalkFunc, dirFunc WalkFunc) (err error) {
 	var infos []os.FileInfo
+	if !fs.IsDir(root) {
+		return nil
+	}
 	if infos, err = fs.ReadDir(root); err != nil {
 		return err
 	}
