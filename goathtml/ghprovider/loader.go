@@ -11,13 +11,14 @@ import (
 // TemplateLoader provide method to load templates from filesystem
 type TemplateLoader struct {
 	template   *template.Template
-	muTemplate sync.Mutex
+	muTemplate *sync.Mutex
 }
 
 // NewTemplateLoader create TemplateLoader instance
 func NewTemplateLoader(template *template.Template) *TemplateLoader {
 	return &TemplateLoader{
-		template: template,
+		template:   template,
+		muTemplate: &sync.Mutex{},
 	}
 }
 
@@ -31,6 +32,9 @@ func (loader *TemplateLoader) Load(fs filesystem.Filespace, subPath string) erro
 	defer loader.muTemplate.Unlock()
 	if len(bytes) == 0 {
 		return goaterr.Errorf("empty file")
+	}
+	if bytes == nil || len(bytes) == 0 {
+		return goaterr.Errorf("file data is empty")
 	}
 	if _, err := loader.template.Parse(string(bytes)); err != nil {
 		return goaterr.Errorf("%v: %v", subPath, err)

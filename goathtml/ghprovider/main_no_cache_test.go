@@ -29,7 +29,7 @@ func TestMainNoCacheChanges(t *testing.T) {
 			return
 		}
 		provider := NewProvider(fs, goathtml.HelpersPath, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, nil, false)
-		if view, err = provider.View(goathtml.DefaultLayout, "test", nil); err != nil {
+		if view, err = provider.View(goathtml.DefaultLayout, "test"); err != nil {
 			t.Errorf("Errors: %v", err)
 			return
 		}
@@ -47,7 +47,7 @@ func TestMainNoCacheChanges(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		if view, err = provider.View(goathtml.DefaultLayout, "test", nil); err != nil {
+		if view, err = provider.View(goathtml.DefaultLayout, "test"); err != nil {
 			t.Errorf("Errors: %v", err)
 			return
 		}
