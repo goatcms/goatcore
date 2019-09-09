@@ -42,8 +42,8 @@ func TestLoadDefaultLayout(t *testing.T) {
 	}
 	// test loop
 	for ti := 0; ti < workers.AsyncTestReapeat; ti++ {
-		provider := NewProvider(fs, goathtml.HelpersPath, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs)
-		view, err := provider.Layout(goathtml.DefaultLayout, nil)
+		provider := NewProvider(fs, goathtml.HelpersPath, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs, true)
+		view, err := provider.Layout(goathtml.DefaultLayout)
 		if err != nil {
 			t.Errorf("Errors: %v", err)
 			return
@@ -90,8 +90,8 @@ func TestLoadViewWithDefaultLayout(t *testing.T) {
 	}
 	// test loop
 	for ti := 0; ti < workers.AsyncTestReapeat; ti++ {
-		provider := NewProvider(fs, goathtml.HelpersPath, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs)
-		view, err := provider.View(goathtml.DefaultLayout, "myview", nil)
+		provider := NewProvider(fs, goathtml.HelpersPath, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs, true)
+		view, err := provider.View(goathtml.DefaultLayout, "myview")
 		if err != nil {
 			t.Errorf("Errors: %v", err)
 			return
@@ -150,8 +150,8 @@ func TestLoadManyFiles(t *testing.T) {
 	}
 	// test loop
 	for ti := 0; ti < workers.AsyncTestReapeat; ti++ {
-		provider := NewProvider(fs, goathtml.HelpersPath, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs)
-		view, errs := provider.View(goathtml.DefaultLayout, "myview", nil)
+		provider := NewProvider(fs, goathtml.HelpersPath, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs, true)
+		view, errs := provider.View(goathtml.DefaultLayout, "myview")
 		if errs != nil {
 			t.Errorf("Errors: %v", errs)
 			return
@@ -198,8 +198,8 @@ func TestHelperLoad(t *testing.T) {
 	}
 	// test loop
 	for ti := 0; ti < workers.AsyncTestReapeat; ti++ {
-		provider := NewProvider(fs, goathtml.HelpersPath, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs)
-		view, errs := provider.View(goathtml.DefaultLayout, "myview", nil)
+		provider := NewProvider(fs, goathtml.HelpersPath, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs, true)
+		view, errs := provider.View(goathtml.DefaultLayout, "myview")
 		if errs != nil {
 			t.Errorf("Errors: %v", errs)
 			return
@@ -246,8 +246,8 @@ func TestNoEscape(t *testing.T) {
 	}
 	// test loop
 	for ti := 0; ti < workers.AsyncTestReapeat; ti++ {
-		provider := NewProvider(fs, goathtml.HelpersPath, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs)
-		view, errs := provider.View(goathtml.DefaultLayout, "myview", nil)
+		provider := NewProvider(fs, goathtml.HelpersPath, goathtml.LayoutPath, goathtml.ViewPath, goathtml.FileExtension, funcs, true)
+		view, errs := provider.View(goathtml.DefaultLayout, "myview")
 		if errs != nil {
 			t.Errorf("Errors: %v", errs)
 			return
