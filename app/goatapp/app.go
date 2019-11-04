@@ -106,8 +106,8 @@ func (gapp *GoatApp) initArgsScope() error {
 	return err
 }
 
-func (gapp *GoatApp) initFilespaceScope(path string) error {
-	var err error
+func (gapp *GoatApp) initFilespaceScope(path string) (err error) {
+	var cwdi interface{}
 	gapp.rootFilespace, err = diskfs.NewFilespace(path)
 	if err != nil {
 		return err
@@ -122,6 +122,15 @@ func (gapp *GoatApp) initFilespaceScope(path string) error {
 		return err
 	}
 	gapp.filespaceScope.Set(app.TmpFilespace, tmpFilespace)
+	if cwdi, err = gapp.argsScope.Get("cwd"); err != nil {
+		gapp.filespaceScope.Set(app.CurrentFilespace, gapp.rootFilespace)
+	} else {
+		var currentFS filesystem.Filespace
+		if currentFS, err = diskfs.NewFilespace(cwdi.(string)); err != nil {
+			return err
+		}
+		gapp.filespaceScope.Set(app.CurrentFilespace, currentFS)
+	}
 	return nil
 }
 

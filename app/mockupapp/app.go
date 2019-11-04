@@ -93,12 +93,16 @@ func (mapp *MockupApp) initFilespaceScope() (err error) {
 	if err = mapp.initTMPFilespace(); err != nil {
 		return err
 	}
+	if err = mapp.initCurrentFilespace(); err != nil {
+		return err
+	}
 	if mapp.options.FilespaceScope != nil {
 		return nil
 	}
 	mapp.options.FilespaceScope = scope.NewScope(app.FilespaceTagName)
 	mapp.options.FilespaceScope.Set(app.RootFilespace, mapp.options.RootFilespace)
 	mapp.options.FilespaceScope.Set(app.TmpFilespace, mapp.options.TMPFilespace)
+	mapp.options.FilespaceScope.Set(app.CurrentFilespace, mapp.options.CurrentFilespace)
 	return nil
 }
 
@@ -122,6 +126,14 @@ func (mapp *MockupApp) initTMPFilespace() (err error) {
 	if mapp.options.TMPFilespace, err = mapp.options.RootFilespace.Filespace("tmp"); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (mapp *MockupApp) initCurrentFilespace() (err error) {
+	if mapp.options.CurrentFilespace != nil {
+		return nil
+	}
+	mapp.options.CurrentFilespace = mapp.options.RootFilespace
 	return nil
 }
 

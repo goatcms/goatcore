@@ -15,8 +15,9 @@ type MockupOptions struct {
 	Input  app.Input
 	Output app.Output
 
-	RootFilespace filesystem.Filespace
-	TMPFilespace  filesystem.Filespace
+	RootFilespace    filesystem.Filespace
+	TMPFilespace     filesystem.Filespace
+	CurrentFilespace filesystem.Filespace
 
 	EngineScope     app.Scope
 	ArgsScope       app.Scope

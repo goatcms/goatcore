@@ -90,6 +90,8 @@ const (
 	RootFilespace = "root"
 	//TmpFilespace is key for tmp filespace
 	TmpFilespace = "tmp"
+	//CurrentFilespace is key for CWD (Current Working Directory) filespace
+	CurrentFilespace = "current"
 
 	// DefaultDurationValue is a default value for undefined env, configs etc
 	DefaultDurationValue = 0
