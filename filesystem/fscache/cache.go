@@ -3,6 +3,7 @@ package fscache
 import (
 	"os"
 	"path"
+	"sync"
 
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
@@ -21,10 +22,14 @@ type Cache struct {
 
 // cacheHistory storage fiflesystem changes
 type cacheHistory struct {
-	remove    map[string]bool
-	removeAll map[string]bool
-	mkdirAll  map[string]os.FileMode
-	write     map[string]bool
+	removeMU    sync.RWMutex
+	remove      map[string]bool
+	removeAllMU sync.RWMutex
+	removeAll   map[string]bool
+	mkdirAllMU  sync.RWMutex
+	mkdirAll    map[string]os.FileMode
+	writeMU     sync.RWMutex
+	write       map[string]bool
 }
 
 // newCache create new chache for remoteFS (use exists buffer filespace)
@@ -62,6 +67,8 @@ func (c Cache) Commit() (err error) {
 		src      string
 		filemode os.FileMode
 	)
+	c.changes.removeMU.RLock()
+	defer c.changes.removeMU.RUnlock()
 	for src = range c.changes.remove {
 		if c.remoteFS.IsFile(src) {
 			if err = c.remoteFS.Remove(src); err != nil {
@@ -69,6 +76,8 @@ func (c Cache) Commit() (err error) {
 			}
 		}
 	}
+	c.changes.removeAllMU.RLock()
+	defer c.changes.removeAllMU.RUnlock()
 	for src = range c.changes.removeAll {
 		if c.remoteFS.IsExist(src) {
 			if err = c.remoteFS.RemoveAll(src); err != nil {
@@ -76,6 +85,8 @@ func (c Cache) Commit() (err error) {
 			}
 		}
 	}
+	c.changes.mkdirAllMU.RLock()
+	defer c.changes.mkdirAllMU.RUnlock()
 	for src, filemode = range c.changes.mkdirAll {
 		if c.bufferFS.IsDir(src) {
 			if err = c.remoteFS.MkdirAll(src, filemode); err != nil {
@@ -83,6 +94,8 @@ func (c Cache) Commit() (err error) {
 			}
 		}
 	}
+	c.changes.writeMU.RLock()
+	defer c.changes.writeMU.RUnlock()
 	for src = range c.changes.write {
 		if err = c.remoteFS.MkdirAll(path.Dir(src), filesystem.DefaultUnixDirMode); err != nil {
 			return err
@@ -129,7 +142,9 @@ func (c Cache) CopyDirectory(src, dest string) error {
 	if !srcFS.IsDir(src) {
 		return goaterr.Errorf("Source node must be a directory")
 	}
+	c.changes.writeMU.Lock()
 	c.changes.write[dest] = true
+	c.changes.writeMU.Unlock()
 	return c.Copy(src, dest)
 }
 
@@ -141,7 +156,9 @@ func (c Cache) CopyFile(src, dest string) error {
 	if !srcFS.IsFile(src) {
 		return goaterr.Errorf("Source node must be a file")
 	}
+	c.changes.writeMU.Lock()
 	c.changes.write[dest] = true
+	c.changes.writeMU.Unlock()
 	return c.Copy(src, dest)
 }
 
@@ -191,14 +208,18 @@ func (c Cache) IsDir(src string) bool {
 // MkdirAll create directory recursively
 func (c Cache) MkdirAll(dest string, filemode os.FileMode) error {
 	dest = varutil.CleanPath(dest)
+	c.changes.mkdirAllMU.Lock()
 	c.changes.mkdirAll[dest] = filemode
+	c.changes.mkdirAllMU.Unlock()
 	return c.bufferFS.MkdirAll(dest, filemode)
 }
 
 // Writer return a file node writer
 func (c Cache) Writer(dest string) (filesystem.Writer, error) {
 	dest = varutil.CleanPath(dest)
+	c.changes.writeMU.Lock()
 	c.changes.write[dest] = true
+	c.changes.writeMU.Unlock()
 	return c.bufferFS.Writer(dest)
 }
 
@@ -218,7 +239,9 @@ func (c Cache) ReadFile(src string) ([]byte, error) {
 
 // WriteFile write file data
 func (c Cache) WriteFile(dest string, data []byte, perm os.FileMode) error {
+	c.changes.writeMU.Lock()
 	c.changes.write[dest] = true
+	c.changes.writeMU.Unlock()
 	return c.bufferFS.WriteFile(dest, data, perm)
 }
 
@@ -243,7 +266,9 @@ func (c Cache) RemoveAll(dest string) (err error) {
 	if c.bufferFS.IsExist(dest) {
 		err = c.bufferFS.RemoveAll(dest)
 	}
+	c.changes.removeAllMU.Lock()
 	c.changes.removeAll[dest] = true
+	c.changes.removeAllMU.Unlock()
 	return err
 }
 
