@@ -8,5 +8,5 @@ import (
 
 func TestCacheInterface(t *testing.T) {
 	t.Parallel()
-	_ = filesystem.Filespace(Cache{})
+	_ = filesystem.Filespace(&Cache{})
 }

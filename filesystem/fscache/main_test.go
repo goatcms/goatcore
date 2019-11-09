@@ -1,4 +1,4 @@
-package memfs
+package fscache
 
 import (
 	"math/rand"
@@ -8,16 +8,17 @@ import (
 	"time"
 
 	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
 	"github.com/goatcms/goatcore/workers"
 )
 
 var randomPathNodes = []string{"dir1", "dir2", "dir3", "dir4", "dir5"}
 
 // testPathsRootDir contains test file tree
-var testPathsRootDir = NewDir("root", filesystem.DefaultUnixDirMode, time.Now(), []os.FileInfo{
-	NewDir("dir1", filesystem.DefaultUnixDirMode, time.Now(), []os.FileInfo{
-		NewDir("dir2", filesystem.DefaultUnixDirMode, time.Now(), []os.FileInfo{
-			NewFile("file", filesystem.DefaultUnixFileMode, time.Now(), []byte("abc")),
+var testPathsRootDir = memfs.NewDir("root", filesystem.DefaultUnixDirMode, time.Now(), []os.FileInfo{
+	memfs.NewDir("dir1", filesystem.DefaultUnixDirMode, time.Now(), []os.FileInfo{
+		memfs.NewDir("dir2", filesystem.DefaultUnixDirMode, time.Now(), []os.FileInfo{
+			memfs.NewFile("file", filesystem.DefaultUnixFileMode, time.Now(), []byte("abc")),
 		}),
 	}),
 })

@@ -57,12 +57,12 @@ func NewMemCache(remoteFS filesystem.Filespace) (c *Cache, err error) {
 }
 
 // Buffer return RO (Reado-Only) buffer filespace
-func (c Cache) Buffer() filesystem.Filespace {
+func (c *Cache) Buffer() filesystem.Filespace {
 	return c.bufferRO
 }
 
 // Commit send buffered changes to remote filesystem
-func (c Cache) Commit() (err error) {
+func (c *Cache) Commit() (err error) {
 	var (
 		src      string
 		filemode os.FileMode
@@ -110,7 +110,7 @@ func (c Cache) Commit() (err error) {
 }
 
 // Copy duplicate a file or directory
-func (c Cache) srcFS(p string) (srcFS filesystem.Filespace, src string) {
+func (c *Cache) srcFS(p string) (srcFS filesystem.Filespace, src string) {
 	src = varutil.CleanPath(p)
 	if c.bufferFS.IsExist(src) {
 		srcFS = c.bufferFS
@@ -121,11 +121,11 @@ func (c Cache) srcFS(p string) (srcFS filesystem.Filespace, src string) {
 }
 
 // Copy duplicate a file or directory
-func (c Cache) Copy(src, dest string) error {
+func (c *Cache) Copy(src, dest string) error {
 	var srcFS filesystem.Filespace
 	srcFS, src = c.srcFS(src)
 	dest = varutil.CleanPath(dest)
-	c.changes.write[dest] = true
+	c.changeWrite(dest, true)
 	return (fshelper.Copier{
 		SrcFS:    srcFS,
 		SrcPath:  src,
@@ -135,35 +135,31 @@ func (c Cache) Copy(src, dest string) error {
 }
 
 // CopyDirectory duplicate a directory
-func (c Cache) CopyDirectory(src, dest string) error {
+func (c *Cache) CopyDirectory(src, dest string) error {
 	var srcFS filesystem.Filespace
 	srcFS, src = c.srcFS(src)
 	dest = varutil.CleanPath(dest)
 	if !srcFS.IsDir(src) {
 		return goaterr.Errorf("Source node must be a directory")
 	}
-	c.changes.writeMU.Lock()
-	c.changes.write[dest] = true
-	c.changes.writeMU.Unlock()
+	c.changeWrite(dest, true)
 	return c.Copy(src, dest)
 }
 
 // CopyFile duplicate a file
-func (c Cache) CopyFile(src, dest string) error {
+func (c *Cache) CopyFile(src, dest string) error {
 	var srcFS filesystem.Filespace
 	srcFS, src = c.srcFS(src)
 	dest = varutil.CleanPath(dest)
 	if !srcFS.IsFile(src) {
 		return goaterr.Errorf("Source node must be a file")
 	}
-	c.changes.writeMU.Lock()
-	c.changes.write[dest] = true
-	c.changes.writeMU.Unlock()
+	c.changeWrite(dest, true)
 	return c.Copy(src, dest)
 }
 
 // ReadDir return directory nodes
-func (c Cache) ReadDir(src string) (result []os.FileInfo, err error) {
+func (c *Cache) ReadDir(src string) (result []os.FileInfo, err error) {
 	var (
 		remoteDirs, bufferDirs []os.FileInfo
 		remoteErr, bufferErr   error
@@ -188,93 +184,109 @@ ReadDirLoop:
 }
 
 // IsExist return true if node exist
-func (c Cache) IsExist(src string) bool {
+func (c *Cache) IsExist(src string) bool {
 	src = varutil.CleanPath(src)
 	return c.bufferFS.IsExist(src) || c.remoteFS.IsExist(src)
 }
 
 // IsFile return true if node exist and is a file
-func (c Cache) IsFile(src string) bool {
+func (c *Cache) IsFile(src string) bool {
 	src = varutil.CleanPath(src)
 	return c.bufferFS.IsFile(src) || c.remoteFS.IsFile(src)
 }
 
 // IsDir return true if node exist and is a directory
-func (c Cache) IsDir(src string) bool {
+func (c *Cache) IsDir(src string) bool {
 	src = varutil.CleanPath(src)
 	return c.bufferFS.IsDir(src) || c.remoteFS.IsDir(src)
 }
 
 // MkdirAll create directory recursively
-func (c Cache) MkdirAll(dest string, filemode os.FileMode) error {
+func (c *Cache) MkdirAll(dest string, filemode os.FileMode) error {
 	dest = varutil.CleanPath(dest)
-	c.changes.mkdirAllMU.Lock()
-	c.changes.mkdirAll[dest] = filemode
-	c.changes.mkdirAllMU.Unlock()
+	c.changeMkdirAll(dest, filemode)
 	return c.bufferFS.MkdirAll(dest, filemode)
 }
 
 // Writer return a file node writer
-func (c Cache) Writer(dest string) (filesystem.Writer, error) {
+func (c *Cache) Writer(dest string) (filesystem.Writer, error) {
 	dest = varutil.CleanPath(dest)
-	c.changes.writeMU.Lock()
-	c.changes.write[dest] = true
-	c.changes.writeMU.Unlock()
+	c.changeWrite(dest, true)
 	return c.bufferFS.Writer(dest)
 }
 
 // Reader return a file node reader
-func (c Cache) Reader(src string) (filesystem.Reader, error) {
+func (c *Cache) Reader(src string) (filesystem.Reader, error) {
 	var srcFS filesystem.Filespace
 	srcFS, src = c.srcFS(src)
 	return srcFS.Reader(src)
 }
 
 // ReadFile return file data
-func (c Cache) ReadFile(src string) ([]byte, error) {
+func (c *Cache) ReadFile(src string) ([]byte, error) {
 	var srcFS filesystem.Filespace
 	srcFS, src = c.srcFS(src)
 	return srcFS.ReadFile(src)
 }
 
 // WriteFile write file data
-func (c Cache) WriteFile(dest string, data []byte, perm os.FileMode) error {
-	c.changes.writeMU.Lock()
-	c.changes.write[dest] = true
-	c.changes.writeMU.Unlock()
+func (c *Cache) WriteFile(dest string, data []byte, perm os.FileMode) error {
+	c.changeWrite(dest, true)
 	return c.bufferFS.WriteFile(dest, data, perm)
 }
 
 // Filespace get directory node and return it as filespace
-func (c Cache) Filespace(subPath string) (filesystem.Filespace, error) {
+func (c *Cache) Filespace(subPath string) (filesystem.Filespace, error) {
 	return fshelper.NewSubFS(c, subPath), nil
 }
 
 // Remove delete node by path
-func (c Cache) Remove(dest string) (err error) {
+func (c *Cache) Remove(dest string) (err error) {
 	dest = varutil.CleanPath(dest)
 	if c.bufferFS.IsExist(dest) {
 		err = c.bufferFS.Remove(dest)
 	}
-	c.changes.remove[dest] = true
+	c.changeRemove(dest, true)
 	return err
 }
 
 // RemoveAll delete node by path recursively
-func (c Cache) RemoveAll(dest string) (err error) {
+func (c *Cache) RemoveAll(dest string) (err error) {
 	dest = varutil.CleanPath(dest)
 	if c.bufferFS.IsExist(dest) {
 		err = c.bufferFS.RemoveAll(dest)
 	}
-	c.changes.removeAllMU.Lock()
-	c.changes.removeAll[dest] = true
-	c.changes.removeAllMU.Unlock()
+	c.changeRemoveAll(dest, true)
 	return err
 }
 
 // Lstat returns a FileInfo describing the named file.
-func (c Cache) Lstat(src string) (os.FileInfo, error) {
+func (c *Cache) Lstat(src string) (os.FileInfo, error) {
 	var srcFS filesystem.Filespace
 	srcFS, src = c.srcFS(src)
 	return srcFS.Lstat(src)
+}
+
+func (c *Cache) changeWrite(dest string, value bool) {
+	c.changes.writeMU.Lock()
+	defer c.changes.writeMU.Unlock()
+	c.changes.write[dest] = value
+}
+
+func (c *Cache) changeRemove(dest string, value bool) {
+	c.changes.removeMU.Lock()
+	defer c.changes.removeMU.Unlock()
+	c.changes.remove[dest] = value
+}
+
+func (c *Cache) changeRemoveAll(dest string, value bool) {
+	c.changes.removeAllMU.Lock()
+	defer c.changes.removeAllMU.Unlock()
+	c.changes.removeAll[dest] = value
+}
+
+func (c *Cache) changeMkdirAll(dest string, value os.FileMode) {
+	c.changes.mkdirAllMU.Lock()
+	defer c.changes.mkdirAllMU.Unlock()
+	c.changes.mkdirAll[dest] = value
 }
