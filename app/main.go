@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"github.com/goatcms/goatcore/dependency"
@@ -85,6 +86,8 @@ const (
 	InputService = "InputService"
 	// OutputService is a default output service
 	OutputService = "OutputService"
+	// ErrorService is a default error service
+	ErrorService = "ErrorService"
 
 	//RootFilespace is key for root filesystem.Filespace
 	RootFilespace = "root"
@@ -133,7 +136,10 @@ type EventCallback func(interface{}) error
 type Callback func() error
 
 // CommandCallback is function call to run user command
-type CommandCallback func(App, Scope) (err error)
+type CommandCallback func(App, IOContext) (err error)
+
+// HealthCheckerCallback is function to check application health
+type HealthCheckerCallback func(App, Scope) (msg string, err error)
 
 // Injector inject data/dependencies to object
 type Injector interface {
@@ -145,6 +151,13 @@ type DataScope interface {
 	Set(string, interface{}) error
 	Get(string) (interface{}, error)
 	Keys() ([]string, error)
+	LockData() (transaction DataScopeLocker)
+}
+
+// DataScopeLocker provide data scope commitable interface
+type DataScopeLocker interface {
+	DataScope
+	Commit() (err error)
 }
 
 // EventScope provide event interface
@@ -208,6 +221,7 @@ type App interface {
 	AppScope() Scope
 	CommandScope() Scope
 	DependencyProvider() dependency.Provider
+	IOContext() IOContext
 }
 
 // Form represent a form data
@@ -218,11 +232,27 @@ type Form interface {
 
 // Input represent a standard input
 type Input interface {
+	io.Reader
 	ReadWord() (string, error)
 	ReadLine() (string, error)
 }
 
 // Output represent a standard output
 type Output interface {
+	io.Writer
 	Printf(format string, a ...interface{}) error
+}
+
+// IO represent a standard input/output
+type IO interface {
+	In() Input
+	Out() Output
+	Err() Output
+	CWD() filesystem.Filespace
+}
+
+// IOContext represent application execution context
+type IOContext interface {
+	IO() IO
+	Scope() Scope
 }

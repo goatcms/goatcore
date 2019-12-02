@@ -35,3 +35,8 @@ func (out *Output) Printf(format string, a ...interface{}) error {
 	_, err := out.wd.Write([]byte(s))
 	return err
 }
+
+// Write data to output
+func (out *Output) Write(p []byte) (n int, err error) {
+	return out.wd.Write(p)
+}

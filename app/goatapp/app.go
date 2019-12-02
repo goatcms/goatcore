@@ -30,8 +30,10 @@ type GoatApp struct {
 	dependencyScope app.Scope
 	appScope        app.Scope
 	commandScope    app.Scope
-
-	dp dependency.Provider
+	io              app.IO
+	ioContext       app.IOContext
+	dp              dependency.Provider
+	cwd             filesystem.Filespace
 }
 
 const (
@@ -40,31 +42,36 @@ const (
 )
 
 // NewGoatApp create new app instance
-func NewGoatApp(name, version, basePath string) (app.App, error) {
+func NewGoatApp(name, version, basePath string) (a app.App, err error) {
+	var (
+		in   = gio.NewAppInput(os.Stdin)
+		out  = gio.NewAppOutput(os.Stdout)
+		eout = gio.NewAppOutput(os.Stderr)
+	)
 	gapp := &GoatApp{
 		name:    name,
 		version: version,
 	}
 
-	if err := gapp.initEngineScope(); err != nil {
+	if err = gapp.initEngineScope(); err != nil {
 		return nil, err
 	}
-	if err := gapp.initArgsScope(); err != nil {
+	if err = gapp.initArgsScope(); err != nil {
 		return nil, err
 	}
-	if err := gapp.initFilespaceScope(basePath); err != nil {
+	if err = gapp.initFilespaceScope(basePath); err != nil {
 		return nil, err
 	}
-	if err := gapp.initConfigScope(); err != nil {
+	if err = gapp.initConfigScope(); err != nil {
 		return nil, err
 	}
-	if err := gapp.initDependencyScope(); err != nil {
+	if err = gapp.initDependencyScope(); err != nil {
 		return nil, err
 	}
-	if err := gapp.initAppScope(); err != nil {
+	if err = gapp.initAppScope(); err != nil {
 		return nil, err
 	}
-	if err := gapp.initCommandScope(); err != nil {
+	if err = gapp.initCommandScope(); err != nil {
 		return nil, err
 	}
 
@@ -76,8 +83,16 @@ func NewGoatApp(name, version, basePath string) (app.App, error) {
 	gapp.dp.SetDefault(app.AppScope, gapp.appScope)
 	gapp.dp.SetDefault(app.CommandScope, gapp.commandScope)
 
-	gapp.dp.SetDefault(app.InputService, gio.NewAppInput(os.Stdin))
-	gapp.dp.SetDefault(app.OutputService, gio.NewAppOutput(os.Stdout))
+	if gapp.io, err = gio.NewIO(in, out, eout, gapp.cwd); err != nil {
+		return nil, err
+	}
+	if gapp.ioContext, err = gio.NewIOContext(gapp.appScope, gapp.io); err != nil {
+		return nil, err
+	}
+
+	gapp.dp.SetDefault(app.InputService, gapp.io.In())
+	gapp.dp.SetDefault(app.OutputService, gapp.io.Out())
+	gapp.dp.SetDefault(app.ErrorService, gapp.io.Err())
 
 	gapp.dp.AddInjectors([]dependency.Injector{
 		gapp.commandScope,
@@ -238,4 +253,14 @@ func (gapp *GoatApp) DependencyProvider() dependency.Provider {
 // RootFilespace return main filespace for application (current directory by default)
 func (gapp *GoatApp) RootFilespace() filesystem.Filespace {
 	return gapp.rootFilespace
+}
+
+// IO return main IO fo application
+func (gapp *GoatApp) IO() app.IO {
+	return gapp.io
+}
+
+// IOContext return main IOContext fo application
+func (gapp *GoatApp) IOContext() app.IOContext {
+	return gapp.ioContext
 }

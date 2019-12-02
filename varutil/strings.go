@@ -64,50 +64,6 @@ func IsWhitespace(s string) bool {
 	return s == " " || s == "\t"
 }
 
-// SplitArguments convert string to separated arguments array
-func SplitArguments(src string) ([]string, error) {
-	var (
-		args        []string
-		isEscaped   = false
-		isSeparated = true
-	)
-	for i := 0; i < len(src); i++ {
-		ch := src[i]
-		if ch == ' ' || ch == '\t' {
-			isEscaped = false
-			isSeparated = true
-			continue
-		} else if ch == '\\' {
-			isEscaped = true
-			isSeparated = false
-			continue
-		}
-		if isSeparated {
-			args = append(args, "")
-		}
-		current := &args[len(args)-1]
-		if !isEscaped && ch == '"' {
-			i++
-			for ; i < len(src) && !(!isEscaped && src[i] == '"'); i++ {
-				ch = src[i]
-				if ch == '\\' {
-					isEscaped = true
-				} else {
-					*current += string(ch)
-					isEscaped = false
-				}
-			}
-			isEscaped = false
-			isSeparated = false
-			continue
-		}
-		*current += string(ch)
-		isEscaped = false
-		isSeparated = false
-	}
-	return args, nil
-}
-
 // UnescapeString convert '\\' to single '\', '\n' to new line, '\t', '\"' to double quote to tab to new line
 func UnescapeString(src string) string {
 	var (

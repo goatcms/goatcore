@@ -110,3 +110,8 @@ func (fs *Filespace) Filespace(subPath string) (filesystem.Filespace, error) {
 func (fs *Filespace) Lstat(subPath string) (os.FileInfo, error) {
 	return os.Lstat(fs.path + subPath)
 }
+
+// LocalPath return path in local filesystem
+func (fs *Filespace) LocalPath() string {
+	return fs.path
+}

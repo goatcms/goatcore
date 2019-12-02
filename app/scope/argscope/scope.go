@@ -18,7 +18,7 @@ func NewScope(args []string, tagname string) (ins app.Scope, err error) {
 // NewScopeFromString create argument scope from string
 func NewScopeFromString(line, tagname string) (s app.Scope, err error) {
 	var args []string
-	if args, err = varutil.SplitArguments(line); err != nil {
+	if args, _, err = varutil.SplitArguments(line); err != nil {
 		return nil, err
 	}
 	return NewScope(args, tagname)

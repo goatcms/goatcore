@@ -25,6 +25,12 @@ func RegisterCommand(a App, name string, callback CommandCallback, help string) 
 	return nil
 }
 
+// RegisterHealthChecker add new health checker to application
+func RegisterHealthChecker(a App, name string, callback HealthCheckerCallback) (err error) {
+	a.CommandScope().Set("health."+name, callback)
+	return nil
+}
+
 // RegisterArgument add new argument definition to application
 func RegisterArgument(a App, name string, help string) (err error) {
 	a.CommandScope().Set("help.argument."+name, help)

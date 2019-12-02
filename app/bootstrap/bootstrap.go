@@ -76,5 +76,5 @@ func (b *Bootstrap) Run() (err error) {
 		}(module)
 	}
 	waitGroup.Wait()
-	return goaterr.ToErrors(errs)
+	return goaterr.ToErrors(goaterr.AppendError(errs, app.CloseApp(b.gapp)))
 }

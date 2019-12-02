@@ -1,13 +1,10 @@
 package terminal
 
 import (
-	"bytes"
-	"strings"
 	"testing"
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/bootstrap"
-	"github.com/goatcms/goatcore/app/gio"
 	"github.com/goatcms/goatcore/app/mockupapp"
 	"github.com/goatcms/goatcore/app/modules"
 )
@@ -19,10 +16,7 @@ func TestModule(t *testing.T) {
 	)
 	t.Parallel()
 	// prepare mockup application
-	if mapp, err = mockupapp.NewApp(mockupapp.MockupOptions{
-		Input:  gio.NewInput(strings.NewReader("")),
-		Output: gio.NewOutput(new(bytes.Buffer)),
-	}); err != nil {
+	if mapp, err = mockupapp.NewApp(mockupapp.MockupOptions{}); err != nil {
 		t.Error(err)
 		return
 	}
@@ -38,12 +32,13 @@ func TestModule(t *testing.T) {
 	// test
 	var deps struct {
 		Terminal modules.Terminal `dependency:"TerminalService"`
+		AppScope app.Scope        `dependency:"AppScope"`
 	}
 	if err = mapp.DependencyProvider().InjectTo(&deps); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = deps.Terminal.RunString("help"); err != nil {
+	if err = deps.Terminal.RunString(mapp.IOContext(), "help"); err != nil {
 		t.Error(err)
 		return
 	}

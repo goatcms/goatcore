@@ -17,7 +17,7 @@ type DataScope struct {
 // NewDataScope create new instance of data scope
 func NewDataScope(data map[string]interface{}) app.DataScope {
 	return app.DataScope(&DataScope{
-		Data: make(map[string]interface{}),
+		Data: data,
 	})
 }
 
@@ -56,4 +56,10 @@ func (ds *DataScope) Keys() ([]string, error) {
 // Injector create new injector for the data scope
 func (ds *DataScope) Injector(tagname string) app.Injector {
 	return injector.NewMapInjector(tagname, ds.Data)
+}
+
+// LockData return new data locker
+func (ds *DataScope) LockData() (locker app.DataScopeLocker) {
+	ds.mu.Lock()
+	return newDataLocker(ds, ds.mu.Unlock)
 }
