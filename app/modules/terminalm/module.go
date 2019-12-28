@@ -1,7 +1,6 @@
-package terminal
+package terminalm
 
 import (
-	"os"
 	"strings"
 
 	"github.com/goatcms/goatcore/app"
@@ -37,18 +36,18 @@ func (m *Module) Run(a app.App) (err error) {
 			Terminal   modules.Terminal `dependency:"TerminalService"`
 			StrictMode string           `argument:"?strict"`
 		}
-		io         app.IO
+		io         = a.IOContext().IO()
 		strictMode bool
 	)
 	if err = a.DependencyProvider().InjectTo(&deps); err != nil {
 		return err
 	}
 	strictMode = strings.ToLower(deps.StrictMode) == "true"
-	args := os.Args[1:]
-	if len(args) == 0 {
+	args := a.Arguments()
+	if len(args) < 2 {
 		return deps.Terminal.RunCommand(a.IOContext(), []string{"help"})
-	} else if args[0] != "terminal" {
-		return deps.Terminal.RunCommand(a.IOContext(), args)
+	} else if args[1] != "terminal" {
+		return deps.Terminal.RunCommand(a.IOContext(), args[1:])
 	}
 	for {
 		if err = deps.Terminal.RunLoop(a.IOContext()); err == nil {

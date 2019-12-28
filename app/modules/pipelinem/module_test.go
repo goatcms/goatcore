@@ -6,8 +6,9 @@ import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/bootstrap"
 	"github.com/goatcms/goatcore/app/mockupapp"
-	"github.com/goatcms/goatcore/app/modules/pipelinem/services"
-	"github.com/goatcms/goatcore/app/modules/terminal"
+	"github.com/goatcms/goatcore/app/modules/commonm"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
+	"github.com/goatcms/goatcore/app/modules/terminalm"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -24,7 +25,8 @@ func TestModule(t *testing.T) {
 	}
 	bootstrap := bootstrap.NewBootstrap(mapp)
 	if err = goaterr.ToErrors(goaterr.AppendError(nil,
-		bootstrap.Register(terminal.NewModule()),
+		bootstrap.Register(terminalm.NewModule()),
+		bootstrap.Register(commonm.NewModule()),
 		bootstrap.Register(NewModule()),
 	)); err != nil {
 		t.Error(err)
@@ -36,7 +38,10 @@ func TestModule(t *testing.T) {
 	}
 	// test
 	var deps struct {
-		SandboxsManager services.SandboxsManager `dependency:"SandboxsManager"`
+		SandboxesManager pipservices.SandboxesManager `dependency:"PipSandboxesManager"`
+		NamespacesUnit   pipservices.NamespacesUnit   `dependency:"PipNamespacesUnit"`
+		Runner           pipservices.Runner           `dependency:"PipRunner"`
+		TasksUnit        pipservices.TasksUnit        `dependency:"PipTasksUnit"`
 	}
 	if err = mapp.DependencyProvider().InjectTo(&deps); err != nil {
 		t.Error(err)

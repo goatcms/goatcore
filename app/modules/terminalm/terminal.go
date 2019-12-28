@@ -1,9 +1,8 @@
-package terminal
+package terminalm
 
 import (
 	"io"
 	"strings"
-	"sync"
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules"
@@ -17,8 +16,6 @@ type IOTerminal struct {
 	deps struct {
 		App app.App `dependency:"App"`
 	}
-	loopModeMutex sync.Mutex
-	mutex         sync.Mutex
 }
 
 // IOTerminalFactory create new IOTerminal instance
@@ -37,8 +34,6 @@ func (terminal *IOTerminal) RunLoop(ctx app.IOContext) (err error) {
 		eof  = false
 		io   = ctx.IO()
 	)
-	terminal.loopModeMutex.Lock()
-	terminal.loopModeMutex.Unlock()
 	for !eof {
 		io.Out().Printf("\n>")
 		if args, eof, err = varutil.ReadArguments(io.In()); err != nil {
@@ -81,8 +76,6 @@ func (terminal *IOTerminal) RunCommand(ctx app.IOContext, args []string) (err er
 		commandScope   = terminal.deps.App.CommandScope()
 		commandContext app.IOContext
 	)
-	terminal.mutex.Lock()
-	defer terminal.mutex.Unlock()
 	if len(args) != 0 {
 		commandName = strings.ToLower(args[0])
 	}

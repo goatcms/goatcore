@@ -5,7 +5,6 @@ import (
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/injector"
-	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 type dataLockerUnlocker func()
@@ -37,11 +36,7 @@ func (locker *DataLocker) Set(key string, v interface{}) error {
 func (locker *DataLocker) Get(key string) (value interface{}, err error) {
 	locker.mu.RLock()
 	defer locker.mu.RUnlock()
-	var ok bool
-	if value, ok = locker.DataScope.Data[key]; !ok {
-		return nil, goaterr.Errorf("Unknow value for key %v", key)
-	}
-	return value, nil
+	return locker.DataScope.Data[key], nil
 }
 
 // Keys get map data

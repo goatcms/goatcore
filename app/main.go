@@ -182,7 +182,7 @@ type SyncScope interface {
 	Kill()
 	IsKilled() bool
 	Wait() error
-	AddTasks(delta int)
+	AddTasks(delta int) (err error)
 	DoneTask()
 }
 
@@ -192,6 +192,8 @@ type Scope interface {
 	EventScope
 	SyncScope
 	dependency.Injector
+
+	Close() (err error)
 }
 
 // Module represent a app module
@@ -212,12 +214,12 @@ type Bootstrap interface {
 type App interface {
 	Name() string
 	Version() string
+	Arguments() []string
 	RootFilespace() filesystem.Filespace
 	EngineScope() Scope
 	ArgsScope() Scope
 	FilespaceScope() Scope
 	ConfigScope() Scope
-	DependencyScope() Scope
 	AppScope() Scope
 	CommandScope() Scope
 	DependencyProvider() dependency.Provider

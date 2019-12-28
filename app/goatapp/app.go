@@ -9,7 +9,6 @@ import (
 	"github.com/goatcms/goatcore/app/scope"
 	"github.com/goatcms/goatcore/app/scope/argscope"
 	"github.com/goatcms/goatcore/dependency"
-	"github.com/goatcms/goatcore/dependency/provider"
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/filesystem/filespace/diskfs"
 	"github.com/goatcms/goatcore/filesystem/json"
@@ -21,19 +20,20 @@ type GoatApp struct {
 	name    string
 	version string
 
+	arguments []string
+
 	rootFilespace filesystem.Filespace
 
-	engineScope     app.Scope
-	argsScope       app.Scope
-	filespaceScope  app.Scope
-	configScope     app.Scope
-	dependencyScope app.Scope
-	appScope        app.Scope
-	commandScope    app.Scope
-	io              app.IO
-	ioContext       app.IOContext
-	dp              dependency.Provider
-	cwd             filesystem.Filespace
+	engineScope    app.Scope
+	argsScope      app.Scope
+	filespaceScope app.Scope
+	configScope    app.Scope
+	appScope       app.Scope
+	commandScope   app.Scope
+	io             app.IO
+	ioContext      app.IOContext
+	dp             dependency.Provider
+	cwd            filesystem.Filespace
 }
 
 const (
@@ -49,8 +49,9 @@ func NewGoatApp(name, version, basePath string) (a app.App, err error) {
 		eout = gio.NewAppOutput(os.Stderr)
 	)
 	gapp := &GoatApp{
-		name:    name,
-		version: version,
+		name:      name,
+		version:   version,
+		arguments: os.Args,
 	}
 
 	if err = gapp.initEngineScope(); err != nil {
@@ -65,9 +66,6 @@ func NewGoatApp(name, version, basePath string) (a app.App, err error) {
 	if err = gapp.initConfigScope(); err != nil {
 		return nil, err
 	}
-	if err = gapp.initDependencyScope(); err != nil {
-		return nil, err
-	}
 	if err = gapp.initAppScope(); err != nil {
 		return nil, err
 	}
@@ -79,7 +77,6 @@ func NewGoatApp(name, version, basePath string) (a app.App, err error) {
 	gapp.dp.SetDefault(app.ArgsScope, gapp.argsScope)
 	gapp.dp.SetDefault(app.FilespaceScope, gapp.filespaceScope)
 	gapp.dp.SetDefault(app.ConfigScope, gapp.configScope)
-	gapp.dp.SetDefault(app.DependencyScope, gapp.dependencyScope)
 	gapp.dp.SetDefault(app.AppScope, gapp.appScope)
 	gapp.dp.SetDefault(app.CommandScope, gapp.commandScope)
 
@@ -97,8 +94,6 @@ func NewGoatApp(name, version, basePath string) (a app.App, err error) {
 	gapp.dp.AddInjectors([]dependency.Injector{
 		gapp.commandScope,
 		gapp.appScope,
-		// gapp.dependencyScope, <- it is wraper for dependency injection and musn't
-		// contains recursive injection
 		gapp.configScope,
 		gapp.filespaceScope,
 		gapp.argsScope,
@@ -117,7 +112,7 @@ func (gapp *GoatApp) initEngineScope() error {
 
 func (gapp *GoatApp) initArgsScope() error {
 	var err error
-	gapp.argsScope, err = argscope.NewScope(os.Args, app.ArgsTagName)
+	gapp.argsScope, err = argscope.NewScope(gapp.arguments, app.ArgsTagName)
 	return err
 }
 
@@ -174,7 +169,7 @@ func (gapp *GoatApp) initConfigScope() error {
 	ds := &scope.DataScope{
 		Data: plainmap,
 	}
-	gapp.configScope = scope.Scope{
+	gapp.configScope = &scope.Scope{
 		EventScope: scope.NewEventScope(),
 		DataScope:  ds,
 		Injector:   ds.Injector(app.ConfigTagName),
@@ -184,12 +179,6 @@ func (gapp *GoatApp) initConfigScope() error {
 
 func (gapp *GoatApp) initCommandScope() error {
 	gapp.commandScope = scope.NewScope(app.CommandTagName)
-	return nil
-}
-
-func (gapp *GoatApp) initDependencyScope() error {
-	gapp.dp = provider.NewProvider(app.DependencyTagName)
-	gapp.dependencyScope = NewDependencyScope(gapp.dp)
 	return nil
 }
 
@@ -210,6 +199,11 @@ func (gapp *GoatApp) Version() string {
 	return gapp.version
 }
 
+// Arguments return application arguments
+func (gapp *GoatApp) Arguments() []string {
+	return gapp.arguments
+}
+
 // EngineScope return engine scope
 func (gapp *GoatApp) EngineScope() app.Scope {
 	return gapp.engineScope
@@ -228,11 +222,6 @@ func (gapp *GoatApp) FilespaceScope() app.Scope {
 // ConfigScope return config scope
 func (gapp *GoatApp) ConfigScope() app.Scope {
 	return gapp.configScope
-}
-
-// DependencyScope return dependency scope
-func (gapp *GoatApp) DependencyScope() app.Scope {
-	return gapp.dependencyScope
 }
 
 // AppScope return app scope

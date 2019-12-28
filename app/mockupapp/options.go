@@ -20,13 +20,12 @@ type MockupOptions struct {
 	RootFilespace filesystem.Filespace
 	TMPFilespace  filesystem.Filespace
 
-	EngineScope     app.Scope
-	ArgsScope       app.Scope
-	FilespaceScope  app.Scope
-	ConfigScope     app.Scope
-	DependencyScope app.Scope
-	AppScope        app.Scope
-	CommandScope    app.Scope
+	EngineScope    app.Scope
+	ArgsScope      app.Scope
+	FilespaceScope app.Scope
+	ConfigScope    app.Scope
+	AppScope       app.Scope
+	CommandScope   app.Scope
 
 	DP dependency.Provider
 }

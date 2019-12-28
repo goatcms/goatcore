@@ -38,5 +38,7 @@ func (out *Output) Printf(format string, a ...interface{}) error {
 
 // Write data to output
 func (out *Output) Write(p []byte) (n int, err error) {
+	out.mu.Lock()
+	defer out.mu.Unlock()
 	return out.wd.Write(p)
 }

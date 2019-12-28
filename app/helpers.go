@@ -1,6 +1,8 @@
 package app
 
 import (
+	"strings"
+
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -10,7 +12,6 @@ func CloseApp(a App) error {
 	return goaterr.ToErrors(goaterr.AppendError(nil,
 		a.CommandScope().Trigger(KillEvent, nil),
 		a.AppScope().Trigger(KillEvent, nil),
-		a.DependencyScope().Trigger(KillEvent, nil),
 		a.FilespaceScope().Trigger(KillEvent, nil),
 		a.ArgsScope().Trigger(KillEvent, nil),
 		a.EngineScope().Trigger(KillEvent, nil),
@@ -19,6 +20,7 @@ func CloseApp(a App) error {
 
 // RegisterCommand add new command to application
 func RegisterCommand(a App, name string, callback CommandCallback, help string) (err error) {
+	name = strings.ToLower(name)
 	commandScope := a.CommandScope()
 	commandScope.Set("help.command."+name, help)
 	commandScope.Set("command."+name, callback)

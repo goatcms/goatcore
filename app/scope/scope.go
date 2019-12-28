@@ -1,6 +1,8 @@
 package scope
 
-import "github.com/goatcms/goatcore/app"
+import (
+	"github.com/goatcms/goatcore/app"
+)
 
 // Scope is global scope interface
 type Scope struct {
@@ -19,6 +21,26 @@ func NewScope(tagname string) app.Scope {
 		EventScope: NewEventScope(),
 		DataScope:  app.DataScope(ds),
 		Injector:   ds.Injector(tagname),
-		SyncScope:  NewSyncScope(),
+		SyncScope:  NewSyncScope(nil),
 	}
+}
+
+// Close scope
+func (scp *Scope) Close() (err error) {
+	if err = scp.Wait(); err != nil {
+		scp.Kill()
+		scp.AppendError(scp.Trigger(app.RollbackEvent, scp))
+		scp.destroy()
+		return scp.ToError()
+	}
+	scp.Kill()
+	scp.AppendError(scp.Trigger(app.CommitEvent, scp))
+	scp.destroy()
+	return scp.ToError()
+}
+
+func (scp *Scope) destroy() {
+	scp.EventScope = nil
+	scp.DataScope = nil
+	scp.Injector = nil
 }

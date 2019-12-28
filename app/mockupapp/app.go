@@ -73,7 +73,6 @@ func NewApp(options MockupOptions) (result *App, err error) {
 	mapp.options.DP.SetDefault(app.ArgsScope, mapp.options.ArgsScope)
 	mapp.options.DP.SetDefault(app.FilespaceScope, mapp.options.FilespaceScope)
 	mapp.options.DP.SetDefault(app.ConfigScope, mapp.options.ConfigScope)
-	mapp.options.DP.SetDefault(app.DependencyScope, mapp.options.DependencyScope)
 	mapp.options.DP.SetDefault(app.AppScope, mapp.options.AppScope)
 	mapp.options.DP.SetDefault(app.CommandScope, mapp.options.CommandScope)
 
@@ -155,11 +154,9 @@ func (mapp *App) initCommandScope() error {
 }
 
 func (mapp *App) initDependencyScope() error {
-	if mapp.options.DependencyScope != nil {
-		return nil
+	if mapp.options.DP == nil {
+		mapp.options.DP = provider.NewProvider(app.DependencyTagName)
 	}
-	mapp.options.DP = provider.NewProvider(app.DependencyTagName)
-	mapp.options.DependencyScope = NewDependencyScope(mapp.options.DP)
 	return nil
 }
 
@@ -183,6 +180,11 @@ func (mapp *App) Version() string {
 	return mapp.options.Version
 }
 
+// Arguments return application arguments
+func (mapp *App) Arguments() []string {
+	return mapp.options.Args
+}
+
 // EngineScope return engine scope
 func (mapp *App) EngineScope() app.Scope {
 	return mapp.options.EngineScope
@@ -201,11 +203,6 @@ func (mapp *App) FilespaceScope() app.Scope {
 // ConfigScope return config scope
 func (mapp *App) ConfigScope() app.Scope {
 	return mapp.options.ConfigScope
-}
-
-// DependencyScope return dependency scope
-func (mapp *App) DependencyScope() app.Scope {
-	return mapp.options.DependencyScope
 }
 
 // AppScope return app scope

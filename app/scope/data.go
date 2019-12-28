@@ -5,7 +5,6 @@ import (
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/injector"
-	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // DataScope represent scope data
@@ -33,11 +32,7 @@ func (ds *DataScope) Set(key string, v interface{}) error {
 func (ds *DataScope) Get(key string) (value interface{}, err error) {
 	ds.mu.RLock()
 	defer ds.mu.RUnlock()
-	var ok bool
-	if value, ok = ds.Data[key]; !ok {
-		return nil, goaterr.Errorf("Unknow value for key %v", key)
-	}
-	return value, nil
+	return ds.Data[key], nil
 }
 
 // Keys get map data

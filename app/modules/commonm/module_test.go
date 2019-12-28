@@ -6,8 +6,8 @@ import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/bootstrap"
 	"github.com/goatcms/goatcore/app/mockupapp"
-	"github.com/goatcms/goatcore/app/modules/commonm/services"
-	"github.com/goatcms/goatcore/app/modules/terminal"
+	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
+	"github.com/goatcms/goatcore/app/modules/terminalm"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -36,7 +36,8 @@ func TestModule(t *testing.T) {
 	}
 	// test
 	var deps struct {
-		Namespaces services.Namespaces `dependency:"Namespaces"`
+		SharedMutex commservices.SharedMutex `dependency:"CommonSharedMutex"`
+		WaitManager commservices.WaitManager `dependency:"CommonWaitManager"`
 	}
 	if err = mapp.DependencyProvider().InjectTo(&deps); err != nil {
 		t.Error(err)

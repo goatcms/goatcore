@@ -1,10 +1,6 @@
 package scopesync
 
-import (
-	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/workers/jobsync"
-)
-
+/* deprecated
 // Lifecycle return jobsync.Lifecycle object connected to scope. If Lifecycle object doesn't exist, create new one and return it.
 func Lifecycle(scope app.Scope) *jobsync.Lifecycle {
 	var (
@@ -21,3 +17,4 @@ func Lifecycle(scope app.Scope) *jobsync.Lifecycle {
 	}
 	return lifecycle
 }
+*/

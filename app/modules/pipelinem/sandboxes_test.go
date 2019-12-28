@@ -6,8 +6,8 @@ import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/bootstrap"
 	"github.com/goatcms/goatcore/app/mockupapp"
-	"github.com/goatcms/goatcore/app/modules/pipelinem/services"
-	"github.com/goatcms/goatcore/app/modules/terminal"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
+	"github.com/goatcms/goatcore/app/modules/terminalm"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -25,7 +25,7 @@ func TestSandboxes(t *testing.T) {
 	bootstrap := bootstrap.NewBootstrap(mapp)
 	if err = goaterr.ToErrors(goaterr.AppendError(nil,
 		bootstrap.Register(NewModule()),
-		bootstrap.Register(terminal.NewModule()),
+		bootstrap.Register(terminalm.NewModule()),
 	)); err != nil {
 		t.Error(err)
 		return
@@ -37,15 +37,15 @@ func TestSandboxes(t *testing.T) {
 	// test
 	var (
 		deps struct {
-			SandboxsManager services.SandboxsManager `dependency:"SandboxsManager"`
+			SandboxesManager pipservices.SandboxesManager `dependency:"PipSandboxesManager"`
 		}
-		sandbox services.Sandbox
+		sandbox pipservices.Sandbox
 	)
 	if err = mapp.DependencyProvider().InjectTo(&deps); err != nil {
 		t.Error(err)
 		return
 	}
-	if sandbox, err = deps.SandboxsManager.Get(""); err != nil {
+	if sandbox, err = deps.SandboxesManager.Get(""); err != nil {
 		t.Error(err)
 		return
 	}
@@ -53,7 +53,7 @@ func TestSandboxes(t *testing.T) {
 		t.Errorf("Expected default sandbox and take nil")
 		return
 	}
-	if sandbox, err = deps.SandboxsManager.Get("terminal"); err != nil {
+	if sandbox, err = deps.SandboxesManager.Get("self"); err != nil {
 		t.Error(err)
 		return
 	}
@@ -61,7 +61,7 @@ func TestSandboxes(t *testing.T) {
 		t.Errorf("Expected terminal sandbox and take nil")
 		return
 	}
-	if sandbox, err = deps.SandboxsManager.Get("docker:ubuntu:disco"); err != nil {
+	if sandbox, err = deps.SandboxesManager.Get("docker:ubuntu:disco"); err != nil {
 		t.Error(err)
 		return
 	}

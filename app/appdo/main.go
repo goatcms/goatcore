@@ -20,7 +20,6 @@ func Emit(a app.App, event int, data interface{}) {
 	a.ConfigScope().Trigger(event, nil)
 	a.EngineScope().Trigger(event, nil)
 	a.CommandScope().Trigger(event, nil)
-	a.DependencyScope().Trigger(event, nil)
 	a.FilespaceScope().Trigger(event, nil)
 	a.AppScope().Trigger(event, nil)
 }

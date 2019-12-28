@@ -2,7 +2,9 @@ package commonm
 
 import (
 	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/app/modules/commonm/services/namespaces"
+	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
+	"github.com/goatcms/goatcore/app/modules/commonm/commservices/mutex"
+	"github.com/goatcms/goatcore/app/modules/commonm/commservices/waits"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -18,7 +20,8 @@ func NewModule() app.Module {
 func (m *Module) RegisterDependencies(a app.App) error {
 	dp := a.DependencyProvider()
 	return goaterr.ToErrors(goaterr.AppendError(nil,
-		dp.AddDefaultFactory("Namespaces", namespaces.NamasepacesFactory),
+		dp.AddDefaultFactory(commservices.SharedMutexService, mutex.SharedMutexFactory),
+		dp.AddDefaultFactory(commservices.WaitManagerService, waits.WaitManagerFactory),
 	))
 }
 

@@ -3,10 +3,15 @@ package pipelinem
 import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules"
-	"github.com/goatcms/goatcore/app/modules/pipelinem/services"
-	"github.com/goatcms/goatcore/app/modules/pipelinem/services/sandboxes"
-	"github.com/goatcms/goatcore/app/modules/pipelinem/services/sandboxes/dockersb"
-	"github.com/goatcms/goatcore/app/modules/pipelinem/services/sandboxes/terminalsb"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipcommands"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipcommands/pipc"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/namespaces"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/runner"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes/dockersb"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes/selfsb"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/tasks"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -22,7 +27,11 @@ func NewModule() app.Module {
 func (m *Module) RegisterDependencies(a app.App) error {
 	dp := a.DependencyProvider()
 	return goaterr.ToErrors(goaterr.AppendError(nil,
-		dp.AddDefaultFactory("SandboxsManager", sandboxes.SandboxsManagerFactory),
+		dp.AddDefaultFactory(pipservices.SandboxesManagerService, sandboxes.ManagerFactory),
+		dp.AddDefaultFactory(pipservices.NamespacesUnitService, namespaces.UnitFactory),
+		dp.AddDefaultFactory(pipservices.RunnerService, runner.Factory),
+		dp.AddDefaultFactory(pipservices.TasksUnitService, tasks.UnitFactory),
+		app.RegisterCommand(a, "pip:run", pipc.Run, pipcommands.PipRun),
 		app.RegisterHealthChecker(a, "docker", SandboxHealthChecker),
 	))
 }
@@ -31,15 +40,15 @@ func (m *Module) RegisterDependencies(a app.App) error {
 func (m *Module) InitDependencies(a app.App) (err error) {
 	var (
 		deps struct {
-			Manager  services.SandboxsManager `dependency:"SandboxsManager"`
-			Terminal modules.Terminal         `dependency:"TerminalService"`
+			Manager  pipservices.SandboxesManager `dependency:"PipSandboxesManager"`
+			Terminal modules.Terminal             `dependency:"TerminalService"`
 		}
-		builder services.SandboxBuilder
+		builder pipservices.SandboxBuilder
 	)
 	if err = a.DependencyProvider().InjectTo(&deps); err != nil {
 		return err
 	}
-	if builder, err = terminalsb.NewSandboxBuilder(deps.Terminal); err != nil {
+	if builder, err = selfsb.NewSandboxBuilder(deps.Terminal); err != nil {
 		return err
 	}
 	deps.Manager.Add(builder)
