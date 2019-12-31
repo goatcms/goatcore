@@ -122,6 +122,9 @@ func (manager *TaskManager) validWaitList(path []string, task pipservices.Task, 
 	if counter < 0 {
 		return goaterr.Errorf("Too many depth. Your wait has to many depth %s", strings.Join(path, "->"))
 	}
+	if task.WaitList() == nil {
+		return nil
+	}
 	for _, taskName := range task.WaitList() {
 		if taskName == path[0] {
 			return goaterr.Errorf("Detected waiting circle %s", strings.Join(path, "->"))
