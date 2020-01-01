@@ -57,7 +57,7 @@ func (task *Task) IOContext() (out app.IOContext) {
 // Close mark task as done and close input data
 func (task *Task) Close() (err error) {
 	task.wg.Done()
-	return nil
+	return task.ctx.Scope().Close()
 }
 
 // Wait for task finish

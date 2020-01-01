@@ -1,63 +1,101 @@
 package scope
 
-/*
+import (
+	"context"
+	"sync"
+
+	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/varutil/goaterr"
+)
+
 // ChildScope represent sub-scope
 type ChildScope struct {
-	parent   app.Scope
-	data     DataScope
-	events   EventScope
-	injector app.Injector
+	app.DataScope
+	app.EventScope
+	parent    app.Scope
+	errors    []error
+	errorsMU  sync.Mutex
+	waitGroup sync.WaitGroup
 }
 
 // NewChildScope create new instance of scope
-func NewChildScope(parent app.Scope, tagname string) app.Scope {
-	ds := DataScope{}
+func NewChildScope(parent app.Scope, dataScope app.DataScope, eventScope app.EventScope) app.Scope {
+	parent.AddTasks(1)
 	return &ChildScope{
-		parent:   parent,
-		data:     ds,
-		injector: ds.Injector(tagname),
-		events:   EventScope{},
+		parent:     parent,
+		DataScope:  dataScope,
+		EventScope: eventScope,
 	}
 }
 
-// Set new scope value
-func (cs *ChildScope) Set(key string, v interface{}) error {
-	return cs.data.Set(key, v)
+// Context return shared context
+func (cs *ChildScope) Context() context.Context {
+	return cs.parent.Context()
 }
 
-// Get get value from context
-func (cs *ChildScope) Get(key string) interface{} {
-	val := cs.data.Get(key)
-	if val != nil {
-		return val
-	}
-	return cs.parent.Get(key)
+// Kill shared context
+func (cs *ChildScope) Kill() {
+	cs.parent.Kill()
 }
 
-// Trigger run all function connected to event
-func (cs *ChildScope) Trigger(eID int) error {
-	if err := cs.events.Trigger(eID); err != nil {
-		return err
-	}
-	if err := cs.parent.Trigger(eID); err != nil {
-		return err
-	}
+// IsKilled return true if shared context is killed/ended
+func (cs *ChildScope) IsKilled() bool {
+	return cs.parent.IsKilled()
+}
+
+// Wait for end of all tasks in child scope
+func (cs *ChildScope) Wait() (err error) {
+	cs.waitGroup.Wait()
+	return goaterr.ToErrors(cs.errors)
+}
+
+// AddTasks tasks to child scope
+func (cs *ChildScope) AddTasks(delta int) (err error) {
+	cs.waitGroup.Add(delta)
 	return nil
 }
 
-// On connect a function to event
-func (cs *ChildScope) On(eID int, callback app.Callback) {
-	cs.events.On(eID, callback)
+// DoneTask done one child scope task
+func (cs *ChildScope) DoneTask() {
+	cs.waitGroup.Done()
+}
+
+// Errors return child scope errors
+func (cs *ChildScope) Errors() []error {
+	return cs.errors
+}
+
+// ToError return error if child scope contains any error
+func (cs *ChildScope) ToError() error {
+	return goaterr.ToErrors(cs.errors)
+}
+
+// AppendError add error to child and parent scope
+func (cs *ChildScope) AppendError(err error) {
+	cs.errorsMU.Lock()
+	defer cs.errorsMU.Unlock()
+	cs.Kill()
+	cs.parent.AppendError(err)
+	cs.errors = append(cs.errors, err)
+}
+
+// AppendErrors add errors to child and parent scope
+func (cs *ChildScope) AppendErrors(errs ...error) {
+	cs.errorsMU.Lock()
+	defer cs.errorsMU.Unlock()
+	cs.Kill()
+	cs.parent.AppendErrors(errs...)
+	cs.errors = append(cs.errors, errs...)
 }
 
 // InjectTo insert data to object
 func (cs *ChildScope) InjectTo(obj interface{}) error {
-	if err := cs.injector.InjectTo(obj); err != nil {
-		return err
-	}
-	if err := cs.parent.InjectTo(obj); err != nil {
-		return err
-	}
-	return nil
+	return cs.parent.InjectTo(obj)
 }
-*/
+
+// Close child scope
+func (cs *ChildScope) Close() (err error) {
+	err = cs.Wait()
+	cs.parent.DoneTask()
+	return err
+}

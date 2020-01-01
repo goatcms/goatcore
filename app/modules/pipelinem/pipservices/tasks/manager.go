@@ -63,11 +63,12 @@ func (manager *TaskManager) Get(name string) (task pipservices.Task) {
 // Create new task
 func (manager *TaskManager) Create(pip pipservices.Pip) (result pipservices.TaskWriter, err error) {
 	var (
-		ok         bool
-		repeatIO   app.IO
-		childScope app.Scope
-		taskCtx    app.IOContext
-		task       *Task
+		ok          bool
+		repeatIO    app.IO
+		childScope  app.Scope
+		taskCtx     app.IOContext
+		task        *Task
+		parentScope = pip.Context.Scope
 	)
 	if pip.Name == "" {
 		return nil, goaterr.Errorf("Pip.Name is required")
@@ -84,7 +85,7 @@ func (manager *TaskManager) Create(pip pipservices.Pip) (result pipservices.Task
 	if pip.Context.Out == nil {
 		return nil, goaterr.Errorf("Expected PipContext.Out not nil")
 	}
-	if pip.Context.Scope == nil {
+	if parentScope == nil {
 		return nil, goaterr.Errorf("Expected PipContext.Scope not nil")
 	}
 	manager.tasksMU.Lock()
@@ -102,8 +103,8 @@ func (manager *TaskManager) Create(pip pipservices.Pip) (result pipservices.Task
 	}), pip.Context.CWD); err != nil {
 		return nil, err
 	}
-	childScope = scope.NewScope("")
-	if err = manager.deps.NamespacesUnit.Bind(pip.Context.Scope, childScope); err != nil {
+	childScope = scope.NewChildScope(parentScope, parentScope, parentScope)
+	if err = manager.deps.NamespacesUnit.Bind(parentScope, childScope); err != nil {
 		return nil, err
 	}
 	if taskCtx, err = gio.NewIOContext(childScope, repeatIO); err != nil {
