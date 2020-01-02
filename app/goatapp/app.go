@@ -9,6 +9,7 @@ import (
 	"github.com/goatcms/goatcore/app/scope"
 	"github.com/goatcms/goatcore/app/scope/argscope"
 	"github.com/goatcms/goatcore/dependency"
+	"github.com/goatcms/goatcore/dependency/provider"
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/filesystem/filespace/diskfs"
 	"github.com/goatcms/goatcore/filesystem/json"
@@ -22,7 +23,8 @@ type GoatApp struct {
 
 	arguments []string
 
-	rootFilespace filesystem.Filespace
+	rootFilespace    filesystem.Filespace
+	currentFilespace filesystem.Filespace
 
 	engineScope    app.Scope
 	argsScope      app.Scope
@@ -33,7 +35,6 @@ type GoatApp struct {
 	io             app.IO
 	ioContext      app.IOContext
 	dp             dependency.Provider
-	cwd            filesystem.Filespace
 }
 
 const (
@@ -73,6 +74,8 @@ func NewGoatApp(name, version, basePath string) (a app.App, err error) {
 		return nil, err
 	}
 
+	gapp.dp = provider.NewProvider(app.DependencyTagName)
+
 	gapp.dp.SetDefault(app.EngineScope, gapp.engineScope)
 	gapp.dp.SetDefault(app.ArgsScope, gapp.argsScope)
 	gapp.dp.SetDefault(app.FilespaceScope, gapp.filespaceScope)
@@ -80,7 +83,7 @@ func NewGoatApp(name, version, basePath string) (a app.App, err error) {
 	gapp.dp.SetDefault(app.AppScope, gapp.appScope)
 	gapp.dp.SetDefault(app.CommandScope, gapp.commandScope)
 
-	if gapp.io, err = gio.NewIO(in, out, eout, gapp.cwd); err != nil {
+	if gapp.io, err = gio.NewIO(in, out, eout, gapp.currentFilespace); err != nil {
 		return nil, err
 	}
 	if gapp.ioContext, err = gio.NewIOContext(gapp.appScope, gapp.io); err != nil {
@@ -132,14 +135,16 @@ func (gapp *GoatApp) initFilespaceScope(path string) (err error) {
 		return err
 	}
 	gapp.filespaceScope.Set(app.TmpFilespace, tmpFilespace)
-	if cwdi, err = gapp.argsScope.Get("cwd"); err != nil {
+	if cwdi, _ = gapp.argsScope.Get("cwd"); cwdi == nil {
 		gapp.filespaceScope.Set(app.CurrentFilespace, gapp.rootFilespace)
+		gapp.currentFilespace = gapp.rootFilespace
 	} else {
 		var currentFS filesystem.Filespace
 		if currentFS, err = diskfs.NewFilespace(cwdi.(string)); err != nil {
 			return err
 		}
 		gapp.filespaceScope.Set(app.CurrentFilespace, currentFS)
+		gapp.currentFilespace = currentFS
 	}
 	return nil
 }
@@ -159,8 +164,10 @@ func (gapp *GoatApp) initConfigScope() error {
 	}
 	fullmap := make(map[string]interface{})
 	path := strings.Replace(ConfigJSONPath, "{{env}}", deps.Env, -1)
-	if err = json.ReadJSON(gapp.rootFilespace, path, &fullmap); err != nil {
-		return err
+	if gapp.currentFilespace.IsFile(path) {
+		if err = json.ReadJSON(gapp.currentFilespace, path, &fullmap); err != nil {
+			return err
+		}
 	}
 	plainmap, err := plainmap.RecursiveMapToPlainMap(fullmap)
 	if err != nil {
