@@ -76,9 +76,9 @@ func NewApp(options MockupOptions) (result *App, err error) {
 	mapp.options.DP.SetDefault(app.AppScope, mapp.options.AppScope)
 	mapp.options.DP.SetDefault(app.CommandScope, mapp.options.CommandScope)
 
-	mapp.options.DP.SetDefault(app.InputService, mapp.io.In)
-	mapp.options.DP.SetDefault(app.OutputService, mapp.io.Out)
-	mapp.options.DP.SetDefault(app.ErrorService, mapp.io.Err)
+	mapp.options.DP.SetDefault(app.InputService, mapp.io.In())
+	mapp.options.DP.SetDefault(app.OutputService, mapp.io.Out())
+	mapp.options.DP.SetDefault(app.ErrorService, mapp.io.Err())
 
 	mapp.options.DP.AddInjectors([]dependency.Injector{
 		mapp.options.CommandScope,
@@ -121,17 +121,18 @@ func (mapp *App) initArgsScope() (err error) {
 }
 
 func (mapp *App) initFilespaceScope() (err error) {
+	var value interface{}
 	if mapp.options.FilespaceScope == nil {
 		mapp.options.FilespaceScope = scope.NewScope(app.FilespaceTagName)
 	}
 	fsscope := mapp.options.FilespaceScope
-	if _, err = fsscope.Get(app.RootFilespace); err != nil {
+	if value, _ = fsscope.Get(app.RootFilespace); value == nil {
 		mapp.options.FilespaceScope.Set(app.RootFilespace, mapp.options.RootFilespace)
 	}
-	if _, err = fsscope.Get(app.TmpFilespace); err != nil {
+	if value, _ = fsscope.Get(app.TmpFilespace); value == nil {
 		mapp.options.FilespaceScope.Set(app.TmpFilespace, mapp.options.TMPFilespace)
 	}
-	if _, err = fsscope.Get(app.CurrentFilespace); err != nil {
+	if value, _ = fsscope.Get(app.CurrentFilespace); value == nil {
 		mapp.options.FilespaceScope.Set(app.CurrentFilespace, mapp.io.CWD())
 	}
 	return nil
