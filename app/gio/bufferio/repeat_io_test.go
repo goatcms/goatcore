@@ -26,10 +26,7 @@ func TestRepeatIOStory(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if io, err = NewRepeatIO(in, out, out, cwd); err != nil {
-		t.Error(err)
-		return
-	}
+	io = NewRepeatIO(in, out, out, cwd)
 	if firstLine, err = io.In().ReadLine(); err != nil {
 		t.Error(err)
 		return

@@ -34,5 +34,5 @@ func newCommandContext(ctx app.IOContext, args []string) (commCtx app.IOContext,
 			argsData.Injector("command"),
 		}),
 	}
-	return gio.NewIOContext(commandScope, ctx.IO())
+	return gio.NewIOContext(commandScope, ctx.IO()), nil
 }

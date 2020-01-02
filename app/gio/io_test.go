@@ -23,10 +23,7 @@ func TestIO(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if io, err = NewIO(in, out, eout, cwd); err != nil {
-		t.Error(err)
-		return
-	}
+	io = NewIO(in, out, eout, cwd)
 	if io.In() != in {
 		t.Errorf("Expected input from constructor")
 	}
@@ -41,33 +38,55 @@ func TestIO(t *testing.T) {
 	}
 }
 
-func TestIORequireAllAttributes(t *testing.T) {
+func TestIORequireInput(t *testing.T) {
 	t.Parallel()
 	var (
-		in   = NewInput(new(bytes.Buffer))
-		out  = NewOutput(new(bytes.Buffer))
-		eout = NewOutput(new(bytes.Buffer))
-		cwd  filesystem.Filespace
-		err  error
+		baseIO = newEmptyIO()
 	)
-	if cwd, err = memfs.NewFilespace(); err != nil {
-		t.Error(err)
-		return
-	}
-	if _, err = NewIO(in, out, eout, cwd); err != nil {
-		t.Error(err)
-		return
-	}
-	if _, err = NewIO(nil, out, eout, cwd); err == nil {
-		t.Errorf("Input is required")
-	}
-	if _, err = NewIO(in, nil, eout, cwd); err == nil {
-		t.Errorf("Output is required")
-	}
-	if _, err = NewIO(in, out, nil, cwd); err == nil {
-		t.Errorf("Error output is required")
-	}
-	if _, err = NewIO(in, out, eout, nil); err == nil {
-		t.Errorf("Current Working Directory is required")
-	}
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The code did not panic")
+		}
+	}()
+	NewIO(nil, baseIO.Out(), baseIO.Err(), baseIO.CWD())
+}
+
+func TestIORequireOutput(t *testing.T) {
+	t.Parallel()
+	var (
+		baseIO = newEmptyIO()
+	)
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The code did not panic")
+		}
+	}()
+	NewIO(baseIO.In(), nil, baseIO.Err(), baseIO.CWD())
+}
+
+func TestIORequireErrorOutput(t *testing.T) {
+	t.Parallel()
+	var (
+		baseIO = newEmptyIO()
+	)
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The code did not panic")
+		}
+	}()
+	NewIO(baseIO.In(), baseIO.Out(), nil, baseIO.CWD())
+}
+
+func TestIORequireCWD(t *testing.T) {
+	t.Parallel()
+	var (
+		baseIO app.IO
+	)
+	baseIO = newEmptyIO()
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The code did not panic")
+		}
+	}()
+	NewIO(baseIO.In(), baseIO.Out(), baseIO.Err(), nil)
 }

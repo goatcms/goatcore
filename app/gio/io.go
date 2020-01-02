@@ -15,25 +15,25 @@ type IO struct {
 }
 
 // NewIO returns a new IO instance.
-func NewIO(in app.Input, out app.Output, eout app.Output, cwd filesystem.Filespace) (io app.IO, err error) {
+func NewIO(in app.Input, out app.Output, eout app.Output, cwd filesystem.Filespace) (io app.IO) {
 	if in == nil {
-		return nil, goaterr.Errorf("gio.IO: Input is required")
+		panic(goaterr.Errorf("gio.IO: Input is required"))
 	}
 	if out == nil {
-		return nil, goaterr.Errorf("gio.IO: Output is required")
+		panic(goaterr.Errorf("gio.IO: Output is required"))
 	}
 	if eout == nil {
-		return nil, goaterr.Errorf("gio.IO: Error output is required")
+		panic(goaterr.Errorf("gio.IO: Error output is required"))
 	}
 	if cwd == nil {
-		return nil, goaterr.Errorf("gio.IO: CWD (Current Working Directory) is required")
+		panic(goaterr.Errorf("gio.IO: CWD (Current Working Directory) is required"))
 	}
 	return IO{
 		in:   in,
 		out:  out,
 		eout: eout,
 		cwd:  cwd,
-	}, nil
+	}
 }
 
 // In return default application input

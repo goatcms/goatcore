@@ -26,14 +26,8 @@ func TestIOContext(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if io, err = NewIO(in, out, eout, cwd); err != nil {
-		t.Error(err)
-		return
-	}
-	if ioc, err = NewIOContext(ioScope, io); err != nil {
-		t.Error(err)
-		return
-	}
+	io = NewIO(in, out, eout, cwd)
+	ioc = NewIOContext(ioScope, io)
 	if ioc.Scope() != ioScope {
 		t.Errorf("Expected input from constructor")
 	}
@@ -42,29 +36,28 @@ func TestIOContext(t *testing.T) {
 	}
 }
 
-func TestIOContextRequireAllAttributes(t *testing.T) {
+func TestIOContextRequireIO(t *testing.T) {
+	t.Parallel()
+	var (
+		io = newEmptyIO()
+	)
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The code did not panic")
+		}
+	}()
+	NewIOContext(nil, io)
+}
+
+func TestIOContextRequireScope(t *testing.T) {
 	t.Parallel()
 	var (
 		ioScope = scope.NewScope("tag")
-		in      = NewInput(new(bytes.Buffer))
-		out     = NewOutput(new(bytes.Buffer))
-		eout    = NewOutput(new(bytes.Buffer))
-		cwd     filesystem.Filespace
-		io      app.IO
-		err     error
 	)
-	if cwd, err = memfs.NewFilespace(); err != nil {
-		t.Error(err)
-		return
-	}
-	if io, err = NewIO(in, out, eout, cwd); err != nil {
-		t.Error(err)
-		return
-	}
-	if _, err = NewIOContext(nil, io); err == nil {
-		t.Errorf("Scope is required")
-	}
-	if _, err = NewIOContext(ioScope, nil); err == nil {
-		t.Errorf("IO is required")
-	}
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The code did not panic")
+		}
+	}()
+	NewIOContext(ioScope, nil)
 }

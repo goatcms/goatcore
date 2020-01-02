@@ -7,7 +7,7 @@ import (
 )
 
 // NewRepeatIO returns a new reapat IO instance. Repeat IO repeat input data to output
-func NewRepeatIO(in app.Input, out app.Output, eout app.Output, cwd filesystem.Filespace) (io app.IO, err error) {
+func NewRepeatIO(in app.Input, out app.Output, eout app.Output, cwd filesystem.Filespace) (io app.IO) {
 	buffer := NewBuffer()
 	rin := NewBufferInput(in, buffer)
 	rout := NewRepeatOutput(out, buffer)

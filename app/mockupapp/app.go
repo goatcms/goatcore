@@ -49,13 +49,11 @@ func NewApp(options MockupOptions) (result *App, err error) {
 		mapp.options.Input = strings.NewReader("")
 	}
 
-	if mapp.io, err = gio.NewIO(
+	mapp.io = gio.NewIO(
 		gio.NewAppInput(mapp.options.Input),
 		gio.NewAppOutput(&mapp.outBuf),
 		gio.NewAppOutput(&mapp.errBuf),
-		mapp.options.RootFilespace); err != nil {
-		return nil, err
-	}
+		mapp.options.RootFilespace)
 
 	if err = goaterr.ToErrors(goaterr.AppendError(nil,
 		mapp.initEngineScope(),
@@ -89,9 +87,7 @@ func NewApp(options MockupOptions) (result *App, err error) {
 		mapp.options.EngineScope,
 	})
 
-	if mapp.ioContext, err = gio.NewIOContext(mapp.options.AppScope, mapp.io); err != nil {
-		return nil, err
-	}
+	mapp.ioContext = gio.NewIOContext(mapp.options.AppScope, mapp.io)
 
 	mapp.options.DP.SetDefault(app.AppService, app.App(mapp))
 	return mapp, nil

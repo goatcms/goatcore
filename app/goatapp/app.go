@@ -83,12 +83,8 @@ func NewGoatApp(name, version, basePath string) (a app.App, err error) {
 	gapp.dp.SetDefault(app.AppScope, gapp.appScope)
 	gapp.dp.SetDefault(app.CommandScope, gapp.commandScope)
 
-	if gapp.io, err = gio.NewIO(in, out, eout, gapp.currentFilespace); err != nil {
-		return nil, err
-	}
-	if gapp.ioContext, err = gio.NewIOContext(gapp.appScope, gapp.io); err != nil {
-		return nil, err
-	}
+	gapp.io = gio.NewIO(in, out, eout, gapp.currentFilespace)
+	gapp.ioContext = gio.NewIOContext(gapp.appScope, gapp.io)
 
 	gapp.dp.SetDefault(app.InputService, gapp.io.In())
 	gapp.dp.SetDefault(app.OutputService, gapp.io.Out())
