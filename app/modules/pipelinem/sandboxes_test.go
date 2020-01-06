@@ -66,7 +66,7 @@ func TestSandboxes(t *testing.T) {
 		return
 	}
 	if sandbox == nil {
-		t.Errorf("Expected terminal sandbox and take nil")
+		t.Errorf("Expected docker sandbox and take nil")
 		return
 	}
 }

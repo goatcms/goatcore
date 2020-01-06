@@ -2,6 +2,6 @@ package terminalm
 
 const (
 	commandPrefix  = "help.command."
-	healthPrefix   = "help.health."
+	healthPrefix   = "health."
 	argumentPrefix = "help.argument."
 )
