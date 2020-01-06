@@ -40,5 +40,8 @@ func (out *RepeatOutput) Write(p []byte) (n int, err error) {
 // Prompt add prompt to output
 func (out *RepeatOutput) Prompt(s string) (result string) {
 	prompt := out.buffer.ReadAndClean()
+	if prompt == "" {
+		return fmt.Sprintf("%s", s)
+	}
 	return fmt.Sprintf("> %s : \n%s", prompt, s)
 }
