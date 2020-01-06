@@ -21,7 +21,7 @@ func NewBufferInput(parent app.Input, buffer *Buffer) app.Input {
 // ReadWord return next word from input stream
 func (input *BufferInput) ReadWord() (s string, err error) {
 	if s, err = input.parent.ReadWord(); err == nil {
-		input.buffer.Write(s)
+		input.buffer.WriteString(s)
 	}
 	return s, err
 }
@@ -29,14 +29,14 @@ func (input *BufferInput) ReadWord() (s string, err error) {
 // ReadLine return next line from input stream
 func (input *BufferInput) ReadLine() (s string, err error) {
 	if s, err = input.parent.ReadWord(); err == nil {
-		input.buffer.Write(s)
+		input.buffer.WriteString(s)
 	}
 	return s, err
 }
 
 func (input *BufferInput) Read(p []byte) (n int, err error) {
 	if n, err = input.parent.Read(p); n > 0 {
-		input.buffer.Write(string(p))
+		input.buffer.WriteString(string(p))
 	}
 	return n, err
 }

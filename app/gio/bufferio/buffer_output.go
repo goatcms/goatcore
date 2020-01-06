@@ -22,12 +22,10 @@ func NewBufferOutput(buffer *Buffer) app.Output {
 // Printf formats according to a format specifier and writes to standard output.
 // It returns the number of bytes written and any write error encountered.
 func (out *BufferOutput) Printf(format string, a ...interface{}) error {
-	out.buffer.Write(fmt.Sprintf(format, a...))
-	return nil
+	return out.buffer.WriteString(fmt.Sprintf(format, a...))
 }
 
 // Write data to output
 func (out *BufferOutput) Write(p []byte) (n int, err error) {
-	out.buffer.Write(fmt.Sprintf(string(p)))
-	return len(p), nil
+	return out.buffer.Write(p)
 }
