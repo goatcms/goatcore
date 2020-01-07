@@ -2,6 +2,7 @@ package dockersb
 
 import (
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/goatcms/goatcore/app"
@@ -29,14 +30,19 @@ func NewDockerSandbox(imageName string) (ins pipservices.Sandbox, err error) {
 // Run run code in sandbox
 func (sandbox *DockerSandbox) Run(ctx app.IOContext) (err error) {
 	var (
-		cio = ctx.IO()
-		ok  bool
-		cwd filesystem.LocalFilespace
+		cio    = ctx.IO()
+		ok     bool
+		cwd    filesystem.LocalFilespace
+		cwdAbs string
 	)
 	if cwd, ok = cio.CWD().(filesystem.LocalFilespace); !ok {
 		return goaterr.Errorf("DockerSandbox support only filesystem.LocalFilespace as CWD (Current Working Directory) and take %T", cio.CWD())
 	}
-	args := []string{"docker", "run", "-i", "--rm", "--entrypoint", "/bin/sh", sandbox.imageName}
+	if cwdAbs, err = filepath.Abs(cwd.LocalPath()); err != nil {
+		return err
+	}
+	volumeAttr := `--volume=` + cwdAbs + `:/cwd`
+	args := []string{"docker", "run", "-i", "--rm", "-w=/cwd", volumeAttr, "--entrypoint", "/bin/sh", sandbox.imageName}
 	ctx.IO().Out().Printf("Run docker sandbox %s by %v", sandbox.imageName, args)
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Stdin = cio.In()
