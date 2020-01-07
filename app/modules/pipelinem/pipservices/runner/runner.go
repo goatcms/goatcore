@@ -74,6 +74,7 @@ func (runner *Runner) runGo(tasksManager pipservices.TasksManager, sandbox pipse
 	defer unlockHandler.Unlock()
 	task.SetStatus(fmt.Sprintf("execute"))
 	if err = sandbox.Run(task.IOContext()); err != nil {
+		task.IOContext().Scope().AppendError(err)
 		task.SetStatus("fail")
 		return
 	}

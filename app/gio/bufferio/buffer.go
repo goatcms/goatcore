@@ -10,8 +10,7 @@ import (
 
 // Buffer cache input data
 type Buffer struct {
-	mu sync.Mutex
-	//cache string
+	mu   sync.Mutex
 	data bytes.Buffer
 }
 

@@ -29,18 +29,23 @@ func NewDockerSandbox(imageName string) (ins pipservices.Sandbox, err error) {
 // Run run code in sandbox
 func (sandbox *DockerSandbox) Run(ctx app.IOContext) (err error) {
 	var (
-		io  = ctx.IO()
+		cio = ctx.IO()
 		ok  bool
 		cwd filesystem.LocalFilespace
 	)
-	if cwd, ok = io.CWD().(filesystem.LocalFilespace); !ok {
-		return goaterr.Errorf("DockerSandbox support only filesystem.LocalFilespace as CWD (Current Working Directory) and take %T", io.CWD())
+	if cwd, ok = cio.CWD().(filesystem.LocalFilespace); !ok {
+		return goaterr.Errorf("DockerSandbox support only filesystem.LocalFilespace as CWD (Current Working Directory) and take %T", cio.CWD())
 	}
-	cmd := exec.Command("docker", "run", "-it", "--rm", "--entrypoint", "/bin/sh", sandbox.imageName)
-	cmd.Stdin = io.In()
-	cmd.Stdout = io.Out()
-	cmd.Stderr = io.Err()
+	args := []string{"docker", "run", "-i", "--rm", "--entrypoint", "/bin/sh", sandbox.imageName}
+	ctx.IO().Out().Printf("Run docker sandbox %s by %v", sandbox.imageName, args)
+	cmd := exec.Command(args[0], args[1:]...)
+	cmd.Stdin = cio.In()
+	cmd.Stdout = cio.Out()
+	cmd.Stderr = cio.Err()
 	cmd.Dir = cwd.LocalPath()
-	err = cmd.Run()
-	return goaterr.Wrap(err)
+	if err = cmd.Run(); err != nil {
+		cio.Err().Printf("\nDocker sandbox error: %v\n", err)
+		return goaterr.Wrap(err)
+	}
+	return nil
 }

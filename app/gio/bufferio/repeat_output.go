@@ -34,7 +34,10 @@ func (out *RepeatOutput) Printf(format string, a ...interface{}) error {
 // Write data to output
 func (out *RepeatOutput) Write(p []byte) (n int, err error) {
 	prompted := out.Prompt(string(p))
-	return out.parent.Write([]byte(prompted))
+	if n, err = out.parent.Write([]byte(prompted)); err != nil {
+		return n, err
+	}
+	return len(p), nil
 }
 
 // Prompt add prompt to output

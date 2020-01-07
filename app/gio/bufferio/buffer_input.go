@@ -36,7 +36,7 @@ func (input *BufferInput) ReadLine() (s string, err error) {
 
 func (input *BufferInput) Read(p []byte) (n int, err error) {
 	if n, err = input.parent.Read(p); n > 0 {
-		input.buffer.WriteString(string(p))
+		input.buffer.WriteString(string(p[:n]))
 	}
 	return n, err
 }

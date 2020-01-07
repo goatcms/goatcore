@@ -24,7 +24,10 @@ func NewLogger(out app.Output, cid string) app.Output {
 // Writer is the interface that wraps the basic Write method.
 func (logger *Logger) Write(p []byte) (n int, err error) {
 	formatted := logger.format(string(p))
-	return logger.out.Write([]byte(formatted))
+	if n, err = logger.out.Write([]byte(formatted)); err != nil {
+		return n, err
+	}
+	return len(p), err
 }
 
 // Printf print to multiple outputs.
