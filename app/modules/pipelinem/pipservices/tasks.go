@@ -21,6 +21,8 @@ type Task interface {
 	WaitList() []string
 	// WaitLockMapList return map described related resources to lock
 	LockMap() commservices.LockMap
+	// Errors return task errors (or nil)
+	Errors() []error
 }
 
 // TaskWriter write data to task

@@ -23,7 +23,12 @@ func TestIO(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	io = NewIO(in, out, eout, cwd)
+	io = NewIO(IOParams{
+		In:  in,
+		Out: out,
+		Err: eout,
+		CWD: cwd,
+	})
 	if io.In() != in {
 		t.Errorf("Expected input from constructor")
 	}
@@ -48,7 +53,12 @@ func TestIORequireInput(t *testing.T) {
 			t.Errorf("The code did not panic")
 		}
 	}()
-	NewIO(nil, baseIO.Out(), baseIO.Err(), baseIO.CWD())
+	NewIO(IOParams{
+		In:  nil,
+		Out: baseIO.Out(),
+		Err: baseIO.Err(),
+		CWD: baseIO.CWD(),
+	})
 }
 
 func TestIORequireOutput(t *testing.T) {
@@ -61,7 +71,12 @@ func TestIORequireOutput(t *testing.T) {
 			t.Errorf("The code did not panic")
 		}
 	}()
-	NewIO(baseIO.In(), nil, baseIO.Err(), baseIO.CWD())
+	NewIO(IOParams{
+		In:  baseIO.In(),
+		Out: nil,
+		Err: baseIO.Err(),
+		CWD: baseIO.CWD(),
+	})
 }
 
 func TestIORequireErrorOutput(t *testing.T) {
@@ -74,7 +89,12 @@ func TestIORequireErrorOutput(t *testing.T) {
 			t.Errorf("The code did not panic")
 		}
 	}()
-	NewIO(baseIO.In(), baseIO.Out(), nil, baseIO.CWD())
+	NewIO(IOParams{
+		In:  baseIO.In(),
+		Out: baseIO.Out(),
+		Err: nil,
+		CWD: baseIO.CWD(),
+	})
 }
 
 func TestIORequireCWD(t *testing.T) {
@@ -88,5 +108,10 @@ func TestIORequireCWD(t *testing.T) {
 			t.Errorf("The code did not panic")
 		}
 	}()
-	NewIO(baseIO.In(), baseIO.Out(), baseIO.Err(), nil)
+	NewIO(IOParams{
+		In:  baseIO.In(),
+		Out: baseIO.Out(),
+		Err: baseIO.Err(),
+		CWD: nil,
+	})
 }

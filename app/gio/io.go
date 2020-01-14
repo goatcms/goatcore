@@ -6,6 +6,14 @@ import (
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
+// IOParams describe io
+type IOParams struct {
+	In  app.Input
+	Out app.Output
+	Err app.Output
+	CWD filesystem.Filespace
+}
+
 // IO represent task context input and output
 type IO struct {
 	in   app.Input
@@ -15,24 +23,24 @@ type IO struct {
 }
 
 // NewIO returns a new IO instance.
-func NewIO(in app.Input, out app.Output, eout app.Output, cwd filesystem.Filespace) (io app.IO) {
-	if in == nil {
+func NewIO(params IOParams) (io app.IO) {
+	if params.In == nil {
 		panic(goaterr.Errorf("gio.IO: Input is required"))
 	}
-	if out == nil {
+	if params.Out == nil {
 		panic(goaterr.Errorf("gio.IO: Output is required"))
 	}
-	if eout == nil {
+	if params.Err == nil {
 		panic(goaterr.Errorf("gio.IO: Error output is required"))
 	}
-	if cwd == nil {
+	if params.CWD == nil {
 		panic(goaterr.Errorf("gio.IO: CWD (Current Working Directory) is required"))
 	}
 	return IO{
-		in:   in,
-		out:  out,
-		eout: eout,
-		cwd:  cwd,
+		in:   params.In,
+		out:  params.Out,
+		eout: params.Err,
+		cwd:  params.CWD,
 	}
 }
 

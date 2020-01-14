@@ -18,10 +18,11 @@ func TestPipRunChildScopeKillStory(t *testing.T) {
 		mapp        *mockupapp.App
 		bootstraper app.Bootstrap
 	)
+	// it check async execution
 	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
 		Input: strings.NewReader(`
 			pip:run --name=first --body="killStatus"
-			kill
+			pip:run --name=second --body="kill"
 			`),
 		Args: []string{`appname`, `terminal`},
 	}); err != nil {
@@ -29,7 +30,7 @@ func TestPipRunChildScopeKillStory(t *testing.T) {
 		return
 	}
 	if err = goaterr.ToErrors(goaterr.AppendError(nil, app.RegisterCommand(mapp, "killStatus", func(a app.App, ctx app.IOContext) (err error) {
-		time.Sleep(1 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 		if ctx.Scope().IsKilled() {
 			return ctx.IO().Out().Printf("is_killed")
 		}
@@ -43,7 +44,10 @@ func TestPipRunChildScopeKillStory(t *testing.T) {
 	}
 	// test
 	bootstraper.Run()
-	mapp.AppScope().Wait()
+	if err = mapp.AppScope().Wait(); err != nil {
+		t.Error(err)
+		return
+	}
 	result := mapp.OutputBuffer().String()
 	if !strings.Contains(result, "is_killed") {
 		t.Errorf("expected 'is_killed' result and take '%s'", result)

@@ -94,14 +94,19 @@ func (manager *TaskManager) Create(pip pipservices.Pip) (result pipservices.Task
 		return nil, goaterr.Errorf("Task '%s' is already defined", pip.Name)
 	}
 	outLogger := gio.NewLogger(manager.logsOutput, pip.Name)
-	repeatIO = bufferio.NewRepeatIO(pip.Context.In, gio.NewOutputBroadcast([]app.Output{
-		outLogger,
-		pip.Context.Out,
-	}), gio.NewOutputBroadcast([]app.Output{
-		outLogger,
-		pip.Context.Err,
-	}), pip.Context.CWD)
-	childScope = scope.NewChildScope(parentScope, parentScope, parentScope)
+	repeatIO = bufferio.NewRepeatIO(gio.IOParams{
+		In: pip.Context.In,
+		Out: gio.NewOutputBroadcast([]app.Output{
+			outLogger,
+			pip.Context.Out,
+		}),
+		Err: gio.NewOutputBroadcast([]app.Output{
+			outLogger,
+			pip.Context.Err,
+		}),
+		CWD: pip.Context.CWD,
+	})
+	childScope = scope.NewChildScope(parentScope, scope.Params{})
 	if err = manager.deps.NamespacesUnit.Bind(parentScope, childScope); err != nil {
 		return nil, err
 	}

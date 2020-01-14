@@ -18,5 +18,10 @@ func newEmptyIO() (ctx app.IO) {
 	if cwd, err = memfs.NewFilespace(); err != nil {
 		panic(err)
 	}
-	return NewIO(in, out, out, cwd)
+	return NewIO(IOParams{
+		In:  in,
+		Out: out,
+		Err: out,
+		CWD: cwd,
+	})
 }

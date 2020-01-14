@@ -257,4 +257,5 @@ type IO interface {
 type IOContext interface {
 	IO() IO
 	Scope() Scope
+	Close() (err error)
 }

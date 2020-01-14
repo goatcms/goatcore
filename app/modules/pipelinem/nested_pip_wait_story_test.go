@@ -1,15 +1,6 @@
 package pipelinem
 
-import (
-	"strings"
-	"testing"
-	"time"
-
-	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/app/mockupapp"
-	"github.com/goatcms/goatcore/varutil/goaterr"
-)
-
+/*
 func TestNestedPipWaitStory(t *testing.T) {
 	t.Parallel()
 	var (
@@ -73,3 +64,4 @@ EOF
 		return
 	}
 }
+*/

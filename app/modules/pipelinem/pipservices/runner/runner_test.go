@@ -19,7 +19,7 @@ func TestRunner(t *testing.T) {
 	var (
 		err  error
 		mapp app.App
-		scp  = scope.NewScope("")
+		scp  = scope.NewScope(scope.Params{})
 		cwd  filesystem.Filespace
 	)
 	if mapp, err = newApp(); err != nil {

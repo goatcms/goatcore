@@ -16,15 +16,23 @@ type ChildScope struct {
 	errors    []error
 	errorsMU  sync.Mutex
 	waitGroup sync.WaitGroup
+	injectors []app.Injector
 }
 
 // NewChildScope create new instance of scope
-func NewChildScope(parent app.Scope, dataScope app.DataScope, eventScope app.EventScope) app.Scope {
+func NewChildScope(parent app.Scope, params Params) app.Scope {
 	parent.AddTasks(1)
+	if params.DataScope == nil {
+		params.DataScope = parent
+	}
+	if params.EventScope == nil {
+		params.EventScope = parent
+	}
 	return &ChildScope{
 		parent:     parent,
-		DataScope:  dataScope,
-		EventScope: eventScope,
+		DataScope:  params.DataScope,
+		EventScope: params.EventScope,
+		injectors:  params.Injectors,
 	}
 }
 
@@ -89,7 +97,12 @@ func (cs *ChildScope) AppendErrors(errs ...error) {
 }
 
 // InjectTo insert data to object
-func (cs *ChildScope) InjectTo(obj interface{}) error {
+func (cs *ChildScope) InjectTo(obj interface{}) (err error) {
+	for _, scpInjector := range cs.injectors {
+		if err = scpInjector.InjectTo(obj); err != nil {
+			return err
+		}
+	}
 	return cs.parent.InjectTo(obj)
 }
 

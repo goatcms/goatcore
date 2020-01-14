@@ -3,9 +3,14 @@ package gio
 import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/scope"
-	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
+
+// IOContextParams describe context
+type IOContextParams struct {
+	Scope scope.Params
+	IO    IOParams
+}
 
 // IOContext represent task context
 type IOContext struct {
@@ -28,35 +33,61 @@ func NewIOContext(scope app.Scope, io app.IO) (ioc app.IOContext) {
 }
 
 // NewChildIOContext extends exist IOContext.
-func NewChildIOContext(parent app.IOContext, in app.Input, out app.Output, eout app.Output, cwd filesystem.Filespace) (ioc app.IOContext) {
+func NewChildIOContext(parent app.IOContext, params IOContextParams) (ioc app.IOContext) {
 	var (
-		parentIO    app.IO
-		childIO     app.IO
-		parentScope app.Scope
-		childScope  app.Scope
+		parentIO app.IO
+		childIO  app.IO
 	)
 	parentIO = parent.IO()
-	if in == nil && out == nil && eout == nil && cwd == nil {
+	if params.IO.In == nil && params.IO.Out == nil && params.IO.Err == nil && params.IO.CWD == nil {
 		childIO = parentIO
 	} else {
-		if in == nil {
-			in = parentIO.In()
+		if params.IO.In == nil {
+			params.IO.In = parentIO.In()
 		}
-		if out == nil {
-			out = parentIO.Out()
+		if params.IO.Out == nil {
+			params.IO.Out = parentIO.Out()
 		}
-		if eout == nil {
-			eout = parentIO.Err()
+		if params.IO.Err == nil {
+			params.IO.Err = parentIO.Err()
 		}
-		if cwd == nil {
-			cwd = parentIO.CWD()
+		if params.IO.CWD == nil {
+			params.IO.CWD = parentIO.CWD()
 		}
-		childIO = NewIO(in, out, eout, cwd)
+		childIO = NewIO(params.IO)
 	}
-	parentScope = parent.Scope()
-	childScope = scope.NewChildScope(parentScope, parentScope, parentScope)
 	return IOContext{
-		scope: childScope,
+		scope: scope.NewChildScope(parent.Scope(), params.Scope),
+		io:    childIO,
+	}
+}
+
+// NewParallelIOContext create new parallel io context related to current.
+func NewParallelIOContext(parent app.IOContext, params IOContextParams) (ioc app.IOContext) {
+	var (
+		parentIO app.IO
+		childIO  app.IO
+	)
+	parentIO = parent.IO()
+	if params.IO.In == nil && params.IO.Out == nil && params.IO.Err == nil && params.IO.CWD == nil {
+		childIO = parentIO
+	} else {
+		if params.IO.In == nil {
+			params.IO.In = parentIO.In()
+		}
+		if params.IO.Out == nil {
+			params.IO.Out = parentIO.Out()
+		}
+		if params.IO.Err == nil {
+			params.IO.Err = parentIO.Err()
+		}
+		if params.IO.CWD == nil {
+			params.IO.CWD = parentIO.CWD()
+		}
+		childIO = NewIO(params.IO)
+	}
+	return IOContext{
+		scope: scope.NewParallelScope(parent.Scope(), params.Scope),
 		io:    childIO,
 	}
 }
@@ -69,4 +100,9 @@ func (ioc IOContext) Scope() app.Scope {
 // IO return task context io
 func (ioc IOContext) IO() app.IO {
 	return ioc.io
+}
+
+// Close elements (like scope)
+func (ioc IOContext) Close() (err error) {
+	return ioc.scope.Close()
 }

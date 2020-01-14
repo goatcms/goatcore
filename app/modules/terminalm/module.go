@@ -4,7 +4,9 @@ import (
 	"strings"
 
 	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/app/gio"
 	"github.com/goatcms/goatcore/app/modules"
+	"github.com/goatcms/goatcore/app/scope"
 )
 
 // Module is command unit
@@ -35,6 +37,7 @@ func (m *Module) Run(a app.App) (err error) {
 		deps struct {
 			Terminal   modules.Terminal `dependency:"TerminalService"`
 			StrictMode string           `argument:"?strict"`
+			ctx        app.IOContext
 		}
 		io         = a.IOContext().IO()
 		strictMode bool
@@ -50,12 +53,32 @@ func (m *Module) Run(a app.App) (err error) {
 		return deps.Terminal.RunCommand(a.IOContext(), args[1:])
 	}
 	for {
-		if err = deps.Terminal.RunLoop(a.IOContext()); err == nil {
+		if err = m.runLoop(a.IOContext(), deps.Terminal); err == nil {
 			return nil
 		}
 		if strictMode {
+			a.IOContext().Scope().AppendError(err)
 			return err
 		}
 		io.Err().Printf("ERROR: %v", err)
 	}
+}
+
+func (m *Module) runLoop(parentCtx app.IOContext, terminal modules.Terminal) (err error) {
+	var (
+		parentScope  = parentCtx.Scope()
+		parentIO     = parentCtx.IO()
+		relatedScope app.Scope
+		relatedCtx   app.IOContext
+	)
+	relatedScope = scope.NewScope(scope.Params{
+		DataScope:  parentScope,
+		EventScope: parentScope,
+	})
+	relatedCtx = gio.NewIOContext(relatedScope, parentIO)
+	defer relatedCtx.Close()
+	if err = terminal.RunLoop(relatedCtx); err != nil {
+		return err
+	}
+	return relatedCtx.Scope().Wait()
 }

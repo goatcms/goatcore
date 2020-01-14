@@ -3,14 +3,27 @@ package bufferio
 import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/gio"
-	"github.com/goatcms/goatcore/filesystem"
 )
 
 // NewRepeatIO returns a new reapat IO instance. Repeat IO repeat input data to output
-func NewRepeatIO(in app.Input, out app.Output, eout app.Output, cwd filesystem.Filespace) (io app.IO) {
+func NewRepeatIO(params gio.IOParams) (io app.IO) {
+	if params.In == nil {
+		panic("Input is required")
+	}
+	if params.Out == nil {
+		panic("Output is required")
+	}
+	if params.Err == nil {
+		panic("Error putput is required")
+	}
+	if params.CWD == nil {
+		panic("CWD is required")
+	}
 	buffer := NewBuffer()
-	rin := NewBufferInput(in, buffer)
-	rout := NewRepeatOutput(out, buffer)
-	reout := NewRepeatOutput(eout, buffer)
-	return gio.NewIO(rin, rout, reout, cwd)
+	return gio.NewIO(gio.IOParams{
+		In:  NewBufferInput(params.In, buffer),
+		Out: NewRepeatOutput(params.Out, buffer),
+		Err: NewRepeatOutput(params.Err, buffer),
+		CWD: params.CWD,
+	})
 }

@@ -13,7 +13,7 @@ import (
 func TestIOContext(t *testing.T) {
 	t.Parallel()
 	var (
-		ioScope = scope.NewScope("tag")
+		ioScope = scope.NewScope(scope.Params{})
 		in      = NewInput(new(bytes.Buffer))
 		out     = NewOutput(new(bytes.Buffer))
 		eout    = NewOutput(new(bytes.Buffer))
@@ -26,7 +26,12 @@ func TestIOContext(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	io = NewIO(in, out, eout, cwd)
+	io = NewIO(IOParams{
+		In:  in,
+		Out: out,
+		Err: eout,
+		CWD: cwd,
+	})
 	ioc = NewIOContext(ioScope, io)
 	if ioc.Scope() != ioScope {
 		t.Errorf("Expected input from constructor")
@@ -52,7 +57,7 @@ func TestIOContextRequireIO(t *testing.T) {
 func TestIOContextRequireScope(t *testing.T) {
 	t.Parallel()
 	var (
-		ioScope = scope.NewScope("tag")
+		ioScope = scope.NewScope(scope.Params{})
 	)
 	defer func() {
 		if r := recover(); r == nil {

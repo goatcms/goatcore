@@ -85,3 +85,8 @@ func (task *Task) Status() string {
 func (task *Task) SetStatus(status string) {
 	task.status = status
 }
+
+// Errors return task errors (or nil)
+func (task *Task) Errors() []error {
+	return task.ctx.Scope().Errors()
+}

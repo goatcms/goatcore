@@ -8,7 +8,9 @@ import (
 
 // NewScope create new ArgScope instance
 func NewScope(args []string, tagname string) (ins app.Scope, err error) {
-	ins = scope.NewScope(tagname)
+	ins = scope.NewScope(scope.Params{
+		Tag: tagname,
+	})
 	if err = InjectArgsToScope(args, ins); err != nil {
 		return nil, err
 	}

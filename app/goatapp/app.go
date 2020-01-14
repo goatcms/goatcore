@@ -83,7 +83,12 @@ func NewGoatApp(name, version, basePath string) (a app.App, err error) {
 	gapp.dp.SetDefault(app.AppScope, gapp.appScope)
 	gapp.dp.SetDefault(app.CommandScope, gapp.commandScope)
 
-	gapp.io = gio.NewIO(in, out, eout, gapp.currentFilespace)
+	gapp.io = gio.NewIO(gio.IOParams{
+		In:  in,
+		Out: out,
+		Err: eout,
+		CWD: gapp.currentFilespace,
+	})
 	gapp.ioContext = gio.NewIOContext(gapp.appScope, gapp.io)
 
 	gapp.dp.SetDefault(app.InputService, gapp.io.In())
@@ -104,7 +109,9 @@ func NewGoatApp(name, version, basePath string) (a app.App, err error) {
 }
 
 func (gapp *GoatApp) initEngineScope() error {
-	gapp.engineScope = scope.NewScope(app.EngineTagName)
+	gapp.engineScope = scope.NewScope(scope.Params{
+		Tag: app.EngineTagName,
+	})
 	gapp.engineScope.Set(app.GoatVersion, app.GoatVersionValue)
 	return nil
 }
@@ -121,7 +128,9 @@ func (gapp *GoatApp) initFilespaceScope(path string) (err error) {
 	if err != nil {
 		return err
 	}
-	gapp.filespaceScope = scope.NewScope(app.FilespaceTagName)
+	gapp.filespaceScope = scope.NewScope(scope.Params{
+		Tag: app.FilespaceTagName,
+	})
 	gapp.filespaceScope.Set(app.RootFilespace, gapp.rootFilespace)
 	if err = gapp.rootFilespace.MkdirAll("tmp", 0766); err != nil {
 		return err
@@ -181,12 +190,16 @@ func (gapp *GoatApp) initConfigScope() error {
 }
 
 func (gapp *GoatApp) initCommandScope() error {
-	gapp.commandScope = scope.NewScope(app.CommandTagName)
+	gapp.commandScope = scope.NewScope(scope.Params{
+		Tag: app.CommandTagName,
+	})
 	return nil
 }
 
 func (gapp *GoatApp) initAppScope() error {
-	gapp.appScope = scope.NewScope(app.AppTagName)
+	gapp.appScope = scope.NewScope(scope.Params{
+		Tag: app.AppTagName,
+	})
 	gapp.appScope.Set(app.AppName, gapp.name)
 	gapp.appScope.Set(app.AppVersion, gapp.version)
 	return nil

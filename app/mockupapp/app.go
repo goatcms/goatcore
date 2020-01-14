@@ -49,11 +49,12 @@ func NewApp(options MockupOptions) (result *App, err error) {
 		mapp.options.Input = strings.NewReader("")
 	}
 
-	mapp.io = gio.NewIO(
-		gio.NewAppInput(mapp.options.Input),
-		gio.NewAppOutput(&mapp.outBuf),
-		gio.NewAppOutput(&mapp.errBuf),
-		mapp.options.RootFilespace)
+	mapp.io = gio.NewIO(gio.IOParams{
+		In:  gio.NewAppInput(mapp.options.Input),
+		Out: gio.NewAppOutput(&mapp.outBuf),
+		Err: gio.NewAppOutput(&mapp.errBuf),
+		CWD: mapp.options.RootFilespace,
+	})
 
 	if err = goaterr.ToErrors(goaterr.AppendError(nil,
 		mapp.initEngineScope(),
@@ -97,7 +98,9 @@ func (mapp *App) initEngineScope() error {
 	if mapp.options.EngineScope != nil {
 		return nil
 	}
-	mapp.options.EngineScope = scope.NewScope(app.EngineTagName)
+	mapp.options.EngineScope = scope.NewScope(scope.Params{
+		Tag: app.EngineTagName,
+	})
 	mapp.options.EngineScope.Set(app.GoatVersion, app.GoatVersionValue)
 	return nil
 }
@@ -119,7 +122,9 @@ func (mapp *App) initArgsScope() (err error) {
 func (mapp *App) initFilespaceScope() (err error) {
 	var value interface{}
 	if mapp.options.FilespaceScope == nil {
-		mapp.options.FilespaceScope = scope.NewScope(app.FilespaceTagName)
+		mapp.options.FilespaceScope = scope.NewScope(scope.Params{
+			Tag: app.FilespaceTagName,
+		})
 	}
 	fsscope := mapp.options.FilespaceScope
 	if value, _ = fsscope.Get(app.RootFilespace); value == nil {
@@ -138,7 +143,9 @@ func (mapp *App) initConfigScope() error {
 	if mapp.options.ConfigScope != nil {
 		return nil
 	}
-	mapp.options.ConfigScope = scope.NewScope(app.ConfigTagName)
+	mapp.options.ConfigScope = scope.NewScope(scope.Params{
+		Tag: app.ConfigTagName,
+	})
 	return nil
 }
 
@@ -146,7 +153,9 @@ func (mapp *App) initCommandScope() error {
 	if mapp.options.CommandScope != nil {
 		return nil
 	}
-	mapp.options.CommandScope = scope.NewScope(app.CommandTagName)
+	mapp.options.CommandScope = scope.NewScope(scope.Params{
+		Tag: app.CommandTagName,
+	})
 	return nil
 }
 
@@ -161,7 +170,9 @@ func (mapp *App) initAppScope() error {
 	if mapp.options.AppScope != nil {
 		return nil
 	}
-	mapp.options.AppScope = scope.NewScope(app.AppTagName)
+	mapp.options.AppScope = scope.NewScope(scope.Params{
+		Tag: app.AppTagName,
+	})
 	mapp.options.AppScope.Set(app.AppName, mapp.options.Name)
 	mapp.options.AppScope.Set(app.AppVersion, mapp.options.Version)
 	return nil

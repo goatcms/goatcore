@@ -2,7 +2,17 @@ package scope
 
 import (
 	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/app/injector"
 )
+
+// Params describe scope
+type Params struct {
+	SyncScope  app.SyncScope
+	DataScope  app.DataScope
+	EventScope app.EventScope
+	Injectors  []app.Injector
+	Tag        string
+}
 
 // Scope is global scope interface
 type Scope struct {
@@ -13,15 +23,32 @@ type Scope struct {
 }
 
 // NewScope create new instance of scope
-func NewScope(tagname string) app.Scope {
-	ds := &DataScope{
-		Data: make(map[string]interface{}),
+func NewScope(params Params) app.Scope {
+	var scopeInjector app.Injector
+	if params.DataScope == nil {
+		params.DataScope = NewDataScope(make(map[string]interface{}))
+	}
+	if params.Tag != "" {
+		params.Injectors = append(params.Injectors, NewScopeInjector(params.Tag, params.DataScope))
+	}
+	if len(params.Injectors) == 1 {
+		scopeInjector = params.Injectors[0]
+	} else if len(params.Injectors) > 1 {
+		scopeInjector = injector.NewMultiInjector(params.Injectors)
+	} else {
+		scopeInjector = injector.NewNilInjector()
+	}
+	if params.EventScope == nil {
+		params.EventScope = NewEventScope()
+	}
+	if params.SyncScope == nil {
+		params.SyncScope = NewSyncScope(nil)
 	}
 	return &Scope{
-		EventScope: NewEventScope(),
-		DataScope:  app.DataScope(ds),
-		Injector:   ds.Injector(tagname),
-		SyncScope:  NewSyncScope(nil),
+		EventScope: params.EventScope,
+		DataScope:  params.DataScope,
+		Injector:   scopeInjector,
+		SyncScope:  params.SyncScope,
 	}
 }
 

@@ -5,7 +5,10 @@ import (
 	"strings"
 
 	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/app/gio"
 	"github.com/goatcms/goatcore/app/modules"
+	"github.com/goatcms/goatcore/app/scope"
+	"github.com/goatcms/goatcore/app/scope/argscope"
 	"github.com/goatcms/goatcore/dependency"
 	"github.com/goatcms/goatcore/varutil"
 	"github.com/goatcms/goatcore/varutil/goaterr"
@@ -35,6 +38,9 @@ func (terminal *IOTerminal) RunLoop(ctx app.IOContext) (err error) {
 		io   = ctx.IO()
 	)
 	for !eof {
+		if ctx.Scope().IsKilled() {
+			return ctx.Scope().ToError()
+		}
 		io.Out().Printf("\n>")
 		if args, eof, err = varutil.ReadArguments(io.In()); err != nil {
 			return err
@@ -46,7 +52,7 @@ func (terminal *IOTerminal) RunLoop(ctx app.IOContext) (err error) {
 			return err
 		}
 	}
-	return nil
+	return err
 }
 
 // RunString execute single command
@@ -79,6 +85,7 @@ func (terminal *IOTerminal) RunCommand(ctx app.IOContext, args []string) (err er
 	if len(args) != 0 {
 		commandName = strings.ToLower(args[0])
 	}
+	// find command
 	if commandName == "" {
 		return HelpComamnd(terminal.deps.App, ctx)
 	}
@@ -86,8 +93,23 @@ func (terminal *IOTerminal) RunCommand(ctx app.IOContext, args []string) (err er
 		return goaterr.Errorf("Error: unknown command %s", commandName)
 	}
 	cb = cbIns.(app.CommandCallback)
-	if commandContext, err = newCommandContext(ctx, args); err != nil {
+	//prepare command child context
+	argsData := &scope.DataScope{
+		Data: make(map[string]interface{}),
+	}
+	if err = argscope.InjectArgsToScope(args, argsData); err != nil {
 		return err
 	}
+	baseScope := ctx.Scope()
+	injectableScope := scope.NewScope(scope.Params{
+		DataScope:  baseScope,
+		EventScope: baseScope,
+		SyncScope:  baseScope,
+		Injectors: []app.Injector{
+			argsData.Injector("command"),
+		},
+	})
+	commandContext = gio.NewIOContext(injectableScope, ctx.IO())
+	// run
 	return cb(terminal.deps.App, commandContext)
 }

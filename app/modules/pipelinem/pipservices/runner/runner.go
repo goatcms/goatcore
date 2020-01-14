@@ -74,11 +74,12 @@ func (runner *Runner) runGo(tasksManager pipservices.TasksManager, sandbox pipse
 	defer unlockHandler.Unlock()
 	task.SetStatus(fmt.Sprintf("execute"))
 	if err = sandbox.Run(task.IOContext()); err != nil {
-		task.IOContext().Scope().AppendError(err)
+		ctxScp.AppendError(err)
 		task.SetStatus("fail")
 		return
 	}
 	if err = ctxScp.Wait(); err != nil {
+		ctxScp.AppendError(err)
 		task.SetStatus(fmt.Sprintf("fail"))
 	}
 }
@@ -93,6 +94,9 @@ func (runner *Runner) waitForTasks(task pipservices.TaskWriter, tasksManager pip
 		}
 		if err = relatedTask.Wait(); err != nil {
 			return err
+		}
+		if len(relatedTask.Errors()) != 0 {
+			return fmt.Errorf("Related task %s failed", relatedTask.Name())
 		}
 	}
 	return nil
