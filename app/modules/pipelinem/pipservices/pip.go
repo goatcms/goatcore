@@ -17,9 +17,10 @@ type PipContext struct {
 
 // Pip describe single commands pipeline
 type Pip struct {
-	Context PipContext
-	Name    string
-	Sandbox string
-	Lock    commservices.LockMap
-	Wait    []string
+	Name       string
+	Context    PipContext
+	Namespaces Namespaces
+	Sandbox    string
+	Lock       commservices.LockMap
+	Wait       []string
 }

@@ -32,7 +32,10 @@ func TestUnitNamespaceStory(t *testing.T) {
 		scp       = scope.NewScope(scope.Params{})
 		namespace pipservices.Namespaces
 	)
-	if err = unit.Define(scp, "task", "lock"); err != nil {
+	if err = unit.Define(scp, NewNamespaces(pipservices.NamasepacesParams{
+		Task: "task",
+		Lock: "lock",
+	})); err != nil {
 		t.Error(err)
 		return
 	}
@@ -57,7 +60,10 @@ func TestUnitNamespaceBindStory(t *testing.T) {
 		child     = scope.NewScope(scope.Params{})
 		namespace pipservices.Namespaces
 	)
-	if err = unit.Define(parent, "task", "lock"); err != nil {
+	if err = unit.Define(parent, NewNamespaces(pipservices.NamasepacesParams{
+		Task: "task",
+		Lock: "lock",
+	})); err != nil {
 		t.Error(err)
 		return
 	}

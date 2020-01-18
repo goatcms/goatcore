@@ -10,7 +10,7 @@ import (
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
-func TestNestedPipWaitStory(t *testing.T) {
+func TestNestedPipNestedNamesStory(t *testing.T) {
 	t.Parallel()
 	var (
 		err         error
@@ -21,8 +21,8 @@ func TestNestedPipWaitStory(t *testing.T) {
 		Input: strings.NewReader(`
 pip:run --name=first --body=<<EOF
 				echoOne
-				pip:run --name=firstnested --body="echoTwo"
-				pip:run --name=secondnested --wait=firstnested --body="echoThree"
+				pip:run --name=first --body="echoTwo"
+				pip:run --name=second --wait=first --body="echoThree"
 EOF
 			pip:run --name=second --wait=first --body="echoFour"
 			pip:run --name=last --wait=second --body="echoFive"

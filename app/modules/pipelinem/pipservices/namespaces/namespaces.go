@@ -8,10 +8,32 @@ type Namasepaces struct {
 }
 
 // NewNamespaces create new Namasepaces instance
-func NewNamespaces(task, lock string) pipservices.Namespaces {
+func NewNamespaces(params pipservices.NamasepacesParams) pipservices.Namespaces {
 	return pipservices.Namespaces(Namasepaces{
-		task: task,
-		lock: lock,
+		task: params.Task,
+		lock: params.Lock,
+	})
+}
+
+// NewSubNamespaces create new Namasepaces instance into any other
+func NewSubNamespaces(parent pipservices.Namespaces, params pipservices.NamasepacesParams) pipservices.Namespaces {
+	if parent.Lock() != "" {
+		if params.Lock != "" {
+			params.Lock = parent.Lock() + ":" + params.Lock
+		} else {
+			params.Lock = parent.Lock()
+		}
+	}
+	if parent.Task() != "" {
+		if params.Task != "" {
+			params.Task = parent.Task() + ":" + params.Task
+		} else {
+			params.Task = parent.Task()
+		}
+	}
+	return pipservices.Namespaces(Namasepaces{
+		task: params.Task,
+		lock: params.Lock,
 	})
 }
 

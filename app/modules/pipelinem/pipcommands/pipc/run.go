@@ -24,7 +24,7 @@ func Run(a app.App, ctx app.IOContext) (err error) {
 			Runner         pipservices.Runner         `dependency:"PipRunner"`
 			NamespacesUnit pipservices.NamespacesUnit `dependency:"PipNamespacesUnit"`
 		}
-		namasepaces   pipservices.Namespaces
+		scpNamespaces pipservices.Namespaces
 		lockMap       = commservices.LockMap{}
 		wait          []string
 		lockNamespace string
@@ -46,10 +46,10 @@ func Run(a app.App, ctx app.IOContext) (err error) {
 	if deps.Body == "" {
 		return goaterr.Errorf("pip:run Body is required")
 	}
-	if namasepaces, err = deps.NamespacesUnit.FromScope(ctx.Scope(), defaultNamespace); err != nil {
+	if scpNamespaces, err = deps.NamespacesUnit.FromScope(ctx.Scope(), defaultNamespace); err != nil {
 		return err
 	}
-	lockNamespace += namasepaces.Lock() + ":"
+	lockNamespace += scpNamespaces.Lock()
 	if deps.RLock != "" {
 		if err = markBoolMapForNamespace(deps.RLock, lockNamespace, commservices.LockR, lockMap); err != nil {
 			return err
@@ -61,7 +61,11 @@ func Run(a app.App, ctx app.IOContext) (err error) {
 		}
 	}
 	if deps.Wait != "" {
-		if wait, err = splitWaitNames(deps.Wait); err != nil {
+		waitPrefix := scpNamespaces.Task()
+		if waitPrefix != "" {
+			waitPrefix = waitPrefix + ":"
+		}
+		if wait, err = splitWaitNames(waitPrefix, deps.Wait); err != nil {
 			return err
 		}
 	}
@@ -74,9 +78,10 @@ func Run(a app.App, ctx app.IOContext) (err error) {
 			CWD:   ctxIO.CWD(),
 			Scope: ctx.Scope(),
 		},
-		Name:    deps.Name,
-		Sandbox: deps.Sandbox,
-		Lock:    lockMap,
-		Wait:    wait,
+		Name:       deps.Name,
+		Namespaces: scpNamespaces,
+		Sandbox:    deps.Sandbox,
+		Lock:       lockMap,
+		Wait:       wait,
 	})
 }

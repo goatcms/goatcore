@@ -7,6 +7,7 @@ import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // Task is single task object
@@ -21,6 +22,9 @@ type Task struct {
 
 // NewTask create a Taks instance
 func NewTask(ctx app.IOContext, pip pipservices.Pip) *Task {
+	if ctx == nil {
+		panic(goaterr.Errorf("context is required"))
+	}
 	task := &Task{
 		ctx: ctx,
 		pip: pip,

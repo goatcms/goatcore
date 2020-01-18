@@ -4,6 +4,7 @@ import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 	"github.com/goatcms/goatcore/dependency"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 const (
@@ -36,8 +37,21 @@ func (unit Unit) FromScope(scp app.Scope, defaultNamespace pipservices.Namespace
 }
 
 // Define define scope namespaces
-func (unit Unit) Define(scp app.Scope, task, lock string) (err error) {
-	return scp.Set(scopeKey, NewNamespaces(task, lock))
+func (unit Unit) Define(scp app.Scope, namespaces pipservices.Namespaces) (err error) {
+	var v interface{}
+	locker := scp.LockData()
+	if v, err = locker.Get(scopeKey); err != nil {
+		return goaterr.ToErrors(goaterr.AppendError(nil, err, locker.Commit()))
+	}
+	if v != nil {
+		return goaterr.ToErrors(goaterr.AppendError(nil,
+			goaterr.Errorf("Namespaces alerdy defined"),
+			locker.Commit()))
+	}
+	if err = locker.Set(scopeKey, namespaces); err != nil {
+		return goaterr.ToErrors(goaterr.AppendError(nil, err, locker.Commit()))
+	}
+	return locker.Commit()
 }
 
 // Bind set child scope namespace from parent

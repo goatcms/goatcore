@@ -6,13 +6,13 @@ import (
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
-func splitWaitNames(str string) (result []string, err error) {
+func splitWaitNames(prefix, str string) (result []string, err error) {
 	for _, row := range strings.Split(str, ",") {
 		row = strings.Trim(row, cutset)
 		if !namePattern.MatchString(row) {
 			return nil, goaterr.Errorf("Incorrect name '%s'", row)
 		}
-		result = append(result, row)
+		result = append(result, prefix+row)
 	}
 	return result, nil
 }

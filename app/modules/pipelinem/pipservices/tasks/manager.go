@@ -8,6 +8,7 @@ import (
 	"github.com/goatcms/goatcore/app/gio"
 	"github.com/goatcms/goatcore/app/gio/bufferio"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/namespaces"
 	"github.com/goatcms/goatcore/app/scope"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
@@ -63,15 +64,19 @@ func (manager *TaskManager) Get(name string) (task pipservices.Task) {
 // Create new task
 func (manager *TaskManager) Create(pip pipservices.Pip) (result pipservices.TaskWriter, err error) {
 	var (
-		ok          bool
-		repeatIO    app.IO
-		childScope  app.Scope
-		taskCtx     app.IOContext
-		task        *Task
-		parentScope = pip.Context.Scope
+		ok              bool
+		repeatIO        app.IO
+		childScope      app.Scope
+		taskCtx         app.IOContext
+		task            *Task
+		parentScope     = pip.Context.Scope
+		childNamespaces pipservices.Namespaces
 	)
 	if pip.Name == "" {
 		return nil, goaterr.Errorf("Pip.Name is required")
+	}
+	if pip.Namespaces == nil {
+		return nil, goaterr.Errorf("Expected Pip.Namespaces not nil")
 	}
 	if pip.Context.CWD == nil {
 		return nil, goaterr.Errorf("Expected PipContext.CWD not nil")
@@ -88,12 +93,16 @@ func (manager *TaskManager) Create(pip pipservices.Pip) (result pipservices.Task
 	if parentScope == nil {
 		return nil, goaterr.Errorf("Expected PipContext.Scope not nil")
 	}
+	childNamespaces = namespaces.NewSubNamespaces(pip.Namespaces, pipservices.NamasepacesParams{
+		Task: pip.Name,
+	})
+	taskname := childNamespaces.Task()
 	manager.tasksMU.Lock()
 	defer manager.tasksMU.Unlock()
-	if _, ok = manager.tasks[pip.Name]; ok {
-		return nil, goaterr.Errorf("Task '%s' is already defined", pip.Name)
+	if _, ok = manager.tasks[taskname]; ok {
+		return nil, goaterr.Errorf("Task '%s' is already defined", taskname)
 	}
-	outLogger := gio.NewLogger(manager.logsOutput, pip.Name)
+	outLogger := gio.NewLogger(manager.logsOutput, taskname)
 	repeatIO = bufferio.NewRepeatIO(gio.IOParams{
 		In: pip.Context.In,
 		Out: gio.NewOutputBroadcast([]app.Output{
@@ -106,16 +115,22 @@ func (manager *TaskManager) Create(pip pipservices.Pip) (result pipservices.Task
 		}),
 		CWD: pip.Context.CWD,
 	})
-	childScope = scope.NewChildScope(parentScope, scope.Params{})
-	if err = manager.deps.NamespacesUnit.Bind(parentScope, childScope); err != nil {
+	childScope = scope.NewChildScope(parentScope, scope.Params{
+		DataScope:  scope.NewDataScope(map[string]interface{}{}),
+		EventScope: scope.NewEventScope(),
+	})
+	if err = manager.deps.NamespacesUnit.Define(childScope, childNamespaces); err != nil {
+		return nil, err
+	}
+	if err = childScope.Set(scopeKey, manager); err != nil {
 		return nil, err
 	}
 	taskCtx = gio.NewIOContext(childScope, repeatIO)
 	task = NewTask(taskCtx, pip)
-	if err = manager.validWaitList([]string{pip.Name}, task, 100); err != nil {
+	manager.tasks[taskname] = task
+	if err = manager.validWaitList([]string{taskname}, task, 100); err != nil {
 		return nil, err
 	}
-	manager.tasks[pip.Name] = task
 	return task, nil
 }
 
@@ -124,7 +139,7 @@ func (manager *TaskManager) validWaitList(path []string, task pipservices.Task, 
 	if counter < 0 {
 		return goaterr.Errorf("Too many depth. Your wait has to many depth %s", strings.Join(path, "->"))
 	}
-	if task.WaitList() == nil {
+	if len(task.WaitList()) == 0 {
 		return nil
 	}
 	for _, taskName := range task.WaitList() {

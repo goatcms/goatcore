@@ -8,6 +8,7 @@ import (
 	"github.com/goatcms/goatcore/app/gio"
 	"github.com/goatcms/goatcore/app/gio/bufferio"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/namespaces"
 	"github.com/goatcms/goatcore/app/scope"
 	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
 )
@@ -49,7 +50,11 @@ func TestUnitStory(t *testing.T) {
 		return
 	}
 	if task, err = manager.Create(pipservices.Pip{
-		Name:    "task",
+		Name: "task",
+		Namespaces: namespaces.NewNamespaces(pipservices.NamasepacesParams{
+			Task: "",
+			Lock: "",
+		}),
 		Context: pipCtx,
 	}); err != nil {
 		t.Error(err)
