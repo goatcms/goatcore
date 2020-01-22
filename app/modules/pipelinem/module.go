@@ -31,7 +31,10 @@ func (m *Module) RegisterDependencies(a app.App) error {
 		dp.AddDefaultFactory(pipservices.NamespacesUnitService, namespaces.UnitFactory),
 		dp.AddDefaultFactory(pipservices.RunnerService, runner.Factory),
 		dp.AddDefaultFactory(pipservices.TasksUnitService, tasks.UnitFactory),
+		app.RegisterCommand(a, "pip:clear", pipc.Clear, pipcommands.PipClear),
 		app.RegisterCommand(a, "pip:run", pipc.Run, pipcommands.PipRun),
+		app.RegisterCommand(a, "pip:logs", pipc.Logs, pipcommands.PipLogs),
+		app.RegisterCommand(a, "pip:summary", pipc.Summary, pipcommands.PipSummary),
 		app.RegisterHealthChecker(a, "docker", SandboxHealthChecker),
 	))
 }

@@ -81,7 +81,9 @@ func (runner *Runner) runGo(tasksManager pipservices.TasksManager, sandbox pipse
 	if err = ctxScp.Wait(); err != nil {
 		ctxScp.AppendError(err)
 		task.SetStatus(fmt.Sprintf("fail"))
+		return
 	}
+	task.SetStatus(fmt.Sprintf("ended"))
 }
 
 // waitForTasks wait for all related task

@@ -19,9 +19,9 @@ func TestPipRunWaitStory(t *testing.T) {
 	)
 	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
 		Input: strings.NewReader(`
-			pip:run --name=first --body="echoAla"
-			pip:run --name=second --wait=first --body="echoMa"
-			pip:run --name=last --wait=second --body="echoKota"
+			pip:run --name=first --body="echoAla" --silent=false
+			pip:run --name=second --wait=first --body="echoMa" --silent=false
+			pip:run --name=last --wait=second --body="echoKota" --silent=false
 			`),
 		Args: []string{`appname`, `terminal`, ``, `--body="testCommand"`},
 	}); err != nil {

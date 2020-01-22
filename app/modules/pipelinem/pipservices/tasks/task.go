@@ -1,7 +1,6 @@
 package tasks
 
 import (
-	"bytes"
 	"sync"
 
 	"github.com/goatcms/goatcore/app"
@@ -12,7 +11,6 @@ import (
 
 // Task is single task object
 type Task struct {
-	logs   bytes.Buffer
 	ctx    app.IOContext
 	done   bool
 	status string
@@ -45,7 +43,7 @@ func (task *Task) Name() string {
 
 // Logs return task result
 func (task *Task) Logs() string {
-	return task.logs.String()
+	return task.pip.LogsBuffer.String()
 }
 
 // Done return true if task is finished

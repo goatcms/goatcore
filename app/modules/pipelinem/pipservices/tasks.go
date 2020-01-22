@@ -48,4 +48,5 @@ type TasksManager interface {
 type TasksUnit interface {
 	FromScope(scp app.Scope) (tasks TasksManager, err error)
 	BindScope(scp app.Scope, tasks TasksManager) (err error)
+	Clear(scp app.Scope) (err error)
 }

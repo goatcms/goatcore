@@ -38,5 +38,5 @@ func (logger *Logger) Printf(format string, a ...interface{}) (err error) {
 
 func (logger *Logger) format(s string) (result string) {
 	timeStr := time.Now().Format("2006-01-02 15:04:05.000000000")
-	return fmt.Sprintf(" [%s] %s : %s", timeStr, logger.cid, s)
+	return fmt.Sprintf(" [%s] %s : %s\n", timeStr, logger.cid, s)
 }

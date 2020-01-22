@@ -17,7 +17,7 @@ func TestRunner(t *testing.T) {
 	)
 	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
 		Input: strings.NewReader(` `),
-		Args:  []string{`appname`, `pip:run`, `--name=name`, `--body="testCommand"`},
+		Args:  []string{`appname`, `pip:run`, `--name=name`, `--body="testCommand"`, `--silent=false`},
 	}); err != nil {
 		t.Error(err)
 		return

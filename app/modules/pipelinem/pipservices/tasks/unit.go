@@ -57,3 +57,8 @@ func (unit *Unit) FromScope(scp app.Scope) (tasks pipservices.TasksManager, err 
 func (unit *Unit) BindScope(scp app.Scope, manager pipservices.TasksManager) (err error) {
 	return scp.Set(scopeKey, manager)
 }
+
+// Clear remove pipelines scope data
+func (unit *Unit) Clear(scp app.Scope) (err error) {
+	return scp.Set(scopeKey, nil)
+}

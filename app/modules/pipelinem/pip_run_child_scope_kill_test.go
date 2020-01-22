@@ -21,8 +21,8 @@ func TestPipRunChildScopeKillStory(t *testing.T) {
 	// it check async execution
 	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
 		Input: strings.NewReader(`
-			pip:run --name=first --body="killStatus"
-			pip:run --name=second --body="kill"
+			pip:run --name=first --body="killStatus" --silent=false
+			pip:run --name=second --body="kill" --silent=false
 			`),
 		Args: []string{`appname`, `terminal`},
 	}); err != nil {

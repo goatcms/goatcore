@@ -23,7 +23,7 @@ func TestPipRunWaitForErrorStory(t *testing.T) {
 			pip:run --name=first --body="error"
 			pip:run --name=second --wait=first --body="afterKillCommand"
 			`),
-		Args: []string{`appname`, `terminal`, `--strict=true`},
+		Args: []string{`appname`, `terminal`, `--strict=true`, `--silent=false`},
 	}); err != nil {
 		t.Error(err)
 		return

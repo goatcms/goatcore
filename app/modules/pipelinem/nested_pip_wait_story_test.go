@@ -19,13 +19,13 @@ func TestNestedPipWaitStory(t *testing.T) {
 	)
 	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
 		Input: strings.NewReader(`
-pip:run --name=first --body=<<EOF
+pip:run --name=first --silent=false --body=<<EOF
 				echoOne
-				pip:run --name=firstnested --body="echoTwo"
-				pip:run --name=secondnested --wait=firstnested --body="echoThree"
+				pip:run --name=firstnested --body="echoTwo" --silent=false
+				pip:run --name=secondnested --wait=firstnested --body="echoThree" --silent=false
 EOF
-			pip:run --name=second --wait=first --body="echoFour"
-			pip:run --name=last --wait=second --body="echoFive"
+			pip:run --name=second --wait=first --body="echoFour" --silent=false
+			pip:run --name=last --wait=second --body="echoFive" --silent=false
 			`),
 		Args: []string{`appname`, `terminal`},
 	}); err != nil {

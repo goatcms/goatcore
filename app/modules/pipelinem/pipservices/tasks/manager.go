@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"bytes"
 	"strings"
 	"sync"
 
@@ -102,14 +103,22 @@ func (manager *TaskManager) Create(pip pipservices.Pip) (result pipservices.Task
 	if _, ok = manager.tasks[taskname]; ok {
 		return nil, goaterr.Errorf("Task '%s' is already defined", taskname)
 	}
+	if pip.LogsBuffer == nil {
+		pip.LogsBuffer = &bytes.Buffer{}
+	}
+	if pip.Logs == nil {
+		pip.Logs = gio.NewOutput(pip.LogsBuffer)
+	}
 	outLogger := gio.NewLogger(manager.logsOutput, taskname)
 	repeatIO = bufferio.NewRepeatIO(gio.IOParams{
 		In: pip.Context.In,
 		Out: gio.NewOutputBroadcast([]app.Output{
+			pip.Logs,
 			outLogger,
 			pip.Context.Out,
 		}),
 		Err: gio.NewOutputBroadcast([]app.Output{
+			pip.Logs,
 			outLogger,
 			pip.Context.Err,
 		}),

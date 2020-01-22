@@ -1,44 +1,28 @@
 package gio
 
 import (
-	"fmt"
-	"io"
-	"sync"
-
 	"github.com/goatcms/goatcore/app"
 )
 
-// Output represent system output
-type Output struct {
-	wd io.Writer // writer provided by the client
-	mu sync.Mutex
-}
+var (
+	nilOutputInstance app.Output = NilOutput{}
+)
 
-// NewOutput returns a new Output.
-func NewOutput(wd io.Writer) *Output {
-	return &Output{
-		wd: wd,
-	}
-}
+// NilOutput represent empty output
+type NilOutput struct{}
 
-// NewAppOutput returns a new app.Output.
-func NewAppOutput(wd io.Writer) app.Output {
-	return NewOutput(wd)
+// NewNilOutput returns a new NilOutput
+func NewNilOutput() app.Output {
+	return nilOutputInstance
 }
 
 // Printf formats according to a format specifier and writes to standard output.
 // It returns the number of bytes written and any write error encountered.
-func (out *Output) Printf(format string, a ...interface{}) error {
-	out.mu.Lock()
-	defer out.mu.Unlock()
-	s := fmt.Sprintf(format, a...)
-	_, err := out.wd.Write([]byte(s))
-	return err
+func (out NilOutput) Printf(format string, a ...interface{}) error {
+	return nil
 }
 
 // Write data to output
-func (out *Output) Write(p []byte) (n int, err error) {
-	out.mu.Lock()
-	defer out.mu.Unlock()
-	return out.wd.Write(p)
+func (out NilOutput) Write(p []byte) (n int, err error) {
+	return len(p), nil
 }

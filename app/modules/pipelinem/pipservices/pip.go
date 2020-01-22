@@ -1,6 +1,8 @@
 package pipservices
 
 import (
+	"bytes"
+
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/filesystem"
@@ -23,4 +25,6 @@ type Pip struct {
 	Sandbox    string
 	Lock       commservices.LockMap
 	Wait       []string
+	LogsBuffer *bytes.Buffer
+	Logs       app.Output
 }

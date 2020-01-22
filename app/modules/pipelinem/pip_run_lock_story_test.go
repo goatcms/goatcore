@@ -19,10 +19,10 @@ func TestPipRunLockStory(t *testing.T) {
 	)
 	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
 		Input: strings.NewReader(`
-			pip:run --name=first --rlock=resource --body="long"
-			pip:run --name=second --wlock=resource --body="short"
+			pip:run --name=first --rlock=resource --body="long" --silent=false
+			pip:run --name=second --wlock=resource --body="short" --silent=false
 			`),
-		Args: []string{`appname`, `terminal`, ``, `--body="testCommand"`},
+		Args: []string{`appname`, `terminal`},
 	}); err != nil {
 		t.Error(err)
 		return
