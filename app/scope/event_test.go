@@ -7,7 +7,7 @@ import (
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
-func TestEventStory(t *testing.T) {
+func TestEventScopeDoneStory(t *testing.T) {
 	t.Parallel()
 	var called1 = false
 	var called2 = false
@@ -29,7 +29,7 @@ func TestEventStory(t *testing.T) {
 	}
 }
 
-func TestErrorStory(t *testing.T) {
+func TestEventScopeErrorStory(t *testing.T) {
 	t.Parallel()
 	c := NewEventScope()
 	c.On(app.KillEvent, func(interface{}) error {

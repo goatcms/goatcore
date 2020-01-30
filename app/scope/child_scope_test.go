@@ -16,7 +16,7 @@ func TestParentScopeIsKillByChildWhenFail(t *testing.T) {
 	)
 	t.Parallel()
 	parentScope = NewScope(Params{})
-	childScope = NewChildScope(parentScope, Params{
+	childScope = NewChildScope(parentScope, ChildParams{
 		EventScope: parentScope,
 		DataScope:  parentScope,
 	})
@@ -34,7 +34,7 @@ func TestChildScopeAppendError(t *testing.T) {
 	)
 	t.Parallel()
 	parentScope = NewScope(Params{})
-	childScope = NewChildScope(parentScope, Params{
+	childScope = NewChildScope(parentScope, ChildParams{
 		EventScope: parentScope,
 		DataScope:  parentScope,
 	})
@@ -55,7 +55,7 @@ func TestChildScopeAppendErrors(t *testing.T) {
 	)
 	t.Parallel()
 	parentScope = NewScope(Params{})
-	childScope = NewChildScope(parentScope, Params{
+	childScope = NewChildScope(parentScope, ChildParams{
 		EventScope: parentScope,
 		DataScope:  parentScope,
 	})
@@ -78,7 +78,7 @@ func TestChildScopeWait(t *testing.T) {
 	)
 	t.Parallel()
 	parentScope = NewScope(Params{})
-	childScope = NewChildScope(parentScope, Params{
+	childScope = NewChildScope(parentScope, ChildParams{
 		EventScope: parentScope,
 		DataScope:  parentScope,
 	})
@@ -112,7 +112,7 @@ func TestParentScopeWait(t *testing.T) {
 	)
 	t.Parallel()
 	parentScope = NewScope(Params{})
-	childScope = NewChildScope(parentScope, Params{
+	childScope = NewChildScope(parentScope, ChildParams{
 		EventScope: parentScope,
 		DataScope:  parentScope,
 	})
@@ -142,7 +142,7 @@ func TestChildScopeInjector(t *testing.T) {
 			"key": "value",
 		},
 	}
-	childScope = NewChildScope(parentScope, Params{
+	childScope = NewChildScope(parentScope, ChildParams{
 		Injectors: []app.Injector{
 			ds.Injector("tagname"),
 		},

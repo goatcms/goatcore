@@ -14,7 +14,7 @@ func newApp(options mockupapp.MockupOptions) (mapp *mockupapp.App, bootstraper a
 		return nil, nil, err
 	}
 	bootstraper = bootstrap.NewBootstrap(mapp)
-	if err = goaterr.ToErrors(goaterr.AppendError(nil,
+	if err = goaterr.ToError(goaterr.AppendError(nil,
 		bootstraper.Register(terminalm.NewModule()),
 		bootstraper.Register(commonm.NewModule()),
 		bootstraper.Register(NewModule()),

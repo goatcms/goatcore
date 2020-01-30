@@ -15,6 +15,6 @@ func AppendError(scope app.Scope, err error) {
 // ToError return scope error object or nil if scope has no error
 func ToError(scope app.Scope) error {
 	var lifecycle = Lifecycle(scope)
-	return goaterr.ToErrors(lifecycle.Errors())
+	return goaterr.ToError(lifecycle.Errors())
 }
 */

@@ -41,15 +41,15 @@ func (unit Unit) Define(scp app.Scope, namespaces pipservices.Namespaces) (err e
 	var v interface{}
 	locker := scp.LockData()
 	if v, err = locker.Get(scopeKey); err != nil {
-		return goaterr.ToErrors(goaterr.AppendError(nil, err, locker.Commit()))
+		return goaterr.ToError(goaterr.AppendError(nil, err, locker.Commit()))
 	}
 	if v != nil {
-		return goaterr.ToErrors(goaterr.AppendError(nil,
+		return goaterr.ToError(goaterr.AppendError(nil,
 			goaterr.Errorf("Namespaces alerdy defined"),
 			locker.Commit()))
 	}
 	if err = locker.Set(scopeKey, namespaces); err != nil {
-		return goaterr.ToErrors(goaterr.AppendError(nil, err, locker.Commit()))
+		return goaterr.ToError(goaterr.AppendError(nil, err, locker.Commit()))
 	}
 	return locker.Commit()
 }

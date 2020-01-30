@@ -76,5 +76,5 @@ func (b *Bootstrap) Run() (err error) {
 	if err = appScope.Wait(); err != nil {
 		errs = append(errs, err)
 	}
-	return goaterr.ToErrors(goaterr.AppendError(errs, app.CloseApp(b.gapp)))
+	return goaterr.ToError(goaterr.AppendError(errs, app.CloseApp(b.gapp)))
 }

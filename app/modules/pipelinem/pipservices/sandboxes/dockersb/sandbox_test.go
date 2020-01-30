@@ -9,6 +9,7 @@ import (
 	"github.com/goatcms/goatcore/app/gio/bufferio"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/namespaces"
 	"github.com/goatcms/goatcore/app/scope"
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/filesystem/filespace/diskfs"
@@ -52,7 +53,11 @@ func TestDockerSandbox(t *testing.T) {
 			Scope: scp,
 			CWD:   cwd,
 		},
-		Name:    "name",
+		Name: "name",
+		Namespaces: namespaces.NewNamespaces(pipservices.NamasepacesParams{
+			Task: "",
+			Lock: "",
+		}),
 		Sandbox: "docker:alpine",
 		Lock:    commservices.LockMap{},
 		Wait:    []string{},

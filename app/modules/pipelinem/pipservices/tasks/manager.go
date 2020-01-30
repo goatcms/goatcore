@@ -21,23 +21,24 @@ type TaskManager struct {
 	logsOutput app.Output
 	tasksMU    sync.RWMutex
 	tasks      map[string]*Task
-	scope      app.Scope
+	rootScope  app.Scope
 }
 
 // NewTaskManager create a Output instance
-func NewTaskManager(deps UnitDeps) (manager *TaskManager) {
+func NewTaskManager(deps UnitDeps, rootScope app.Scope) (manager *TaskManager) {
 	manager = &TaskManager{
-		deps:  deps,
-		logs:  bufferio.NewBuffer(),
-		tasks: map[string]*Task{},
+		deps:      deps,
+		rootScope: rootScope,
+		logs:      bufferio.NewBuffer(),
+		tasks:     map[string]*Task{},
 	}
 	manager.logsOutput = bufferio.NewBufferOutput(manager.logs)
 	return manager
 }
 
 // newTaskManager create a Output instance
-func newTaskManager(deps UnitDeps) (manager pipservices.TasksManager) {
-	return NewTaskManager(deps)
+func newTaskManager(deps UnitDeps, rootScope app.Scope) (manager pipservices.TasksManager) {
+	return NewTaskManager(deps, rootScope)
 }
 
 // Logs return logs
@@ -124,10 +125,7 @@ func (manager *TaskManager) Create(pip pipservices.Pip) (result pipservices.Task
 		}),
 		CWD: pip.Context.CWD,
 	})
-	childScope = scope.NewChildScope(parentScope, scope.Params{
-		DataScope:  scope.NewDataScope(map[string]interface{}{}),
-		EventScope: scope.NewEventScope(),
-	})
+	childScope = scope.NewChildScope(parentScope, scope.ChildParams{})
 	if err = manager.deps.NamespacesUnit.Define(childScope, childNamespaces); err != nil {
 		return nil, err
 	}
@@ -135,11 +133,12 @@ func (manager *TaskManager) Create(pip pipservices.Pip) (result pipservices.Task
 		return nil, err
 	}
 	taskCtx = gio.NewIOContext(childScope, repeatIO)
-	task = NewTask(taskCtx, pip)
+	task = NewTask(taskCtx, pip, manager.rootScope.DoneTask)
 	manager.tasks[taskname] = task
 	if err = manager.validWaitList([]string{taskname}, task, 100); err != nil {
 		return nil, err
 	}
+	manager.rootScope.AddTasks(1)
 	return task, nil
 }
 

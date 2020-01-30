@@ -56,7 +56,7 @@ func NewApp(options MockupOptions) (result *App, err error) {
 		CWD: mapp.options.RootFilespace,
 	})
 
-	if err = goaterr.ToErrors(goaterr.AppendError(nil,
+	if err = goaterr.ToError(goaterr.AppendError(nil,
 		mapp.initEngineScope(),
 		mapp.initArgsScope(),
 		mapp.initFilespaceScope(),

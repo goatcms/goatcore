@@ -11,29 +11,31 @@ import (
 
 // Task is single task object
 type Task struct {
-	ctx    app.IOContext
-	done   bool
-	status string
-	pip    pipservices.Pip
-	wg     sync.WaitGroup
+	ctx     app.IOContext
+	done    bool
+	status  string
+	pip     pipservices.Pip
+	wg      sync.WaitGroup
+	closeCB func()
 }
 
 // NewTask create a Taks instance
-func NewTask(ctx app.IOContext, pip pipservices.Pip) *Task {
+func NewTask(ctx app.IOContext, pip pipservices.Pip, closeCB func()) *Task {
 	if ctx == nil {
 		panic(goaterr.Errorf("context is required"))
 	}
 	task := &Task{
-		ctx: ctx,
-		pip: pip,
+		ctx:     ctx,
+		pip:     pip,
+		closeCB: closeCB,
 	}
 	task.wg.Add(1)
 	return task
 }
 
 // newPipTaskWriter create a PipTaskWriter instance
-func newPipTaskWriter(ctx app.IOContext, pip pipservices.Pip) pipservices.TaskWriter {
-	return NewTask(ctx, pip)
+func newPipTaskWriter(ctx app.IOContext, pip pipservices.Pip, closeCB func()) pipservices.TaskWriter {
+	return NewTask(ctx, pip, closeCB)
 }
 
 // Name return task name
@@ -59,6 +61,9 @@ func (task *Task) IOContext() (out app.IOContext) {
 // Close mark task as done and close input data
 func (task *Task) Close() (err error) {
 	task.wg.Done()
+	if task.closeCB != nil {
+		task.closeCB()
+	}
 	return task.ctx.Scope().Close()
 }
 

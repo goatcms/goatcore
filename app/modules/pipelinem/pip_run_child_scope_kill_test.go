@@ -29,7 +29,7 @@ func TestPipRunChildScopeKillStory(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if err = goaterr.ToErrors(goaterr.AppendError(nil, app.RegisterCommand(mapp, "killStatus", func(a app.App, ctx app.IOContext) (err error) {
+	if err = goaterr.ToError(goaterr.AppendError(nil, app.RegisterCommand(mapp, "killStatus", func(a app.App, ctx app.IOContext) (err error) {
 		time.Sleep(10 * time.Millisecond)
 		if ctx.Scope().IsKilled() {
 			return ctx.IO().Out().Printf("is_killed")
@@ -43,7 +43,10 @@ func TestPipRunChildScopeKillStory(t *testing.T) {
 		return
 	}
 	// test
-	bootstraper.Run()
+	if err = bootstraper.Run(); err != nil {
+		t.Error(err)
+		return
+	}
 	if err = mapp.AppScope().Wait(); err != nil {
 		t.Error(err)
 		return

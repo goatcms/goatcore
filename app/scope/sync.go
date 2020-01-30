@@ -49,7 +49,7 @@ func (s *SyncScope) IsKilled() bool {
 
 // ToError return scope error object or nil if does't contains a error
 func (s *SyncScope) ToError() error {
-	return goaterr.ToErrors(s.Errors())
+	return goaterr.ToError(s.Errors())
 }
 
 // Errors return scope errors

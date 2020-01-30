@@ -50,5 +50,5 @@ func HealthComamnd(a app.App, ctx app.IOContext) (err error) {
 		}
 	}
 	io.Out().Printf("\n")
-	return goaterr.ToErrors(errs)
+	return goaterr.ToError(errs)
 }

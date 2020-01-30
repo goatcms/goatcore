@@ -11,16 +11,16 @@ type dataLockerUnlocker func()
 
 // DataLocker represent scope data
 type DataLocker struct {
-	*DataScope
+	data     map[string]interface{}
 	mu       sync.RWMutex
 	unlockCB dataLockerUnlocker
 }
 
 // Commit unlock parent scope and close locker
-func newDataLocker(dataScope *DataScope, unlockCB dataLockerUnlocker) (locker app.DataScopeLocker) {
+func newDataLocker(data map[string]interface{}, unlockCB dataLockerUnlocker) (locker app.DataScopeLocker) {
 	return &DataLocker{
-		DataScope: dataScope,
-		unlockCB:  unlockCB,
+		data:     data,
+		unlockCB: unlockCB,
 	}
 }
 
@@ -28,7 +28,7 @@ func newDataLocker(dataScope *DataScope, unlockCB dataLockerUnlocker) (locker ap
 func (locker *DataLocker) Set(key string, v interface{}) error {
 	locker.mu.Lock()
 	defer locker.mu.Unlock()
-	locker.DataScope.Data[key] = v
+	locker.data[key] = v
 	return nil
 }
 
@@ -36,16 +36,16 @@ func (locker *DataLocker) Set(key string, v interface{}) error {
 func (locker *DataLocker) Get(key string) (value interface{}, err error) {
 	locker.mu.RLock()
 	defer locker.mu.RUnlock()
-	return locker.DataScope.Data[key], nil
+	return locker.data[key], nil
 }
 
 // Keys get map data
 func (locker *DataLocker) Keys() ([]string, error) {
 	locker.mu.RLock()
 	defer locker.mu.RUnlock()
-	keys := make([]string, len(locker.DataScope.Data))
+	keys := make([]string, len(locker.data))
 	i := 0
-	for key := range locker.DataScope.Data {
+	for key := range locker.data {
 		keys[i] = key
 		i++
 	}
@@ -54,18 +54,18 @@ func (locker *DataLocker) Keys() ([]string, error) {
 
 // Injector create new injector for the data scope
 func (locker *DataLocker) Injector(tagname string) app.Injector {
-	return injector.NewMapInjector(tagname, locker.DataScope.Data)
+	return injector.NewMapInjector(tagname, locker.data)
 }
 
 // LockData return new data locker
 func (locker *DataLocker) LockData() app.DataScopeLocker {
 	locker.mu.Lock()
-	return newDataLocker(locker.DataScope, locker.mu.Unlock)
+	return newDataLocker(locker.data, locker.mu.Unlock)
 }
 
 // Commit unlock parent scope and close locker
 func (locker *DataLocker) Commit() (err error) {
 	locker.unlockCB()
-	locker.DataScope = nil
+	locker.data = nil
 	return nil
 }

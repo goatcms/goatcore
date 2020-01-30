@@ -6,6 +6,12 @@ import (
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
+// ChildIOContextParams describe child context
+type ChildIOContextParams struct {
+	Scope scope.ChildParams
+	IO    IOParams
+}
+
 // IOContextParams describe context
 type IOContextParams struct {
 	Scope scope.Params
@@ -33,7 +39,7 @@ func NewIOContext(scope app.Scope, io app.IO) (ioc app.IOContext) {
 }
 
 // NewChildIOContext extends exist IOContext.
-func NewChildIOContext(parent app.IOContext, params IOContextParams) (ioc app.IOContext) {
+func NewChildIOContext(parent app.IOContext, params ChildIOContextParams) (ioc app.IOContext) {
 	var (
 		parentIO app.IO
 		childIO  app.IO

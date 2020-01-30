@@ -20,13 +20,13 @@ type ChildScope struct {
 }
 
 // NewChildScope create new instance of scope
-func NewChildScope(parent app.Scope, params Params) app.Scope {
+func NewChildScope(parent app.Scope, params ChildParams) app.Scope {
 	parent.AddTasks(1)
 	if params.DataScope == nil {
-		params.DataScope = parent
+		params.DataScope = NewChildDataScope(parent, make(map[string]interface{}))
 	}
 	if params.EventScope == nil {
-		params.EventScope = parent
+		params.EventScope = NewChildEventScope(parent)
 	}
 	return &ChildScope{
 		parent:     parent,
@@ -54,7 +54,7 @@ func (cs *ChildScope) IsKilled() bool {
 // Wait for end of all tasks in child scope
 func (cs *ChildScope) Wait() (err error) {
 	cs.waitGroup.Wait()
-	return goaterr.ToErrors(cs.errors)
+	return goaterr.ToError(cs.errors)
 }
 
 // AddTasks tasks to child scope
@@ -75,7 +75,7 @@ func (cs *ChildScope) Errors() []error {
 
 // ToError return error if child scope contains any error
 func (cs *ChildScope) ToError() error {
-	return goaterr.ToErrors(cs.errors)
+	return goaterr.ToError(cs.errors)
 }
 
 // AppendError add error to child and parent scope

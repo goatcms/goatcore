@@ -5,12 +5,19 @@ import (
 	"github.com/goatcms/goatcore/app/injector"
 )
 
-// Params describe scope
-type Params struct {
-	SyncScope  app.SyncScope
+// ChildParams describe child scope
+type ChildParams struct {
 	DataScope  app.DataScope
 	EventScope app.EventScope
 	Injectors  []app.Injector
+}
+
+// Params describe scope
+type Params struct {
+	DataScope  app.DataScope
+	EventScope app.EventScope
+	Injectors  []app.Injector
+	SyncScope  app.SyncScope
 	Tag        string
 }
 

@@ -27,7 +27,7 @@ func TestPipRunLockStory(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if err = goaterr.ToErrors(goaterr.AppendError(nil, app.RegisterCommand(mapp, "long", func(a app.App, ctx app.IOContext) (err error) {
+	if err = goaterr.ToError(goaterr.AppendError(nil, app.RegisterCommand(mapp, "long", func(a app.App, ctx app.IOContext) (err error) {
 		ctx.IO().Out().Printf("lock")
 		time.Sleep(30 * time.Millisecond)
 		return ctx.IO().Out().Printf("unlock")

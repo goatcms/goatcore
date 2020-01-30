@@ -168,7 +168,7 @@ func (c *Cache) ReadDir(src string) (result []os.FileInfo, err error) {
 	remoteDirs, remoteErr = c.remoteFS.ReadDir(src)
 	bufferDirs, bufferErr = c.bufferFS.ReadDir(src)
 	if remoteErr != nil && bufferErr != nil {
-		return nil, goaterr.ToErrors(goaterr.AppendError(nil, remoteErr, bufferErr))
+		return nil, goaterr.ToError(goaterr.AppendError(nil, remoteErr, bufferErr))
 	}
 	result = remoteDirs
 ReadDirLoop:

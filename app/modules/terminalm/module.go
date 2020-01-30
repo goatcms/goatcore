@@ -66,16 +66,19 @@ func (m *Module) Run(a app.App) (err error) {
 
 func (m *Module) runLoop(parentCtx app.IOContext, terminal modules.Terminal) (err error) {
 	var (
-		parentScope  = parentCtx.Scope()
-		parentIO     = parentCtx.IO()
 		relatedScope app.Scope
 		relatedCtx   app.IOContext
+		parentScope  = parentCtx.Scope()
 	)
+	// Related scope is scope for terminal loop.
+	// It is not child scope (It contains separated app.ScopeSync).
+	// Kill the scope doesn't kill application scope by default.
+	// The scope share data with application scope.
 	relatedScope = scope.NewScope(scope.Params{
-		DataScope:  parentScope,
-		EventScope: parentScope,
+		DataScope: parentScope,
+		//EventScope: parentScope, <- event scope is not shared to prevent memory leaks
 	})
-	relatedCtx = gio.NewIOContext(relatedScope, parentIO)
+	relatedCtx = gio.NewIOContext(relatedScope, parentCtx.IO())
 	defer relatedCtx.Close()
 	if err = terminal.RunLoop(relatedCtx); err != nil {
 		return err

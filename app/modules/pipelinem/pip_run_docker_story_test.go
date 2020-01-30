@@ -7,31 +7,44 @@ import (
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/mockupapp"
+	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/filesystem/filespace/diskfs"
+	"github.com/goatcms/goatcore/testbase"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
-func TestPipRunWaitStory(t *testing.T) {
+func TestPipRunDockerStory(t *testing.T) {
 	t.Parallel()
 	var (
 		err         error
 		mapp        *mockupapp.App
 		bootstraper app.Bootstrap
+		cwd         filesystem.Filespace
 	)
+	if _, err = testbase.LoadDockerTestConfig(); err != nil {
+		t.Skip(err.Error())
+		return
+	}
+	if cwd, err = diskfs.NewFilespace("./"); err != nil {
+		t.Error(err)
+		return
+	}
 	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
+		RootFilespace: cwd,
 		Input: strings.NewReader(`
-			pip:run --name=first --body="echoAla" --silent=false
+			pip:run --name=first --sandbox="docker:alpine" --body=<<FIRSTEND
+echo "outputAla"
+FIRSTEND --silent=false
 			pip:run --name=second --wait=first --body="echoMa" --silent=false
 			pip:run --name=last --wait=second --body="echoKota" --silent=false
+			pip:wait
 			`),
-		Args: []string{`appname`, `terminal`, ``, `--body="testCommand"`},
+		Args: []string{`appname`, `terminal`},
 	}); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = goaterr.ToError(goaterr.AppendError(nil, app.RegisterCommand(mapp, "echoAla", func(a app.App, ctx app.IOContext) (err error) {
-		time.Sleep(10 * time.Millisecond)
-		return ctx.IO().Out().Printf("outputAla")
-	}, ""), app.RegisterCommand(mapp, "echoMa", func(a app.App, ctx app.IOContext) (err error) {
+	if err = goaterr.ToError(goaterr.AppendError(nil, app.RegisterCommand(mapp, "echoMa", func(a app.App, ctx app.IOContext) (err error) {
 		time.Sleep(20 * time.Millisecond)
 		return ctx.IO().Out().Printf("outputMa")
 	}, ""), app.RegisterCommand(mapp, "echoKota", func(a app.App, ctx app.IOContext) (err error) {
@@ -62,4 +75,5 @@ func TestPipRunWaitStory(t *testing.T) {
 		t.Errorf("order incorrect for result: '%s'", result)
 		return
 	}
+	t.Errorf("err: '%s'", result)
 }

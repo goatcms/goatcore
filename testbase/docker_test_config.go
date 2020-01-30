@@ -14,7 +14,7 @@ type DockerTestConfig struct {
 // LoadDockerTestConfig return docker config from envs
 func LoadDockerTestConfig() (config *DockerTestConfig, err error) {
 	config = &DockerTestConfig{}
-	if err = goaterr.ToErrors(goaterr.AppendError(nil,
+	if err = goaterr.ToError(goaterr.AppendError(nil,
 		InjectEnv("DOCKER_TESTS", &config.onStr),
 	)); err != nil {
 		return nil, err

@@ -9,7 +9,7 @@ import (
 // CloseApp close application
 func CloseApp(a App) error {
 	// close in inverted order (to init)
-	return goaterr.ToErrors(goaterr.AppendError(nil,
+	return goaterr.ToError(goaterr.AppendError(nil,
 		a.CommandScope().Trigger(KillEvent, nil),
 		a.AppScope().Trigger(KillEvent, nil),
 		a.FilespaceScope().Trigger(KillEvent, nil),

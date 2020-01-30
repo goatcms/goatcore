@@ -19,7 +19,7 @@ func NewModule() app.Module {
 // RegisterDependencies is init callback to register module dependencies
 func (m *Module) RegisterDependencies(a app.App) error {
 	dp := a.DependencyProvider()
-	return goaterr.ToErrors(goaterr.AppendError(nil,
+	return goaterr.ToError(goaterr.AppendError(nil,
 		dp.AddDefaultFactory(commservices.SharedMutexService, mutex.SharedMutexFactory),
 		dp.AddDefaultFactory(commservices.WaitManagerService, waits.WaitManagerFactory),
 	))

@@ -23,7 +23,7 @@ func newApp(options mockupapp.MockupOptions) (mapp *mockupapp.App, bootstraper a
 		return nil, nil, err
 	}
 	dp := mapp.DependencyProvider()
-	if err = goaterr.ToErrors(goaterr.AppendError(nil,
+	if err = goaterr.ToError(goaterr.AppendError(nil,
 		dp.AddDefaultFactory(pipservices.NamespacesUnitService, namespaces.UnitFactory),
 		dp.AddDefaultFactory(pipservices.TasksUnitService, tasks.UnitFactory),
 		dp.AddDefaultFactory(pipservices.SandboxesManagerService, sandboxes.ManagerFactory),

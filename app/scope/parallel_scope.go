@@ -53,7 +53,7 @@ func (scp *ParallelScope) IsKilled() bool {
 // Wait for end of all tasks in child scope
 func (scp *ParallelScope) Wait() (err error) {
 	scp.waitGroup.Wait()
-	return goaterr.ToErrors(scp.errors)
+	return goaterr.ToError(scp.errors)
 }
 
 // AddTasks tasks to child scope
@@ -74,7 +74,7 @@ func (scp *ParallelScope) Errors() []error {
 
 // ToError return error if child scope contains any error
 func (scp *ParallelScope) ToError() error {
-	return goaterr.ToErrors(scp.errors)
+	return goaterr.ToError(scp.errors)
 }
 
 // AppendError add error to child and parent scope

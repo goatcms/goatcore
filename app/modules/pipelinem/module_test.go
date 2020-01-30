@@ -24,7 +24,7 @@ func TestModule(t *testing.T) {
 		return
 	}
 	bootstrap := bootstrap.NewBootstrap(mapp)
-	if err = goaterr.ToErrors(goaterr.AppendError(nil,
+	if err = goaterr.ToError(goaterr.AppendError(nil,
 		bootstrap.Register(terminalm.NewModule()),
 		bootstrap.Register(commonm.NewModule()),
 		bootstrap.Register(NewModule()),

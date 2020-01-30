@@ -46,7 +46,7 @@ func (unit *Unit) FromScope(scp app.Scope) (tasks pipservices.TasksManager, err 
 	if ins != nil {
 		return ins.(pipservices.TasksManager), nil
 	}
-	manager = NewTaskManager(unit.deps)
+	manager = NewTaskManager(unit.deps, scp)
 	if err = locker.Set(scopeKey, manager); err != nil {
 		return nil, err
 	}

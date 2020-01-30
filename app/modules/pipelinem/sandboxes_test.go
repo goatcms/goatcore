@@ -23,7 +23,7 @@ func TestSandboxes(t *testing.T) {
 		return
 	}
 	bootstrap := bootstrap.NewBootstrap(mapp)
-	if err = goaterr.ToErrors(goaterr.AppendError(nil,
+	if err = goaterr.ToError(goaterr.AppendError(nil,
 		bootstrap.Register(NewModule()),
 		bootstrap.Register(terminalm.NewModule()),
 	)); err != nil {

@@ -9,4 +9,6 @@ const (
 	PipSummary = "Show execution summary"
 	// PipLogs is a pip:logs command help
 	PipLogs = "Show execution logs"
+	// PipWait is a pip:wait command help
+	PipWait = "Wait for all tasks in context"
 )

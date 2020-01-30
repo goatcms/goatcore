@@ -26,7 +26,7 @@ func NewModule() app.Module {
 // RegisterDependencies is init callback to register module dependencies
 func (m *Module) RegisterDependencies(a app.App) error {
 	dp := a.DependencyProvider()
-	return goaterr.ToErrors(goaterr.AppendError(nil,
+	return goaterr.ToError(goaterr.AppendError(nil,
 		dp.AddDefaultFactory(pipservices.SandboxesManagerService, sandboxes.ManagerFactory),
 		dp.AddDefaultFactory(pipservices.NamespacesUnitService, namespaces.UnitFactory),
 		dp.AddDefaultFactory(pipservices.RunnerService, runner.Factory),
@@ -35,6 +35,7 @@ func (m *Module) RegisterDependencies(a app.App) error {
 		app.RegisterCommand(a, "pip:run", pipc.Run, pipcommands.PipRun),
 		app.RegisterCommand(a, "pip:logs", pipc.Logs, pipcommands.PipLogs),
 		app.RegisterCommand(a, "pip:summary", pipc.Summary, pipcommands.PipSummary),
+		app.RegisterCommand(a, "pip:wait", pipc.Wait, pipcommands.PipWait),
 		app.RegisterHealthChecker(a, "docker", SandboxHealthChecker),
 	))
 }

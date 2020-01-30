@@ -21,7 +21,7 @@ func newApp() (mapp app.App, err error) {
 		return nil, err
 	}
 	dp := mapp.DependencyProvider()
-	if err = goaterr.ToErrors(goaterr.AppendError(nil,
+	if err = goaterr.ToError(goaterr.AppendError(nil,
 		dp.AddDefaultFactory(pipservices.SandboxesManagerService, sandboxes.ManagerFactory),
 		dp.AddDefaultFactory(pipservices.NamespacesUnitService, namespaces.UnitFactory),
 		dp.AddDefaultFactory(pipservices.TasksUnitService, tasks.UnitFactory),

@@ -17,8 +17,8 @@ type ErrorCollection struct {
 type ErrorCollectionJSON struct {
 }
 
-// NewErrors create a new errors instance
-func NewErrors(errs []error) Errors {
+// NewErrorCollection create a new errors instance
+func NewErrorCollection(errs []error) Errors {
 	e := &ErrorCollection{
 		errs:       errs,
 		Errs:       []string{},
@@ -36,16 +36,16 @@ func NewErrors(errs []error) Errors {
 	return e
 }
 
-// ToErrors return error object if error list is not empty or nil.
+// ToError return error object if error list is not empty or nil.
 // Otherwise return error object.
-func ToErrors(errs []error) error {
+func ToError(errs []error) error {
 	if errs == nil || len(errs) == 0 {
 		return nil
 	}
 	if len(errs) == 1 {
 		return errs[0]
 	}
-	return NewErrors(errs)
+	return NewErrorCollection(errs)
 }
 
 // Errors return sub error collection

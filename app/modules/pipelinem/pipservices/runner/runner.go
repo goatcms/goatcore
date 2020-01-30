@@ -3,6 +3,8 @@ package runner
 import (
 	"fmt"
 
+	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/app/gio"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 	"github.com/goatcms/goatcore/dependency"
@@ -62,24 +64,26 @@ func (runner *Runner) runGo(tasksManager pipservices.TasksManager, sandbox pipse
 	var (
 		unlockHandler commservices.UnlockHandler
 		err           error
-		ctxScp        = task.IOContext().Scope()
+		childCtx      app.IOContext
 	)
 	defer task.Close()
+	childCtx = gio.NewChildIOContext(task.IOContext(), gio.ChildIOContextParams{})
+	defer childCtx.Close()
 	if err = runner.waitForTasks(task, tasksManager); err != nil {
-		ctxScp.AppendError(err)
+		childCtx.Scope().AppendError(err)
 		return
 	}
 	task.SetStatus(fmt.Sprintf("wait for resources"))
 	unlockHandler = runner.deps.SharedMutex.Lock(task.LockMap())
 	defer unlockHandler.Unlock()
 	task.SetStatus(fmt.Sprintf("execute"))
-	if err = sandbox.Run(task.IOContext()); err != nil {
-		ctxScp.AppendError(err)
+	if err = sandbox.Run(childCtx); err != nil {
+		childCtx.Scope().AppendError(err)
 		task.SetStatus("fail")
 		return
 	}
-	if err = ctxScp.Wait(); err != nil {
-		ctxScp.AppendError(err)
+	if err = childCtx.Scope().Wait(); err != nil {
+		childCtx.Scope().AppendError(err)
 		task.SetStatus(fmt.Sprintf("fail"))
 		return
 	}
