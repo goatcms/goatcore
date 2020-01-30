@@ -36,7 +36,7 @@ func TestToError(t *testing.T) {
 	}
 }
 
-func TestWrapError(t *testing.T) {
+func TestWrap(t *testing.T) {
 	t.Parallel()
 	var err = Wrap(errors.New("Parent error"), "Child error")
 	if err == nil {
