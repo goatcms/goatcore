@@ -13,15 +13,7 @@ func Errorf(format string, a ...interface{}) error {
 // Wrapf formats according to a format specifier and returns the string
 // as a value that satisfies error. And wrap a based error
 func Wrapf(format string, err error, a ...interface{}) error {
-	return NewErrorWrapper(fmt.Sprintf(format, a...), err)
-}
-
-// Wrap simple wrap a error
-func Wrap(err error) error {
-	if err == nil {
-		return nil
-	}
-	return NewErrorWrapper(err.Error(), err)
+	return Wrap(err, fmt.Sprintf(format, a...))
 }
 
 // AppendError append error to error collection

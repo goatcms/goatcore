@@ -51,7 +51,7 @@ func (sandbox *DockerSandbox) Run(ctx app.IOContext) (err error) {
 	cmd.Dir = cwd.LocalPath()
 	if err = cmd.Run(); err != nil {
 		cio.Err().Printf("\nDocker sandbox error: %v\n", err)
-		return goaterr.Wrap(err)
+		return goaterr.Wrap(err, "Docker sandbox error")
 	}
 	return nil
 }
