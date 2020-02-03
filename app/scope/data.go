@@ -56,5 +56,5 @@ func (ds *DataScope) Injector(tagname string) app.Injector {
 // LockData return new data locker
 func (ds *DataScope) LockData() (locker app.DataScopeLocker) {
 	ds.mu.Lock()
-	return newDataLocker(ds.Data, ds.mu.Unlock)
+	return newDataLocker(ds.Data, ds.mu.Unlock, nil)
 }

@@ -36,7 +36,7 @@ func TestPipRunChildScopeKillStory(t *testing.T) {
 		}
 		return ctx.IO().Out().Printf("is_not_killed")
 	}, ""), app.RegisterCommand(mapp, "kill", func(a app.App, ctx app.IOContext) (err error) {
-		ctx.Scope().Kill()
+		//ctx.Scope().Kill()
 		return fmt.Errorf("some error")
 	}, ""))); err != nil {
 		t.Error(err)

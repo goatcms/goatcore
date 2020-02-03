@@ -6,6 +6,7 @@ import (
 	"github.com/goatcms/goatcore/app/mockupapp"
 	"github.com/goatcms/goatcore/app/modules"
 	"github.com/goatcms/goatcore/app/modules/commonm"
+	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/namespaces"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/runner"
@@ -48,8 +49,9 @@ func newApp() (mapp app.App, err error) {
 func initDependencies(a app.App) (err error) {
 	var (
 		deps struct {
-			Manager  pipservices.SandboxesManager `dependency:"PipSandboxesManager"`
-			Terminal modules.Terminal             `dependency:"TerminalService"`
+			Manager          pipservices.SandboxesManager  `dependency:"PipSandboxesManager"`
+			Terminal         modules.Terminal              `dependency:"TerminalService"`
+			EnvironmentsUnit commservices.EnvironmentsUnit `dependency:"CommonEnvironmentsUnit"`
 		}
 		builder pipservices.SandboxBuilder
 	)
@@ -60,6 +62,6 @@ func initDependencies(a app.App) (err error) {
 		return err
 	}
 	deps.Manager.Add(builder)
-	deps.Manager.Add(NewDockerSandboxBuilder())
+	deps.Manager.Add(NewDockerSandboxBuilder(deps.EnvironmentsUnit))
 	return nil
 }

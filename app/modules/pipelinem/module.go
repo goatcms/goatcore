@@ -3,6 +3,7 @@ package pipelinem
 import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules"
+	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipcommands"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipcommands/pipc"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
@@ -44,8 +45,9 @@ func (m *Module) RegisterDependencies(a app.App) error {
 func (m *Module) InitDependencies(a app.App) (err error) {
 	var (
 		deps struct {
-			Manager  pipservices.SandboxesManager `dependency:"PipSandboxesManager"`
-			Terminal modules.Terminal             `dependency:"TerminalService"`
+			Manager          pipservices.SandboxesManager  `dependency:"PipSandboxesManager"`
+			Terminal         modules.Terminal              `dependency:"TerminalService"`
+			EnvironmentsUnit commservices.EnvironmentsUnit `dependency:"CommonEnvironmentsUnit"`
 		}
 		builder pipservices.SandboxBuilder
 	)
@@ -56,7 +58,7 @@ func (m *Module) InitDependencies(a app.App) (err error) {
 		return err
 	}
 	deps.Manager.Add(builder)
-	deps.Manager.Add(dockersb.NewDockerSandboxBuilder())
+	deps.Manager.Add(dockersb.NewDockerSandboxBuilder(deps.EnvironmentsUnit))
 	return nil
 }
 

@@ -6,6 +6,7 @@ import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/bootstrap"
 	"github.com/goatcms/goatcore/app/mockupapp"
+	"github.com/goatcms/goatcore/app/modules/commonm"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 	"github.com/goatcms/goatcore/app/modules/terminalm"
 	"github.com/goatcms/goatcore/varutil/goaterr"
@@ -26,6 +27,7 @@ func TestSandboxes(t *testing.T) {
 	if err = goaterr.ToError(goaterr.AppendError(nil,
 		bootstrap.Register(NewModule()),
 		bootstrap.Register(terminalm.NewModule()),
+		bootstrap.Register(commonm.NewModule()),
 	)); err != nil {
 		t.Error(err)
 		return

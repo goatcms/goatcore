@@ -1,37 +1,40 @@
 package goaterr
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
 
 func print(err error) (result string) {
-	return printStep(err, "  \n")
+	return "{" + printBody(err, "\n  ") + "\n}"
 }
 
-func printStep(err error, separator string) (result string) {
-	result = `{`
+func printBody(err error, separator string) (result string) {
+	var fields []string
 	if messageError, ok := err.(MessageError); ok {
-		result += separator + `message: ` + strconv.Quote(messageError.Message())
-	} else {
-		result += separator + `message: ` + strconv.Quote(err.Error())
-	}
-	if trackedError, ok := err.(TrackedError); ok {
-		result += separator + `stack: ` + strconv.Quote(trackedError.Stack())
-	}
-	if errorsWrapper, ok := err.(ErrorsWrapper); ok {
-		errs := errorsWrapper.UnwrapAll()
-		if len(errs) != 0 {
-			result += separator + `wraps: [`
-			for _, childErr := range errorsWrapper.UnwrapAll() {
-				result += printStep(childErr, separator+"  ")
-			}
-			result += `]`
+		fields = append(fields, `"message": `+strconv.Quote(messageError.Message()))
+		if trackedError, ok := err.(TrackedError); ok {
+			fields = append(fields, `"stack": `+strconv.Quote(trackedError.Stack()))
 		}
-	} else {
-		if errorWrapper, ok := err.(ErrorWrapper); ok {
-			childErr := errorWrapper.Unwrap()
-			if childErr != nil {
-				result += separator + `wraps: [` + printStep(childErr, separator+"  ") + `]`
+		if errorsWrapper, ok := err.(ErrorsWrapper); ok {
+			errs := errorsWrapper.UnwrapAll()
+			if len(errs) != 0 {
+				var steps []string
+				for _, childErr := range errorsWrapper.UnwrapAll() {
+					steps = append(steps, printBody(childErr, separator+"  "))
+				}
+				fields = append(fields, `"wraps": [{`+strings.Join(steps, separator+"}, {")+separator+`}]`)
+			}
+		} else {
+			if errorWrapper, ok := err.(ErrorWrapper); ok {
+				childErr := errorWrapper.Unwrap()
+				if childErr != nil {
+					fields = append(fields, `"wraps": [{`+printBody(childErr, separator+"}, {")+separator+`}]`)
+				}
 			}
 		}
+	} else {
+		fields = append(fields, `"message": `+strconv.Quote(err.Error()))
 	}
-	return result + `}`
+	return separator + strings.Join(fields, ","+separator)
 }

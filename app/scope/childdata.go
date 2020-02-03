@@ -65,5 +65,5 @@ func (scp *DataChildScope) Injector(tagname string) app.Injector {
 // LockData return new data locker
 func (scp *DataChildScope) LockData() (locker app.DataScopeLocker) {
 	scp.mu.Lock()
-	return newDataLocker(scp.data, scp.mu.Unlock)
+	return newDataLocker(scp.data, scp.mu.Unlock, scp.parent)
 }

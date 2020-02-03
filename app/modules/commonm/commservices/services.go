@@ -1,8 +1,10 @@
 package commservices
 
 const (
-	// SharedMutexService is service key
+	// SharedMutexService is a service key
 	SharedMutexService = "CommonSharedMutex"
-	// WaitManagerService is service key
+	// WaitManagerService is a service key
 	WaitManagerService = "CommonWaitManager"
+	// EnvironmentsUnitService is a service key
+	EnvironmentsUnitService = "CommonEnvironmentsUnit"
 )

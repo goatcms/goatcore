@@ -36,8 +36,9 @@ func TestModule(t *testing.T) {
 	}
 	// test
 	var deps struct {
-		SharedMutex commservices.SharedMutex `dependency:"CommonSharedMutex"`
-		WaitManager commservices.WaitManager `dependency:"CommonWaitManager"`
+		SharedMutex      commservices.SharedMutex      `dependency:"CommonSharedMutex"`
+		WaitManager      commservices.WaitManager      `dependency:"CommonWaitManager"`
+		EnvironmentsUnit commservices.EnvironmentsUnit `dependency:"CommonEnvironmentsUnit"`
 	}
 	if err = mapp.DependencyProvider().InjectTo(&deps); err != nil {
 		t.Error(err)

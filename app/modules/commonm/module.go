@@ -3,6 +3,7 @@ package commonm
 import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
+	"github.com/goatcms/goatcore/app/modules/commonm/commservices/envs"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices/mutex"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices/waits"
 	"github.com/goatcms/goatcore/varutil/goaterr"
@@ -22,6 +23,7 @@ func (m *Module) RegisterDependencies(a app.App) error {
 	return goaterr.ToError(goaterr.AppendError(nil,
 		dp.AddDefaultFactory(commservices.SharedMutexService, mutex.SharedMutexFactory),
 		dp.AddDefaultFactory(commservices.WaitManagerService, waits.WaitManagerFactory),
+		dp.AddDefaultFactory(commservices.EnvironmentsUnitService, envs.UnitFactory),
 	))
 }
 
