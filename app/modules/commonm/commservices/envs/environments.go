@@ -11,6 +11,7 @@ import (
 type Environments struct {
 	data map[string]string
 	mu   sync.RWMutex
+	cert commservices.SSHCert
 }
 
 // NewEnvironments return new empty Environments instance
@@ -63,8 +64,8 @@ func (envs *Environments) validKey(key string) (err error) {
 	return nil
 }
 
-// GetAll return all sandboxes environments
-func (envs *Environments) GetAll() (result map[string]string) {
+// All return all sandboxes environments
+func (envs *Environments) All() (result map[string]string) {
 	result = make(map[string]string)
 	envs.mu.RLock()
 	defer envs.mu.RUnlock()
@@ -79,4 +80,18 @@ func (envs *Environments) Get(name string) string {
 	envs.mu.RLock()
 	defer envs.mu.RUnlock()
 	return envs.data[name]
+}
+
+// SSHCert return ssh certificate
+func (envs *Environments) SSHCert() commservices.SSHCert {
+	envs.mu.Lock()
+	defer envs.mu.Unlock()
+	return envs.cert
+}
+
+// SetSSHCert set new ssh certificate
+func (envs *Environments) SetSSHCert(cert commservices.SSHCert) {
+	envs.mu.RLock()
+	defer envs.mu.RUnlock()
+	envs.cert = cert
 }

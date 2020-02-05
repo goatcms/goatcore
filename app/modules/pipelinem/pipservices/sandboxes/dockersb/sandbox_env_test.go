@@ -75,10 +75,12 @@ func TestDockerSandboxEnvs(t *testing.T) {
 		Wait:    []string{},
 	}); err != nil {
 		t.Error(err)
+		t.Errorf(buffer.String())
 		return
 	}
 	if err = scp.Wait(); err != nil {
 		t.Error(err)
+		t.Errorf(buffer.String())
 		return
 	}
 	result := buffer.String()

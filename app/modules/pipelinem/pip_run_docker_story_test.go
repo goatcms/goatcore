@@ -75,5 +75,4 @@ FIRSTEND --silent=false
 		t.Errorf("order incorrect for result: '%s'", result)
 		return
 	}
-	t.Errorf("err: '%s'", result)
 }
