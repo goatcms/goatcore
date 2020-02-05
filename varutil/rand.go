@@ -8,6 +8,10 @@ import (
 const (
 	// NumericBytes is set of numeric characters for RandString function
 	NumericBytes = "1234567890"
+	// LowerAlphaBytes is set of lower alphabetic characters for RandString function
+	LowerAlphaBytes = "abcdefghijklmnopqrstuvwxyz"
+	// UpperAlphaBytes is set of upper alphabetic characters for RandString function
+	UpperAlphaBytes = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	// AlphaBytes is set of alphabetic characters for RandString function
 	AlphaBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	// AlphaNumericBytes is set of numeric and alphabetic characters for RandString function
