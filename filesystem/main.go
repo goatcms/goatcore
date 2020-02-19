@@ -47,6 +47,13 @@ type Filespace interface {
 	Lstat(subPath string) (os.FileInfo, error)
 }
 
+// LocalFilespace is a filesystem interface on local harddisk
+type LocalFilespace interface {
+	Filespace
+	// LocalPath return path in local filesystem
+	LocalPath() string
+}
+
 // LoopOn is a callback type trigged on a file or directory
 type LoopOn func(fs Filespace, subPath string) error
 

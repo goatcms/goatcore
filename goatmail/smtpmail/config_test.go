@@ -17,7 +17,7 @@ type TestConfig struct {
 func LoadTestConfig(t *testing.T) (config *TestConfig) {
 	var err error
 	config = &TestConfig{}
-	if err = goaterr.ToErrors(goaterr.AppendError(nil,
+	if err = goaterr.ToError(goaterr.AppendError(nil,
 		InjectEnv("GOATCORE_TEST_SMTP_FROM_ADDRESS", &config.FromAddress),
 		InjectEnv("GOATCORE_TEST_SMTP_TO_ADDRESS", &config.ToAddress),
 		InjectEnv("GOATCORE_TEST_SMTP_SERVER", &config.SenderConfig.SMTPAddr),

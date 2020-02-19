@@ -30,8 +30,5 @@ func Copy(srcfs, destfs filesystem.Filespace, filterFN filesystem.LoopFilter) (e
 	}, nil)
 	loop.Run("")
 	loop.Wait()
-	if len(loop.Errors()) != 0 {
-		return goaterr.NewErrors(loop.Errors())
-	}
-	return err
+	return goaterr.ToError(loop.Errors())
 }

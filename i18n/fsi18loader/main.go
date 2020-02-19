@@ -33,8 +33,5 @@ func Load(fs filesystem.Filespace, basePath string, i18 i18n.I18N, scope app.Sco
 	}, scope)
 	loop.Run(basePath)
 	loop.Wait()
-	if errs := loop.Errors(); len(errs) != 0 {
-		return goaterr.NewErrors(errs)
-	}
-	return nil
+	return goaterr.ToError(loop.Errors())
 }

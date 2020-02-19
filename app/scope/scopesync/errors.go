@@ -1,11 +1,6 @@
 package scopesync
 
-import (
-	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/varutil/goaterr"
-	"github.com/goatcms/goatcore/workers/jobsync"
-)
-
+/* deprecated
 // AppendError add error to scope
 func AppendError(scope app.Scope, err error) {
 	var lifecycle *jobsync.Lifecycle
@@ -20,5 +15,6 @@ func AppendError(scope app.Scope, err error) {
 // ToError return scope error object or nil if scope has no error
 func ToError(scope app.Scope) error {
 	var lifecycle = Lifecycle(scope)
-	return goaterr.ToErrors(lifecycle.Errors())
+	return goaterr.ToError(lifecycle.Errors())
 }
+*/

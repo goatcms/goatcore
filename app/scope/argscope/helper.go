@@ -8,7 +8,7 @@ import (
 )
 
 // InjectArgsToScope insert arguments to scope
-func InjectArgsToScope(args []string, scope app.Scope) (err error) {
+func InjectArgsToScope(args []string, scope app.DataScope) (err error) {
 	for i, value := range args {
 		// position keys
 		ikey := "$" + strconv.Itoa(i)

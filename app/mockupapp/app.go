@@ -1,56 +1,84 @@
 package mockupapp
 
 import (
+	"bytes"
+	"strings"
+
 	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/app/gio"
 	"github.com/goatcms/goatcore/app/scope"
 	"github.com/goatcms/goatcore/app/scope/argscope"
 	"github.com/goatcms/goatcore/dependency"
 	"github.com/goatcms/goatcore/dependency/provider"
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
-// MockupApp is default mockup applicationo test code
-// It is used t
-type MockupApp struct {
-	options MockupOptions
+// App is default mockup applicationo test code
+type App struct {
+	options   MockupOptions
+	outBuf    bytes.Buffer
+	errBuf    bytes.Buffer
+	io        app.IO
+	ioContext app.IOContext
 }
 
-// NewApp create a new MockupApp
-func NewApp(options MockupOptions) (app.App, error) {
-	mapp := &MockupApp{
+// NewApp create a new App
+func NewApp(options MockupOptions) (result *App, err error) {
+	mapp := &App{
 		options: options,
 	}
-	if err := mapp.initEngineScope(); err != nil {
+
+	if mapp.options.RootFilespace == nil {
+		if mapp.options.RootFilespace, err = memfs.NewFilespace(); err != nil {
+			return nil, err
+		}
+	}
+	if mapp.options.TMPFilespace == nil {
+		rootfs := mapp.options.RootFilespace
+		if err = rootfs.MkdirAll("tmp", 0766); err != nil {
+			return nil, err
+		}
+		if mapp.options.TMPFilespace, err = rootfs.Filespace("tmp"); err != nil {
+			return nil, err
+		}
+	}
+
+	if mapp.options.Input == nil {
+		mapp.options.Input = strings.NewReader("")
+	}
+
+	mapp.io = gio.NewIO(gio.IOParams{
+		In:  gio.NewAppInput(mapp.options.Input),
+		Out: gio.NewAppOutput(&mapp.outBuf),
+		Err: gio.NewAppOutput(&mapp.errBuf),
+		CWD: mapp.options.RootFilespace,
+	})
+
+	if err = goaterr.ToError(goaterr.AppendError(nil,
+		mapp.initEngineScope(),
+		mapp.initArgsScope(),
+		mapp.initFilespaceScope(),
+		mapp.initConfigScope(),
+		mapp.initDependencyScope(),
+		mapp.initAppScope(),
+		mapp.initCommandScope(),
+	)); err != nil {
 		return nil, err
 	}
-	if err := mapp.initArgsScope(); err != nil {
-		return nil, err
-	}
-	if err := mapp.initFilespaceScope(); err != nil {
-		return nil, err
-	}
-	if err := mapp.initConfigScope(); err != nil {
-		return nil, err
-	}
-	if err := mapp.initDependencyScope(); err != nil {
-		return nil, err
-	}
-	if err := mapp.initAppScope(); err != nil {
-		return nil, err
-	}
-	if err := mapp.initCommandScope(); err != nil {
-		return nil, err
-	}
+
 	mapp.options.DP.SetDefault(app.EngineScope, mapp.options.EngineScope)
 	mapp.options.DP.SetDefault(app.ArgsScope, mapp.options.ArgsScope)
 	mapp.options.DP.SetDefault(app.FilespaceScope, mapp.options.FilespaceScope)
 	mapp.options.DP.SetDefault(app.ConfigScope, mapp.options.ConfigScope)
-	mapp.options.DP.SetDefault(app.DependencyScope, mapp.options.DependencyScope)
 	mapp.options.DP.SetDefault(app.AppScope, mapp.options.AppScope)
 	mapp.options.DP.SetDefault(app.CommandScope, mapp.options.CommandScope)
-	mapp.options.DP.SetDefault(app.InputService, mapp.options.Input)
-	mapp.options.DP.SetDefault(app.OutputService, mapp.options.Output)
+
+	mapp.options.DP.SetDefault(app.InputService, mapp.io.In())
+	mapp.options.DP.SetDefault(app.OutputService, mapp.io.Out())
+	mapp.options.DP.SetDefault(app.ErrorService, mapp.io.Err())
+
 	mapp.options.DP.AddInjectors([]dependency.Injector{
 		mapp.options.CommandScope,
 		mapp.options.AppScope,
@@ -59,20 +87,25 @@ func NewApp(options MockupOptions) (app.App, error) {
 		mapp.options.ArgsScope,
 		mapp.options.EngineScope,
 	})
+
+	mapp.ioContext = gio.NewIOContext(mapp.options.AppScope, mapp.io)
+
 	mapp.options.DP.SetDefault(app.AppService, app.App(mapp))
 	return mapp, nil
 }
 
-func (mapp *MockupApp) initEngineScope() error {
+func (mapp *App) initEngineScope() error {
 	if mapp.options.EngineScope != nil {
 		return nil
 	}
-	mapp.options.EngineScope = scope.NewScope(app.EngineTagName)
+	mapp.options.EngineScope = scope.NewScope(scope.Params{
+		Tag: app.EngineTagName,
+	})
 	mapp.options.EngineScope.Set(app.GoatVersion, app.GoatVersionValue)
 	return nil
 }
 
-func (mapp *MockupApp) initArgsScope() (err error) {
+func (mapp *App) initArgsScope() (err error) {
 	if mapp.options.ArgsScope != nil {
 		return nil
 	}
@@ -86,143 +119,136 @@ func (mapp *MockupApp) initArgsScope() (err error) {
 	return err
 }
 
-func (mapp *MockupApp) initFilespaceScope() (err error) {
-	if err = mapp.initRootFilespace(); err != nil {
-		return err
+func (mapp *App) initFilespaceScope() (err error) {
+	var value interface{}
+	if mapp.options.FilespaceScope == nil {
+		mapp.options.FilespaceScope = scope.NewScope(scope.Params{
+			Tag: app.FilespaceTagName,
+		})
 	}
-	if err = mapp.initTMPFilespace(); err != nil {
-		return err
+	fsscope := mapp.options.FilespaceScope
+	if value, _ = fsscope.Get(app.RootFilespace); value == nil {
+		mapp.options.FilespaceScope.Set(app.RootFilespace, mapp.options.RootFilespace)
 	}
-	if err = mapp.initCurrentFilespace(); err != nil {
-		return err
+	if value, _ = fsscope.Get(app.TmpFilespace); value == nil {
+		mapp.options.FilespaceScope.Set(app.TmpFilespace, mapp.options.TMPFilespace)
 	}
-	if mapp.options.FilespaceScope != nil {
-		return nil
-	}
-	mapp.options.FilespaceScope = scope.NewScope(app.FilespaceTagName)
-	mapp.options.FilespaceScope.Set(app.RootFilespace, mapp.options.RootFilespace)
-	mapp.options.FilespaceScope.Set(app.TmpFilespace, mapp.options.TMPFilespace)
-	mapp.options.FilespaceScope.Set(app.CurrentFilespace, mapp.options.CurrentFilespace)
-	return nil
-}
-
-func (mapp *MockupApp) initRootFilespace() (err error) {
-	if mapp.options.RootFilespace != nil {
-		return nil
-	}
-	if mapp.options.RootFilespace, err = memfs.NewFilespace(); err != nil {
-		return err
+	if value, _ = fsscope.Get(app.CurrentFilespace); value == nil {
+		mapp.options.FilespaceScope.Set(app.CurrentFilespace, mapp.io.CWD())
 	}
 	return nil
 }
 
-func (mapp *MockupApp) initTMPFilespace() (err error) {
-	if mapp.options.TMPFilespace != nil {
-		return nil
-	}
-	if err = mapp.options.RootFilespace.MkdirAll("tmp", 0766); err != nil {
-		return err
-	}
-	if mapp.options.TMPFilespace, err = mapp.options.RootFilespace.Filespace("tmp"); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (mapp *MockupApp) initCurrentFilespace() (err error) {
-	if mapp.options.CurrentFilespace != nil {
-		return nil
-	}
-	mapp.options.CurrentFilespace = mapp.options.RootFilespace
-	return nil
-}
-
-func (mapp *MockupApp) initConfigScope() error {
+func (mapp *App) initConfigScope() error {
 	if mapp.options.ConfigScope != nil {
 		return nil
 	}
-	mapp.options.ConfigScope = scope.NewScope(app.ConfigTagName)
+	mapp.options.ConfigScope = scope.NewScope(scope.Params{
+		Tag: app.ConfigTagName,
+	})
 	return nil
 }
 
-func (mapp *MockupApp) initCommandScope() error {
+func (mapp *App) initCommandScope() error {
 	if mapp.options.CommandScope != nil {
 		return nil
 	}
-	mapp.options.CommandScope = scope.NewScope(app.CommandTagName)
+	mapp.options.CommandScope = scope.NewScope(scope.Params{
+		Tag: app.CommandTagName,
+	})
 	return nil
 }
 
-func (mapp *MockupApp) initDependencyScope() error {
-	if mapp.options.DependencyScope != nil {
-		return nil
+func (mapp *App) initDependencyScope() error {
+	if mapp.options.DP == nil {
+		mapp.options.DP = provider.NewProvider(app.DependencyTagName)
 	}
-	mapp.options.DP = provider.NewProvider(app.DependencyTagName)
-	mapp.options.DependencyScope = NewDependencyScope(mapp.options.DP)
 	return nil
 }
 
-func (mapp *MockupApp) initAppScope() error {
+func (mapp *App) initAppScope() error {
 	if mapp.options.AppScope != nil {
 		return nil
 	}
-	mapp.options.AppScope = scope.NewScope(app.AppTagName)
+	mapp.options.AppScope = scope.NewScope(scope.Params{
+		Tag: app.AppTagName,
+	})
 	mapp.options.AppScope.Set(app.AppName, mapp.options.Name)
 	mapp.options.AppScope.Set(app.AppVersion, mapp.options.Version)
 	return nil
 }
 
 // Name return app name
-func (mapp *MockupApp) Name() string {
+func (mapp *App) Name() string {
 	return mapp.options.Name
 }
 
 // Version return app version
-func (mapp *MockupApp) Version() string {
+func (mapp *App) Version() string {
 	return mapp.options.Version
 }
 
+// Arguments return application arguments
+func (mapp *App) Arguments() []string {
+	return mapp.options.Args
+}
+
 // EngineScope return engine scope
-func (mapp *MockupApp) EngineScope() app.Scope {
+func (mapp *App) EngineScope() app.Scope {
 	return mapp.options.EngineScope
 }
 
 // ArgsScope return app scope
-func (mapp *MockupApp) ArgsScope() app.Scope {
+func (mapp *App) ArgsScope() app.Scope {
 	return mapp.options.ArgsScope
 }
 
 // FilespaceScope return filespace scope
-func (mapp *MockupApp) FilespaceScope() app.Scope {
+func (mapp *App) FilespaceScope() app.Scope {
 	return mapp.options.FilespaceScope
 }
 
 // ConfigScope return config scope
-func (mapp *MockupApp) ConfigScope() app.Scope {
+func (mapp *App) ConfigScope() app.Scope {
 	return mapp.options.ConfigScope
 }
 
-// DependencyScope return dependency scope
-func (mapp *MockupApp) DependencyScope() app.Scope {
-	return mapp.options.DependencyScope
-}
-
 // AppScope return app scope
-func (mapp *MockupApp) AppScope() app.Scope {
+func (mapp *App) AppScope() app.Scope {
 	return mapp.options.AppScope
 }
 
 // CommandScope return command scope
-func (mapp *MockupApp) CommandScope() app.Scope {
+func (mapp *App) CommandScope() app.Scope {
 	return mapp.options.CommandScope
 }
 
 // DependencyProvider return dependency provider
-func (mapp *MockupApp) DependencyProvider() dependency.Provider {
+func (mapp *App) DependencyProvider() dependency.Provider {
 	return mapp.options.DP
 }
 
 // RootFilespace return main filespace for application (current directory by default)
-func (mapp *MockupApp) RootFilespace() filesystem.Filespace {
+func (mapp *App) RootFilespace() filesystem.Filespace {
 	return mapp.options.RootFilespace
+}
+
+// IO return main application Input/Output objcet
+func (mapp *App) IO() app.IO {
+	return mapp.io
+}
+
+// IOContext return application IO context
+func (mapp *App) IOContext() app.IOContext {
+	return mapp.ioContext
+}
+
+// OutputBuffer return output buffer
+func (mapp *App) OutputBuffer() *bytes.Buffer {
+	return &mapp.outBuf
+}
+
+// ErrorBuffer return error output buffer
+func (mapp *App) ErrorBuffer() *bytes.Buffer {
+	return &mapp.errBuf
 }

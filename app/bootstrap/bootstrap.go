@@ -1,8 +1,6 @@
 package bootstrap
 
 import (
-	"sync"
-
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
@@ -56,8 +54,8 @@ func (b *Bootstrap) Init() error {
 // Run all modules
 func (b *Bootstrap) Run() (err error) {
 	var (
-		waitGroup = &sync.WaitGroup{}
-		errs      []error
+		appScope = b.gapp.AppScope()
+		errs     []error
 	)
 	if !b.inited {
 		return goaterr.Errorf("Bootstrap.Run must be run after modules init")
@@ -66,15 +64,17 @@ func (b *Bootstrap) Run() (err error) {
 		return goaterr.Errorf("Bootstrap.Run can not be run twice")
 	}
 	b.runed = true
-	waitGroup.Add(len(b.modules))
+	appScope.AddTasks(len(b.modules))
 	for _, module := range b.modules {
 		go func(module app.Module) {
-			defer waitGroup.Done()
+			defer appScope.DoneTask()
 			if err = module.Run(b.gapp); err != nil {
 				errs = append(errs, err)
 			}
 		}(module)
 	}
-	waitGroup.Wait()
-	return goaterr.ToErrors(errs)
+	if err = appScope.Wait(); err != nil {
+		errs = append(errs, err)
+	}
+	return goaterr.ToError(goaterr.AppendError(errs, app.CloseApp(b.gapp)))
 }

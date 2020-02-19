@@ -13,13 +13,15 @@ import (
 type SyncScope struct {
 	lifecycle *jobsync.Lifecycle
 	waitGroup *sync.WaitGroup
+	parent    app.SyncScope
 }
 
 // NewSyncScope create new instance of error scope
-func NewSyncScope() app.SyncScope {
+func NewSyncScope(parent app.SyncScope) app.SyncScope {
 	return &SyncScope{
 		lifecycle: jobsync.NewLifecycle(app.DefaultDeadline, true),
 		waitGroup: &sync.WaitGroup{},
+		parent:    parent,
 	}
 }
 
@@ -35,12 +37,19 @@ func (s *SyncScope) Kill() {
 
 // IsKilled check if scope is killed
 func (s *SyncScope) IsKilled() bool {
-	return s.lifecycle.IsKilled()
+	if s.lifecycle.IsKilled() {
+		return true
+	}
+	if s.parent != nil && s.parent.IsKilled() {
+		s.lifecycle.Kill()
+		return true
+	}
+	return false
 }
 
 // ToError return scope error object or nil if does't contains a error
 func (s *SyncScope) ToError() error {
-	return goaterr.ToErrors(s.Errors())
+	return goaterr.ToError(s.Errors())
 }
 
 // Errors return scope errors
@@ -69,14 +78,13 @@ func (s *SyncScope) Wait() error {
 	return s.ToError()
 }
 
-// AddTask add task to execute
-func (s *SyncScope) AddTask(delta int) {
-	s.waitGroup.Add(delta)
-}
-
 // AddTasks add task to wait group
-func (s *SyncScope) AddTasks(delta int) {
+func (s *SyncScope) AddTasks(delta int) (err error) {
+	if s.IsKilled() {
+		return s.ToError()
+	}
 	s.waitGroup.Add(delta)
+	return nil
 }
 
 // DoneTask mark single task as done

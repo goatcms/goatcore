@@ -1,6 +1,8 @@
 package mockupapp
 
 import (
+	"io"
+
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/dependency"
 	"github.com/goatcms/goatcore/filesystem"
@@ -11,21 +13,19 @@ type MockupOptions struct {
 	Name    string
 	Version string
 
-	Args   []string
-	Input  app.Input
-	Output app.Output
+	Input io.Reader
 
-	RootFilespace    filesystem.Filespace
-	TMPFilespace     filesystem.Filespace
-	CurrentFilespace filesystem.Filespace
+	Args []string
 
-	EngineScope     app.Scope
-	ArgsScope       app.Scope
-	FilespaceScope  app.Scope
-	ConfigScope     app.Scope
-	DependencyScope app.Scope
-	AppScope        app.Scope
-	CommandScope    app.Scope
+	RootFilespace filesystem.Filespace
+	TMPFilespace  filesystem.Filespace
+
+	EngineScope    app.Scope
+	ArgsScope      app.Scope
+	FilespaceScope app.Scope
+	ConfigScope    app.Scope
+	AppScope       app.Scope
+	CommandScope   app.Scope
 
 	DP dependency.Provider
 }

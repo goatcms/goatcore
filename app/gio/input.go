@@ -21,6 +21,7 @@ const (
 
 // Input represent system input
 type Input struct {
+	io.Reader
 	buf    []byte
 	rd     io.Reader // reader provided by the client
 	r, w   int       // buf read and write positions
@@ -35,10 +36,11 @@ func NewInputSize(rd io.Reader, size int) *Input {
 		size = minReadBufferSize
 	}
 	in := &Input{
-		buf: make([]byte, size),
-		rd:  rd,
-		r:   0,
-		w:   0,
+		Reader: rd,
+		buf:    make([]byte, size),
+		rd:     rd,
+		r:      0,
+		w:      0,
 	}
 	return in
 }
