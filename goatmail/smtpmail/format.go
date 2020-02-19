@@ -1,7 +1,6 @@
 package smtpmail
 
 import (
-	"encoding/base64"
 	"io"
 	"mime/quotedprintable"
 	"strings"
@@ -47,16 +46,7 @@ func FormatMail(mail *goatmail.Mail, lc *jobsync.Lifecycle) (io.Reader, error) {
 		bodyHeader := "\n\n--content_" + boundary + "\n"
 		bodyHeader += "Content-Type: " + mime + "; charset=\"utf-8\"\n"
 		bodyHeader += "Content-Transfer-Encoding: QUOTED-PRINTABLE\n\n"
-		reader, writer := io.Pipe()
-		w := quotedprintable.NewWriter(writer)
-		go func(bodyReader io.Reader) {
-			_, err := io.Copy(w, bodyReader)
-			if err != nil {
-				lc.Error(err)
-			}
-			w.Close()
-			writer.Close()
-		}(body)
+		reader := quotedprintable.NewReader(body)
 		readers = append(readers, strings.NewReader(bodyHeader), reader)
 	}
 	readers = append(readers, strings.NewReader("\n\n--content_"+boundary+"--\n"))
@@ -67,16 +57,7 @@ func FormatMail(mail *goatmail.Mail, lc *jobsync.Lifecycle) (io.Reader, error) {
 		attStr += "Content-Type: " + attachment.MIME + "; name=\"" + attachment.Name + "\"\n"
 		attStr += "Content-Transfer-Encoding: base64\n"
 		attStr += "Content-Disposition: attachment; filename=\"" + attachment.Name + "\"\n\n"
-		reader, writer := io.Pipe()
-		encoder := base64.NewEncoder(base64.StdEncoding, writer)
-		go func(reader io.Reader) {
-			_, err := io.Copy(encoder, reader)
-			if err != nil {
-				lc.Error(err)
-			}
-			encoder.Close()
-			writer.Close()
-		}(attachment.Reader)
+		reader := NewBase64Encoder(attachment.Reader)
 		readers = append(readers, strings.NewReader(attStr), reader)
 	}
 	readers = append(readers, strings.NewReader("\n\n--"+boundary+"--\n"))

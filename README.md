@@ -19,14 +19,19 @@ To run test define system environment
 
  * GOATCORE_TEST_SMTP_FROM_ADDRESS - sender email
  * GOATCORE_TEST_SMTP_TO_ADDRESS - reciver email
- * GOATCORE_TEST_SMTP_SERVER - SMTP server URL
+ * GOATCORE_TEST_SMTP_SERVER - SMTP server URL (like smtp.gmail.com:465)
  * GOATCORE_TEST_SMTP_USERNAME - SMTP server username
  * GOATCORE_TEST_SMTP_PASSWORD - SMTP server password
  * GOATCORE_TEST_SMTP_IDENTITY - SMTP server identity
 
 On linux/unix/mac add envs by
 ```
-export GOATCORE_TEST_SMTP_FROM_ADDRESS=some@email.pl
+export GOATCORE_TEST_SMTP_FROM_ADDRESS="test@email.com"
+export GOATCORE_TEST_SMTP_TO_ADDRESS="test@email.com"
+export GOATCORE_TEST_SMTP_SERVER="smtp.gmail.com:465"
+export GOATCORE_TEST_SMTP_USERNAME="YOUR_TEST_USER"
+export GOATCORE_TEST_SMTP_PASSWORD="YOUR_TEST_USER_PASSWORD"
+export GOATCORE_TEST_SMTP_IDENTITY=""
 ```
 
 Run tests:
