@@ -85,9 +85,13 @@ func (sandbox *DockerSandbox) initSequence(envs commservices.Environments) (read
 		if sshCert.Secret == "" {
 			return nil, goaterr.Errorf("SSHCert: Secret key is required")
 		}
-		initCode += "mkdir -p ~/.ssh"
-		initCode += "cat <<" + eofTag + " >> ~/.ssh/id_rsa.pub \n" + sshCert.Public + "\n" + eofTag + "\n"
-		initCode += "cat <<" + eofTag + " >> ~/.ssh/id_rsa \n" + sshCert.Secret + "\n" + eofTag + "\n"
+		initCode += "mkdir -p ~/.ssh\n"
+		if sshCert.Public != "" {
+			initCode += "cat <<" + eofTag + " >> ~/.ssh/id_rsa.pub \n" + sshCert.Public + "\n" + eofTag + "\n"
+		}
+		if sshCert.Secret != "" {
+			initCode += "cat <<" + eofTag + " >> ~/.ssh/id_rsa \n" + sshCert.Secret + "\n" + eofTag + "\n"
+		}
 	}
 	return strings.NewReader(initCode), nil
 }
