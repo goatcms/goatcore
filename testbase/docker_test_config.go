@@ -15,12 +15,12 @@ type DockerTestConfig struct {
 func LoadDockerTestConfig() (config *DockerTestConfig, err error) {
 	config = &DockerTestConfig{}
 	if err = goaterr.ToError(goaterr.AppendError(nil,
-		InjectEnv("DOCKER_TESTS", &config.onStr),
+		InjectEnv("GOATCORE_TEST_DOCKER", &config.onStr),
 	)); err != nil {
 		return nil, err
 	}
 	if config.onStr != "YES" && config.onStr != "yes" {
-		return nil, fmt.Errorf("Set DOCKER_TESTS=YES environment to run docker tests")
+		return nil, fmt.Errorf("export GOATCORE_TEST_DOCKER=YES environment to run docker tests")
 	}
 	return config, nil
 }
