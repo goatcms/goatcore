@@ -4,13 +4,17 @@
 
 GoatCore is the main project contains dump functions, primitives and base/independent libraries. It includes interfaces, packages, dependency injection system, base application architecture and external modules like terminal, pipelines commands etc.
 
+## Contents
+* [Quick start guide](docs/quick_start.md)
+* [Architecture](docs/app/architecture.md)
+
 ## Structure
 * app/* - contains application architecture
 * dependency/* - contains dependency injection libraries
 * filesystem/* - contains filesystem interfaces and accessor for virtual and operating system filesystem
-* goathtml/* - contains loader and provider for *HTML template* (it separate layout views, helpers and layout)
+* goathtml/* - contains loader and provider for **HTML template** (it separate layout views, helpers and layout)
 * goatmail/* - SMTP (Simple Mail Transfer Protocol) client
-* goattext/* - contains loader and provider for *plain text template* (it separate layout views, helpers and layout)
+* goattext/* - contains loader and provider for **plain text template** (it separate layout views, helpers and layout)
 * i18n/* - provide internationalization libraries
 * messages/* - contains forms messages wrapper
 * repositories/* - contains libraries for VCS (Version Control System). The git is partly covered now.
@@ -20,7 +24,7 @@ GoatCore is the main project contains dump functions, primitives and base/indepe
 ## Tests
 
 ### Concurrency tests accuracy
-Improve test execution time by set *AsyncTestReapeat* (at workers/main.go) to lower value (like 200 or 500). Tests will less-restrictive but faster. Increase AsyncTestReapeat to improve test accuracy.
+Improve test execution time by set **AsyncTestReapeat** (at workers/main.go) to lower value (like 200 or 500). Tests will less-restrictive but faster. Increase AsyncTestReapeat to improve test accuracy.
 
 ### Run tests
 Define the system environment to tests runs.
