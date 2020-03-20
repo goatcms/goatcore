@@ -19,6 +19,7 @@ type MockupOptions struct {
 
 	RootFilespace filesystem.Filespace
 	TMPFilespace  filesystem.Filespace
+	HomeFilespace filesystem.Filespace
 
 	EngineScope    app.Scope
 	ArgsScope      app.Scope

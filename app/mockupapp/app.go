@@ -44,6 +44,15 @@ func NewApp(options MockupOptions) (result *App, err error) {
 			return nil, err
 		}
 	}
+	if mapp.options.HomeFilespace == nil {
+		rootfs := mapp.options.RootFilespace
+		if err = rootfs.MkdirAll("home", 0766); err != nil {
+			return nil, err
+		}
+		if mapp.options.HomeFilespace, err = rootfs.Filespace("home"); err != nil {
+			return nil, err
+		}
+	}
 
 	if mapp.options.Input == nil {
 		mapp.options.Input = strings.NewReader("")

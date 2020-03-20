@@ -93,6 +93,8 @@ const (
 	RootFilespace = "root"
 	//TmpFilespace is key for tmp filespace
 	TmpFilespace = "tmp"
+	//HomeFilespace is key for home filespace
+	HomeFilespace = "home"
 	//CurrentFilespace is key for CWD (Current Working Directory) filespace
 	CurrentFilespace = "current"
 
