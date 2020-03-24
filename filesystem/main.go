@@ -17,14 +17,12 @@ const (
 
 // Writer is a Writer stream
 type Writer interface {
-	io.Writer
-	Close() error
+	io.WriteCloser
 }
 
 // Reader is a reader stream
 type Reader interface {
-	io.Reader
-	Close() error
+	io.ReadCloser
 }
 
 // Filespace is a abstract filesystem interface
