@@ -268,9 +268,14 @@ func (gapp *GoatApp) DependencyProvider() dependency.Provider {
 	return gapp.dp
 }
 
-// RootFilespace return main filespace for application (current directory by default)
+// RootFilespace return root filespace for application ('/' directory by default)
 func (gapp *GoatApp) RootFilespace() filesystem.Filespace {
 	return gapp.rootFilespace
+}
+
+// HomeFilespace return user home directory filespace (like '/Users/username')
+func (gapp *GoatApp) HomeFilespace() filesystem.Filespace {
+	return gapp.homeFilespace
 }
 
 // IO return main IO fo application

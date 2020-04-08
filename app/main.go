@@ -218,6 +218,7 @@ type App interface {
 	Version() string
 	Arguments() []string
 	RootFilespace() filesystem.Filespace
+	HomeFilespace() filesystem.Filespace
 	EngineScope() Scope
 	ArgsScope() Scope
 	FilespaceScope() Scope

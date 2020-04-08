@@ -237,9 +237,14 @@ func (mapp *App) DependencyProvider() dependency.Provider {
 	return mapp.options.DP
 }
 
-// RootFilespace return main filespace for application (current directory by default)
+// RootFilespace return root filespace for application
 func (mapp *App) RootFilespace() filesystem.Filespace {
 	return mapp.options.RootFilespace
+}
+
+// HomeFilespace return user home directory filespace (like '/Users/username')
+func (mapp *App) HomeFilespace() filesystem.Filespace {
+	return mapp.options.HomeFilespace
 }
 
 // IO return main application Input/Output objcet
