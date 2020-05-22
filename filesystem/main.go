@@ -13,6 +13,10 @@ const (
 	DefaultUnixFileMode = 0644
 	// DefaultUnixDirMode is a default dir mode for unix base filesystems
 	DefaultUnixDirMode = 0777
+	// SafeFilePermissions is a safe file mode for unix base filesystems (allow owner access only)
+	SafeFilePermissions = 0600
+	// SafeDirPermissions is a safe directory mode for unix base filesystems (allow owner access only)
+	SafeDirPermissions = 0700
 )
 
 // Writer is a Writer stream
