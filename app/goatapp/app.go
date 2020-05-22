@@ -2,7 +2,10 @@ package goatapp
 
 import (
 	"os"
+	"runtime"
 	"strings"
+
+	"github.com/goatcms/goatcore/varutil/goaterr"
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/gio"
@@ -11,6 +14,7 @@ import (
 	"github.com/goatcms/goatcore/dependency"
 	"github.com/goatcms/goatcore/dependency/provider"
 	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/filesystem/disk"
 	"github.com/goatcms/goatcore/filesystem/filespace/diskfs"
 	"github.com/goatcms/goatcore/filesystem/json"
 	"github.com/goatcms/goatcore/varutil/plainmap"
@@ -45,7 +49,7 @@ const (
 )
 
 // NewGoatApp create new app instance
-func NewGoatApp(name, version, basePath string) (a app.App, err error) {
+func NewGoatApp(name, version, defaultCWDPath string) (a app.App, err error) {
 	var (
 		in   = gio.NewAppInput(os.Stdin)
 		out  = gio.NewAppOutput(os.Stdout)
@@ -63,7 +67,7 @@ func NewGoatApp(name, version, basePath string) (a app.App, err error) {
 	if err = gapp.initArgsScope(); err != nil {
 		return nil, err
 	}
-	if err = gapp.initFilespaceScope(basePath); err != nil {
+	if err = gapp.initFilespaceScope(defaultCWDPath); err != nil {
 		return nil, err
 	}
 	if err = gapp.initConfigScope(); err != nil {
@@ -124,21 +128,31 @@ func (gapp *GoatApp) initArgsScope() error {
 	return err
 }
 
-func (gapp *GoatApp) initFilespaceScope(path string) (err error) {
+func (gapp *GoatApp) initFilespaceScope(defaultCWDPath string) (err error) {
 	var (
-		homePath string
-		tmpFS    filesystem.Filespace
-		homeFS   filesystem.Filespace
-		cwdi     interface{}
+		rootPath  string
+		homePath  string
+		cwdPath   string
+		tmpFS     filesystem.Filespace
+		homeFS    filesystem.Filespace
+		currentFS filesystem.Filespace
+		cwdi      interface{}
 	)
-	gapp.rootFilespace, err = diskfs.NewFilespace(path)
-	if err != nil {
-		return err
-	}
+	// create scope
 	gapp.filespaceScope = scope.NewScope(scope.Params{
 		Tag: app.FilespaceTagName,
 	})
+	// root filespace
+	if runtime.GOOS == "windows" {
+		rootPath = os.Getenv("SYSTEMDRIVE") + "\\"
+	} else {
+		rootPath = "/"
+	}
+	if gapp.rootFilespace, err = diskfs.NewFilespace(rootPath); err != nil {
+		return err
+	}
 	gapp.filespaceScope.Set(app.RootFilespace, gapp.rootFilespace)
+	// tmp filespace
 	if err = gapp.rootFilespace.MkdirAll("tmp", 0766); err != nil {
 		return err
 	}
@@ -146,24 +160,31 @@ func (gapp *GoatApp) initFilespaceScope(path string) (err error) {
 		return err
 	}
 	gapp.filespaceScope.Set(app.TmpFilespace, tmpFS)
+	// home filespace
 	if homePath, err = homedir.Dir(); err != nil {
+		return err
+	}
+	if err = gapp.rootFilespace.MkdirAll(homePath, filesystem.SafeDirPermissions); err != nil {
 		return err
 	}
 	if homeFS, err = gapp.rootFilespace.Filespace(homePath); err != nil {
 		return err
 	}
 	gapp.filespaceScope.Set(app.HomeFilespace, homeFS)
+	// CWD (Current Working Directory)
 	if cwdi, _ = gapp.argsScope.Get("cwd"); cwdi == nil {
-		gapp.filespaceScope.Set(app.CurrentFilespace, gapp.rootFilespace)
-		gapp.currentFilespace = gapp.rootFilespace
+		cwdPath = defaultCWDPath
 	} else {
-		var currentFS filesystem.Filespace
-		if currentFS, err = diskfs.NewFilespace(cwdi.(string)); err != nil {
-			return err
-		}
-		gapp.filespaceScope.Set(app.CurrentFilespace, currentFS)
-		gapp.currentFilespace = currentFS
+		cwdPath = cwdi.(string)
 	}
+	if !disk.IsDir(cwdPath) {
+		return goaterr.Errorf("CWD (Current Working directory) path (%s) is not a directory", cwdPath)
+	}
+	if currentFS, err = diskfs.NewFilespace(cwdPath); err != nil {
+		return err
+	}
+	gapp.filespaceScope.Set(app.CurrentFilespace, currentFS)
+	gapp.currentFilespace = currentFS
 	return nil
 }
 
