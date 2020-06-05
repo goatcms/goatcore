@@ -75,7 +75,8 @@ func (sandbox *DockerSandbox) initSequence(envs commservices.Environments) (read
 		eofTag   = "EOF" + varutil.RandString(10, varutil.UpperAlphaBytes)
 	)
 	for key, value := range envs.All() {
-		initCode += "export " + key + "=$(cat <<" + eofTag + "\n" + value + "\n" + eofTag + "\n)\n"
+		initCode += key + "=$(cat <<" + eofTag + "\n" + value + "\n" + eofTag + "\n)\n"
+		initCode += "export " + key + "\n"
 	}
 	sshCert := envs.SSHCert()
 	if sshCert.Public != "" || sshCert.Secret != "" {
