@@ -1,12 +1,15 @@
 package dockersb
 
 import (
+	"bytes"
 	"io"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/app/gio"
+	"github.com/goatcms/goatcore/app/gio/bufferio"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 	"github.com/goatcms/goatcore/filesystem"
@@ -41,6 +44,8 @@ func (sandbox *DockerSandbox) Run(ctx app.IOContext) (err error) {
 		cwdAbs     string
 		envs       commservices.Environments
 		initReader io.Reader
+		buf        = &bytes.Buffer{}
+		bufOutput  = gio.NewOutput(buf)
 	)
 	if cwd, ok = cio.CWD().(filesystem.LocalFilespace); !ok {
 		return goaterr.Errorf("DockerSandbox support only filesystem.LocalFilespace as CWD (Current Working Directory) and take %T", cio.CWD())
@@ -57,13 +62,19 @@ func (sandbox *DockerSandbox) Run(ctx app.IOContext) (err error) {
 		return err
 	}
 	cmd := exec.Command(args[0], args[1:]...)
-	cmd.Stdin = io.MultiReader(initReader, cio.In())
-	cmd.Stdout = cio.Out()
-	cmd.Stderr = cio.Err()
+	buffIO := bufferio.NewRepeatIO(gio.IOParams{
+		In:  cio.In(),
+		Out: bufOutput,
+		Err: bufOutput,
+		CWD: cwd,
+	})
+	cmd.Stdin = io.MultiReader(initReader, buffIO.In())
+	cmd.Stdout = io.MultiWriter(buffIO.Out(), cio.Out())
+	cmd.Stderr = io.MultiWriter(buffIO.Err(), cio.Err())
 	cmd.Dir = cwd.LocalPath()
 	if err = cmd.Run(); err != nil {
 		cio.Err().Printf(err.Error())
-		err = goaterr.Wrapf("Docker sandbox error: %s", err, err.Error())
+		err = goaterr.Wrapf("Docker sandbox error: %s\n%s", err, err.Error(), buf.String())
 		return err
 	}
 	return nil
