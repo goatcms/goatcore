@@ -12,6 +12,7 @@ import (
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes/dockersb"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes/selfsb"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes/sshsb"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/tasks"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
@@ -59,6 +60,7 @@ func (m *Module) InitDependencies(a app.App) (err error) {
 	}
 	deps.Manager.Add(builder)
 	deps.Manager.Add(dockersb.NewDockerSandboxBuilder(deps.EnvironmentsUnit))
+	deps.Manager.Add(sshsb.NewSSHSandboxBuilder(deps.EnvironmentsUnit))
 	return nil
 }
 
