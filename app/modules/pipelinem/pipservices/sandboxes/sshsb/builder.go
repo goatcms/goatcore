@@ -3,6 +3,8 @@ package sshsb
 import (
 	"strings"
 
+	"github.com/goatcms/goatcore/varutil/goaterr"
+
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 	"github.com/goatcms/goatcore/dependency"
@@ -33,10 +35,18 @@ func SSHSandboxBuilderFactory(dp dependency.Provider) (ins interface{}, err erro
 
 // Is return true if name is match to terminal factory
 func (factory *SSHSandboxBuilder) Is(name string) bool {
-	return strings.HasPrefix(name, "ssh:")
+	return strings.HasPrefix(name, "ssh:") || strings.HasPrefix(name, "sshb:")
 }
 
 // Build return terminal sandbox
 func (factory *SSHSandboxBuilder) Build(name string) (sandbox pipservices.Sandbox, err error) {
-	return NewSSHSandbox(name[len("ssh:"):], factory.deps)
+	// sh for ssh:*
+	if strings.HasPrefix(name, "ssh:") {
+		return NewSSHSandbox(name[len("ssh:"):], "sh", factory.deps)
+	}
+	// bash for sshd:*
+	if strings.HasPrefix(name, "sshb:") {
+		return NewSSHSandbox(name[len("sshb:"):], "bash", factory.deps)
+	}
+	return nil, goaterr.Errorf("Incorrect sandbox %s", name)
 }

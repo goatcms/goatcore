@@ -19,19 +19,22 @@ import (
 
 // DockerSandbox is termal sandbox
 type DockerSandbox struct {
-	imageName, cwd string
-	deps           deps
+	imageName  string
+	cwd        string
+	entrypoint string
+	deps       deps
 }
 
 // NewDockerSandbox create a DockerSandbox instance
-func NewDockerSandbox(imageName string, deps deps) (ins pipservices.Sandbox, err error) {
+func NewDockerSandbox(imageName, entrypoint string, deps deps) (ins pipservices.Sandbox, err error) {
 	imageName = strings.Trim(imageName, " \t\n")
 	if imageName == "" {
 		return nil, goaterr.Errorf("Docker Sandbox: Container name can not be empty")
 	}
 	return &DockerSandbox{
-		deps:      deps,
-		imageName: imageName,
+		deps:       deps,
+		imageName:  imageName,
+		entrypoint: entrypoint,
 	}, nil
 }
 
@@ -57,7 +60,7 @@ func (sandbox *DockerSandbox) Run(ctx app.IOContext) (err error) {
 		return err
 	}
 	volumeAttr := `--volume=` + cwdAbs + `:/cwd`
-	args := []string{"docker", "run", "-i", "--rm", "-w=/cwd", volumeAttr, "--entrypoint", "/bin/sh", sandbox.imageName}
+	args := []string{"docker", "run", "-i", "--rm", "-w=/cwd", volumeAttr, "--entrypoint", sandbox.entrypoint, sandbox.imageName}
 	if initReader, err = sandbox.initSequence(envs); err != nil {
 		return err
 	}

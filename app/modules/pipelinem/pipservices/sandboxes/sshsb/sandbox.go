@@ -1,10 +1,12 @@
 package sshsb
 
 import (
+	"bytes"
 	"io"
 	"strings"
 
 	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/app/gio"
 	"github.com/goatcms/goatcore/app/gio/bufferio"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
@@ -15,14 +17,15 @@ import (
 
 // SSHSandbox is termal sandbox
 type SSHSandbox struct {
-	username string
-	host     string
-	cwd      string
-	deps     deps
+	username   string
+	host       string
+	cwd        string
+	entrypoint string
+	deps       deps
 }
 
 // NewSSHSandbox create a SSHSandbox instance
-func NewSSHSandbox(sshParam string, deps deps) (ins pipservices.Sandbox, err error) {
+func NewSSHSandbox(sshParam, entrypoint string, deps deps) (ins pipservices.Sandbox, err error) {
 	var (
 		username string
 		host     string
@@ -39,9 +42,10 @@ func NewSSHSandbox(sshParam string, deps deps) (ins pipservices.Sandbox, err err
 		return nil, goaterr.Errorf("SSH Sandbox: Host can not be empty. Insert sandbox like ssh:username@hostname")
 	}
 	return &SSHSandbox{
-		username: username,
-		host:     host,
-		deps:     deps,
+		username:   username,
+		host:       host,
+		entrypoint: entrypoint,
+		deps:       deps,
 	}, nil
 }
 
@@ -51,10 +55,11 @@ func (sandbox *SSHSandbox) Run(ctx app.IOContext) (err error) {
 		cio        = ctx.IO()
 		envs       commservices.Environments
 		initReader io.Reader
-		outBuffer  = bufferio.NewBuffer()
 		sshKey     ssh.Signer
 		sshClient  *ssh.Client
 		sshSession *ssh.Session
+		buf        = &bytes.Buffer{}
+		bufOutput  = gio.NewOutput(buf)
 	)
 	if envs, err = sandbox.deps.EnvironmentsUnit.Envs(ctx.Scope()); err != nil {
 		return err
@@ -86,14 +91,20 @@ func (sandbox *SSHSandbox) Run(ctx app.IOContext) (err error) {
 		return goaterr.Wrapf("SSH Sandbox: %s@%s session error", err, sandbox.username, sandbox.host)
 	}
 	defer sshSession.Close()
-	sshSession.Stdin = io.MultiReader(initReader, cio.In())
-	sshSession.Stdout = io.MultiWriter(outBuffer, cio.Out())
-	sshSession.Stderr = io.MultiWriter(outBuffer, cio.Err())
+	buffIO := bufferio.NewRepeatIO(gio.IOParams{
+		In:  cio.In(),
+		Out: bufOutput,
+		Err: bufOutput,
+		CWD: cio.CWD(),
+	})
+	sshSession.Stdin = io.MultiReader(initReader, buffIO.In())
+	sshSession.Stdout = io.MultiWriter(buffIO.Out(), cio.Out())
+	sshSession.Stderr = io.MultiWriter(buffIO.Err(), cio.Err())
 	if err = sshSession.Shell(); err != nil {
-		return goaterr.Wrapf("SSH Sandbox: %s@%s Execution error", err, sandbox.username, sandbox.host, outBuffer.String())
+		return goaterr.Wrapf("SSH Sandbox: %s@%s Execution error", err, sandbox.username, sandbox.host, buf.String())
 	}
 	if err = sshSession.Wait(); err != nil {
-		return goaterr.Wrapf("SSH Sandbox: %s@%s Execution error\n%s", err, sandbox.username, sandbox.host, outBuffer.String())
+		return goaterr.Wrapf("SSH Sandbox: %s@%s Execution error\n%s", err, sandbox.username, sandbox.host, buf.String())
 	}
 	return nil
 }
@@ -105,7 +116,8 @@ func (sandbox *SSHSandbox) initSequence(envs commservices.Environments) (reader 
 	)
 	for key, value := range envs.All() {
 		initCode += key + "=$(cat <<" + eofTag + "\n" + value + "\n" + eofTag + "\n)\n"
+		initCode += "export " + key + "\n"
 	}
-	initCode += "set -x\n"
+	initCode += sandbox.entrypoint + "\n"
 	return strings.NewReader(initCode), nil
 }
