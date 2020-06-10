@@ -143,6 +143,36 @@ EOF`); err != nil {
 		argument`)
 }
 
+func TestSplitDoubleMultilineArguments(t *testing.T) {
+	var (
+		eof  bool
+		err  error
+		args []string
+	)
+	t.Parallel()
+	if args, eof, err = SplitArguments(`   v1 path=<<EOF
+		Some
+		Multiline
+		argument
+EOF desc=<<EOFD
+Some
+desc
+EOFD`); err != nil {
+		t.Error(err)
+		return
+	}
+	if eof != true {
+		t.Errorf("Expected eof")
+		return
+	}
+	checkSplitArguments(t, args, 0, "v1")
+	checkSplitArguments(t, args, 1, `path=Some
+		Multiline
+		argument`)
+	checkSplitArguments(t, args, 2, `desc=Some
+desc`)
+}
+
 func checkSplitArguments(t *testing.T, args []string, index int, expected string) {
 	var have string
 	if index >= len(args) {
