@@ -11,8 +11,8 @@ import (
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
-// RunnerDeps is deps for runner
-type RunnerDeps struct {
+// Deps is deps for runner
+type Deps struct {
 	SandboxesManager pipservices.SandboxesManager `dependency:"PipSandboxesManager"`
 	TasksUnit        pipservices.TasksUnit        `dependency:"PipTasksUnit"`
 	SharedMutex      commservices.SharedMutex     `dependency:"CommonSharedMutex"`
@@ -20,11 +20,11 @@ type RunnerDeps struct {
 
 // Runner is piplines repository
 type Runner struct {
-	deps RunnerDeps
+	deps Deps
 }
 
 // NewRunner create a Runner instance
-func NewRunner(deps RunnerDeps) *Runner {
+func NewRunner(deps Deps) *Runner {
 	return &Runner{
 		deps: deps,
 	}
@@ -32,7 +32,7 @@ func NewRunner(deps RunnerDeps) *Runner {
 
 // Factory create a Runner instance
 func Factory(dp dependency.Provider) (ri interface{}, err error) {
-	var deps RunnerDeps
+	var deps Deps
 	if err = dp.InjectTo(&deps); err != nil {
 		return nil, err
 	}
@@ -73,10 +73,10 @@ func (runner *Runner) runGo(tasksManager pipservices.TasksManager, sandbox pipse
 		childCtx.Scope().AppendError(err)
 		return
 	}
-	task.SetStatus(fmt.Sprintf("wait for resources"))
+	task.SetStatus("wait for resources")
 	unlockHandler = runner.deps.SharedMutex.Lock(task.LockMap())
 	defer unlockHandler.Unlock()
-	task.SetStatus(fmt.Sprintf("execute"))
+	task.SetStatus("execute")
 	if err = sandbox.Run(childCtx); err != nil {
 		childCtx.Scope().AppendError(err)
 		task.SetStatus("fail")
@@ -84,10 +84,10 @@ func (runner *Runner) runGo(tasksManager pipservices.TasksManager, sandbox pipse
 	}
 	if err = childCtx.Scope().Wait(); err != nil {
 		childCtx.Scope().AppendError(err)
-		task.SetStatus(fmt.Sprintf("fail"))
+		task.SetStatus("fail")
 		return
 	}
-	task.SetStatus(fmt.Sprintf("success"))
+	task.SetStatus("success")
 }
 
 // waitForTasks wait for all related task
