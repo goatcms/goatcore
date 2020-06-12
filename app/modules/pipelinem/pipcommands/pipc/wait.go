@@ -34,17 +34,27 @@ func Wait(a app.App, ctx app.IOContext) (err error) {
 		if task = taskManager.Get(taskName); task == nil {
 			return goaterr.Errorf("Unknow task %s", taskName)
 		}
-		out.Printf("\n wait for %s task...", taskName)
-		if err = task.Wait(); err != nil {
-			return err
+		if !task.Done() {
+			out.Printf("\n Wait for %s: %s ", taskName, task.Description())
+			if err = task.Wait(); err != nil {
+				return err
+			}
 		}
-		out.Printf(" ended (%s)", task.Status())
+		out.Printf("\n [%s] %s... %s", taskName, task.Description(), task.Status())
 		if len(task.Errors()) != 0 {
 			for _, err = range task.Errors() {
-				out.Printf("\n %v", err)
+				var (
+					merr goaterr.MessageError
+					ok   bool
+				)
+				if merr, ok = err.(goaterr.MessageError); ok {
+					out.Printf("\n - %s", merr.Message())
+				} else {
+					out.Printf("\n - %s", err.Error())
+				}
 			}
-			out.Printf("\n %v", task.Logs())
 		}
 	}
+	out.Printf("\n")
 	return nil
 }

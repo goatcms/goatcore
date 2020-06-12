@@ -87,7 +87,7 @@ func (runner *Runner) runGo(tasksManager pipservices.TasksManager, sandbox pipse
 		task.SetStatus(fmt.Sprintf("fail"))
 		return
 	}
-	task.SetStatus(fmt.Sprintf("ended"))
+	task.SetStatus(fmt.Sprintf("success"))
 }
 
 // waitForTasks wait for all related task

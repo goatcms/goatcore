@@ -15,13 +15,14 @@ import (
 func Run(a app.App, ctx app.IOContext) (err error) {
 	var (
 		deps struct {
-			Name    string `command:"?name"`
-			Body    string `command:"?body"`
-			RLock   string `command:"?rlock"`
-			RWLock  string `command:"?wlock"`
-			Wait    string `command:"?wait"`
-			Sandbox string `command:"?sandbox"`
-			Silent  string `command:"?silent" ,argument:"?silent"`
+			Name        string `command:"?name"`
+			Description string `command:"?description"`
+			Body        string `command:"?body"`
+			RLock       string `command:"?rlock"`
+			RWLock      string `command:"?wlock"`
+			Wait        string `command:"?wait"`
+			Sandbox     string `command:"?sandbox"`
+			Silent      string `command:"?silent" ,argument:"?silent"`
 
 			Runner         pipservices.Runner         `dependency:"PipRunner"`
 			NamespacesUnit pipservices.NamespacesUnit `dependency:"PipNamespacesUnit"`
@@ -94,10 +95,11 @@ func Run(a app.App, ctx app.IOContext) (err error) {
 			CWD:   ctxIO.CWD(),
 			Scope: ctx.Scope(),
 		},
-		Name:       deps.Name,
-		Namespaces: scpNamespaces,
-		Sandbox:    deps.Sandbox,
-		Lock:       lockMap,
-		Wait:       wait,
+		Name:        deps.Name,
+		Description: deps.Description,
+		Namespaces:  scpNamespaces,
+		Sandbox:     deps.Sandbox,
+		Lock:        lockMap,
+		Wait:        wait,
 	})
 }

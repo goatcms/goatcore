@@ -9,6 +9,8 @@ import (
 type Task interface {
 	// Name return task name
 	Name() string
+	// Description return task description
+	Description() string
 	// Logs return task result
 	Logs() string
 	// Done return true if task is finished

@@ -37,6 +37,12 @@ func Summary(a app.App, ctx app.IOContext) (err error) {
 		out.Printf("***************************\n")
 		out.Printf("**   %s (%s)\n", taskName, task.Status())
 		out.Printf("***************************\n")
+
+		desc := task.Description()
+		if desc != "" {
+			out.Printf("\n'''%s'''\n\n", desc)
+		}
+
 		out.Printf(task.Logs())
 		out.Printf("\n\n")
 	}

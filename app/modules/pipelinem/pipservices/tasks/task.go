@@ -43,6 +43,11 @@ func (task *Task) Name() string {
 	return task.pip.Name
 }
 
+// Description return task description
+func (task *Task) Description() string {
+	return task.pip.Description
+}
+
 // Logs return task result
 func (task *Task) Logs() string {
 	return task.pip.LogsBuffer.String()
