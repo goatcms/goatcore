@@ -85,7 +85,7 @@ func (sandbox *DockerSandbox) Run(ctx app.IOContext) (err error) {
 
 func (sandbox *DockerSandbox) initSequence(envs commservices.Environments) (reader io.Reader, err error) {
 	var (
-		initCode = "\nset -e\n"
+		initCode = "\nset -e\nset +x\n"
 		eofTag   = "EOF" + varutil.RandString(10, varutil.UpperAlphaBytes)
 	)
 	for key, value := range envs.All() {

@@ -91,15 +91,15 @@ func (sandbox *SSHSandbox) Run(ctx app.IOContext) (err error) {
 		return goaterr.Wrapf("SSH Sandbox: %s@%s session error", err, sandbox.username, sandbox.host)
 	}
 	defer sshSession.Close()
-	buffIO := bufferio.NewRepeatIO(gio.IOParams{
+	repeatIO := bufferio.NewRepeatIO(gio.IOParams{
 		In:  cio.In(),
 		Out: bufOutput,
 		Err: bufOutput,
 		CWD: cio.CWD(),
 	})
-	sshSession.Stdin = io.MultiReader(initReader, buffIO.In())
-	sshSession.Stdout = io.MultiWriter(buffIO.Out(), cio.Out())
-	sshSession.Stderr = io.MultiWriter(buffIO.Err(), cio.Err())
+	sshSession.Stdin = io.MultiReader(initReader, repeatIO.In())
+	sshSession.Stdout = io.MultiWriter(repeatIO.Out(), cio.Out())
+	sshSession.Stderr = io.MultiWriter(repeatIO.Err(), cio.Err())
 	if err = sshSession.Shell(); err != nil {
 		return goaterr.Wrapf("SSH Sandbox: %s@%s Execution error", err, sandbox.username, sandbox.host, buf.String())
 	}
@@ -111,7 +111,7 @@ func (sandbox *SSHSandbox) Run(ctx app.IOContext) (err error) {
 
 func (sandbox *SSHSandbox) initSequence(envs commservices.Environments) (reader io.Reader, err error) {
 	var (
-		initCode = "\nset -e\n"
+		initCode = "\nset -e\nset +x\n"
 		eofTag   = "EOF" + varutil.RandString(10, varutil.UpperAlphaBytes)
 	)
 	for key, value := range envs.All() {

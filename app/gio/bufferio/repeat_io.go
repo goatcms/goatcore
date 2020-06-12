@@ -19,11 +19,11 @@ func NewRepeatIO(params gio.IOParams) (io app.IO) {
 	if params.CWD == nil {
 		panic("CWD is required")
 	}
-	buffer := NewBuffer()
+	repeater := NewRepeater(params.Out, params.Err, params.In)
 	return gio.NewIO(gio.IOParams{
-		In:  NewBufferInput(params.In, buffer),
-		Out: NewRepeatOutput(params.Out, buffer),
-		Err: NewRepeatOutput(params.Err, buffer),
+		In:  repeater,
+		Out: repeater,
+		Err: repeater.Err(),
 		CWD: params.CWD,
 	})
 }

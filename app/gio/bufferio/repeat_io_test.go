@@ -14,13 +14,14 @@ import (
 func TestRepeatIOStory(t *testing.T) {
 	t.Parallel()
 	var (
-		buf       = &bytes.Buffer{}
-		in        = gio.NewInput(strings.NewReader("some\ntext"))
-		out       = gio.NewOutput(buf)
-		cwd       filesystem.Filespace
-		io        app.IO
-		err       error
-		firstLine string
+		outBuf     = &bytes.Buffer{}
+		in         = gio.NewInput(strings.NewReader("some\nsecondlinetext\n"))
+		out        = gio.NewOutput(outBuf)
+		cwd        filesystem.Filespace
+		io         app.IO
+		err        error
+		firstLine  string
+		secondLine string
 	)
 	if cwd, err = memfs.NewFilespace(); err != nil {
 		t.Error(err)
@@ -44,12 +45,24 @@ func TestRepeatIOStory(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if !strings.Contains(buf.String(), "some") {
-		t.Errorf("Output text should contains input line and it is '%s'", buf.String())
+	if !strings.Contains(outBuf.String(), "some") {
+		t.Errorf("Output text should contains input line and it is '%s'", outBuf.String())
 		return
 	}
-	if !strings.Contains(buf.String(), "result") {
-		t.Errorf("Output text should contains writed content and it is '%s'", buf.String())
+	if !strings.Contains(outBuf.String(), "result") {
+		t.Errorf("Output text should contains writed content and it is '%s'", outBuf.String())
+		return
+	}
+	if secondLine, err = io.In().ReadLine(); err != nil {
+		t.Error(err)
+		return
+	}
+	if secondLine != "secondlinetext" {
+		t.Error("Expected second line equals to 'text'")
+		return
+	}
+	if !strings.Contains(outBuf.String(), "secondlinetext") {
+		t.Errorf("Output text should contains writed second input line and it is '%s'", outBuf.String())
 		return
 	}
 }

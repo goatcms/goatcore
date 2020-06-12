@@ -2,6 +2,7 @@
 npm-debug.log
 *.test
 *~
+.vscode
 
 # generated files
 tests/smtp.json
