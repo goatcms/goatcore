@@ -57,10 +57,11 @@ func (manager *TaskManager) Names() (names []string) {
 }
 
 // Get return task by name
-func (manager *TaskManager) Get(name string) (task pipservices.Task) {
+func (manager *TaskManager) Get(name string) (task pipservices.Task, ok bool) {
 	manager.tasksMU.RLock()
 	defer manager.tasksMU.RUnlock()
-	return manager.tasks[name]
+	task, ok = manager.tasks[name]
+	return
 }
 
 // Create new task

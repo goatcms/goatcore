@@ -92,10 +92,13 @@ func (runner *Runner) runGo(tasksManager pipservices.TasksManager, sandbox pipse
 
 // waitForTasks wait for all related task
 func (runner *Runner) waitForTasks(task pipservices.TaskWriter, tasksManager pipservices.TasksManager) (err error) {
-	var relatedTask pipservices.Task
+	var (
+		relatedTask pipservices.Task
+		ok          bool
+	)
 	for _, taskName := range task.WaitList() {
 		task.SetStatus(fmt.Sprintf("wait for %s task", taskName))
-		if relatedTask = tasksManager.Get(taskName); relatedTask == nil {
+		if relatedTask, ok = tasksManager.Get(taskName); !ok {
 			return goaterr.Errorf("Unknow task %s", taskName)
 		}
 		if err = relatedTask.Wait(); err != nil {

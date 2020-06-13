@@ -42,7 +42,7 @@ type TaskWriter interface {
 type TasksManager interface {
 	Logs() string
 	Names() []string
-	Get(name string) (task Task)
+	Get(name string) (task Task, ok bool)
 	Create(pip Pip) (task TaskWriter, err error)
 }
 

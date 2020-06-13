@@ -14,6 +14,7 @@ func Summary(a app.App, ctx app.IOContext) (err error) {
 		}
 		taskManager pipservices.TasksManager
 		task        pipservices.Task
+		ok          bool
 	)
 	if err = ctx.Scope().InjectTo(&deps); err != nil {
 		return err
@@ -31,7 +32,7 @@ func Summary(a app.App, ctx app.IOContext) (err error) {
 	}
 	out := ctx.IO().Out()
 	for _, taskName := range names {
-		if task = taskManager.Get(taskName); task == nil {
+		if task, ok = taskManager.Get(taskName); !ok {
 			return goaterr.Errorf("Unknow task %s", taskName)
 		}
 		out.Printf("***************************\n")
