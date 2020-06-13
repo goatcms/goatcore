@@ -24,5 +24,5 @@ func NewSelfSandbox(terminal modules.Terminal) (ins pipservices.Sandbox, err err
 
 // Run run code in sandbox
 func (sandbox *SelfSandbox) Run(ctx app.IOContext) (err error) {
-	return sandbox.terminal.RunLoop(ctx)
+	return sandbox.terminal.RunLoop(ctx, "")
 }

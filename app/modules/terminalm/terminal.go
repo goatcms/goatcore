@@ -31,7 +31,7 @@ func IOTerminalFactory(dp dependency.Provider) (in interface{}, err error) {
 }
 
 // RunLoop run terminal loop
-func (terminal *IOTerminal) RunLoop(ctx app.IOContext) (err error) {
+func (terminal *IOTerminal) RunLoop(ctx app.IOContext, prompt string) (err error) {
 	var (
 		args []string
 		eof  = false
@@ -41,7 +41,7 @@ func (terminal *IOTerminal) RunLoop(ctx app.IOContext) (err error) {
 		if ctx.Scope().IsKilled() {
 			return ctx.Scope().ToError()
 		}
-		io.Out().Printf("\n>")
+		io.Out().Printf(prompt)
 		if args, eof, err = varutil.ReadArguments(io.In()); err != nil {
 			return err
 		}

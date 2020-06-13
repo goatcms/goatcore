@@ -41,7 +41,7 @@ func TestRunLoop(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if err = deps.Terminal.RunLoop(mapp.IOContext()); err != nil {
+	if err = deps.Terminal.RunLoop(mapp.IOContext(), "\n>"); err != nil {
 		t.Error(err)
 		return
 	}

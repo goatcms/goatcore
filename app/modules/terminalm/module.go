@@ -80,7 +80,7 @@ func (m *Module) runLoop(parentCtx app.IOContext, terminal modules.Terminal) (er
 	})
 	relatedCtx = gio.NewIOContext(relatedScope, parentCtx.IO())
 	defer relatedCtx.Close()
-	if err = terminal.RunLoop(relatedCtx); err != nil {
+	if err = terminal.RunLoop(relatedCtx, "\n>"); err != nil {
 		return err
 	}
 	return relatedCtx.Scope().Wait()
