@@ -1,12 +1,11 @@
-package bufferio
+package gio
 
 import (
 	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/app/gio"
 )
 
 // NewRepeatIO returns a new reapat IO instance. Repeat IO repeat input data to output
-func NewRepeatIO(params gio.IOParams) (io app.IO) {
+func NewRepeatIO(params IOParams) (io app.IO) {
 	if params.In == nil {
 		panic("Input is required")
 	}
@@ -20,7 +19,7 @@ func NewRepeatIO(params gio.IOParams) (io app.IO) {
 		panic("CWD is required")
 	}
 	repeater := NewRepeater(params.Out, params.Err, params.In)
-	return gio.NewIO(gio.IOParams{
+	return NewIO(IOParams{
 		In:  repeater,
 		Out: repeater,
 		Err: repeater.Err(),

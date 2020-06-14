@@ -7,13 +7,13 @@ import (
 	"github.com/goatcms/goatcore/app"
 )
 
-func TestOutputBroadcast(t *testing.T) {
+func TestMultiOutput(t *testing.T) {
 	t.Parallel()
 	firstBuf := new(bytes.Buffer)
 	firstOutput := NewAppOutput(firstBuf)
 	secondBuf := new(bytes.Buffer)
 	secondOutput := NewAppOutput(secondBuf)
-	brodcast := NewOutputBroadcast([]app.Output{
+	brodcast := NewMultiOutput([]app.Output{
 		firstOutput,
 		secondOutput,
 	})

@@ -7,7 +7,6 @@ import (
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/gio"
-	"github.com/goatcms/goatcore/app/gio/bufferio"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 	"github.com/goatcms/goatcore/varutil"
@@ -91,7 +90,7 @@ func (sandbox *SSHSandbox) Run(ctx app.IOContext) (err error) {
 		return goaterr.Wrapf("SSH Sandbox: %s@%s session error", err, sandbox.username, sandbox.host)
 	}
 	defer sshSession.Close()
-	repeatIO := bufferio.NewRepeatIO(gio.IOParams{
+	repeatIO := gio.NewRepeatIO(gio.IOParams{
 		In:  cio.In(),
 		Out: bufOutput,
 		Err: bufOutput,

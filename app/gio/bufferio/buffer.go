@@ -2,6 +2,7 @@ package bufferio
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"sync"
 
@@ -58,11 +59,24 @@ func (buffer *Buffer) Write(p []byte) (n int, err error) {
 	return buffer.data.Write(p)
 }
 
+// Printf to buffer
+func (buffer *Buffer) Printf(format string, a ...interface{}) (err error) {
+	_, err = buffer.Write([]byte(fmt.Sprintf(format, a...)))
+	return
+}
+
 // Read return buffer
-func (buffer *Buffer) String() (s string) {
+func (buffer *Buffer) String() string {
 	buffer.mu.Lock()
 	defer buffer.mu.Unlock()
 	return buffer.data.String()
+}
+
+// Bytes return buffer
+func (buffer *Buffer) Bytes() []byte {
+	buffer.mu.Lock()
+	defer buffer.mu.Unlock()
+	return buffer.data.Bytes()
 }
 
 // ReadAndClean return buffor and clean buffor content

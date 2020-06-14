@@ -9,7 +9,6 @@ import (
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/gio"
-	"github.com/goatcms/goatcore/app/gio/bufferio"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 	"github.com/goatcms/goatcore/filesystem"
@@ -65,7 +64,7 @@ func (sandbox *DockerSandbox) Run(ctx app.IOContext) (err error) {
 		return err
 	}
 	cmd := exec.Command(args[0], args[1:]...)
-	buffIO := bufferio.NewRepeatIO(gio.IOParams{
+	buffIO := gio.NewRepeatIO(gio.IOParams{
 		In:  cio.In(),
 		Out: bufOutput,
 		Err: bufOutput,

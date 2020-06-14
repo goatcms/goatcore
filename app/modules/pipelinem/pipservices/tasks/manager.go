@@ -36,11 +36,6 @@ func NewTaskManager(deps UnitDeps, rootScope app.Scope) (manager *TaskManager) {
 	return manager
 }
 
-// newTaskManager create a Output instance
-func newTaskManager(deps UnitDeps, rootScope app.Scope) (manager pipservices.TasksManager) {
-	return NewTaskManager(deps, rootScope)
-}
-
 // Logs return logs
 func (manager *TaskManager) Logs() string {
 	return manager.logs.String()
@@ -112,14 +107,14 @@ func (manager *TaskManager) Create(pip pipservices.Pip) (result pipservices.Task
 		pip.Logs = gio.NewOutput(pip.LogsBuffer)
 	}
 	outLogger := gio.NewLogger(manager.logsOutput, taskname)
-	repeatIO = bufferio.NewRepeatIO(gio.IOParams{
+	repeatIO = gio.NewRepeatIO(gio.IOParams{
 		In: pip.Context.In,
-		Out: gio.NewOutputBroadcast([]app.Output{
+		Out: gio.NewMultiOutput([]app.Output{
 			pip.Logs,
 			outLogger,
 			pip.Context.Out,
 		}),
-		Err: gio.NewOutputBroadcast([]app.Output{
+		Err: gio.NewMultiOutput([]app.Output{
 			pip.Logs,
 			outLogger,
 			pip.Context.Err,

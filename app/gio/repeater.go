@@ -1,4 +1,4 @@
-package bufferio
+package gio
 
 import (
 	"fmt"

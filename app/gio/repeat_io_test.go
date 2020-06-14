@@ -1,4 +1,4 @@
-package bufferio
+package gio
 
 import (
 	"bytes"
@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/app/gio"
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
 )
@@ -15,8 +14,8 @@ func TestRepeatIOStory(t *testing.T) {
 	t.Parallel()
 	var (
 		outBuf     = &bytes.Buffer{}
-		in         = gio.NewInput(strings.NewReader("some\nsecondlinetext\n"))
-		out        = gio.NewOutput(outBuf)
+		in         = NewInput(strings.NewReader("some\nsecondlinetext\n"))
+		out        = NewOutput(outBuf)
 		cwd        filesystem.Filespace
 		io         app.IO
 		err        error
@@ -27,7 +26,7 @@ func TestRepeatIOStory(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	io = NewRepeatIO(gio.IOParams{
+	io = NewRepeatIO(IOParams{
 		In:  in,
 		Out: out,
 		Err: out,
