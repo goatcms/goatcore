@@ -21,8 +21,8 @@ func TestPipRunChildScopeKillStory(t *testing.T) {
 	// it check async execution
 	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
 		Input: strings.NewReader(`
-			pip:run --name=first --body="killStatus" --silent=false
-			pip:run --name=second --body="kill" --silent=false
+			pip:run --name=first --body="kill" --silent=false
+			pip:run --name=second --wait=first --body="killStatus" --silent=false
 			`),
 		Args: []string{`appname`, `terminal`},
 	}); err != nil {
@@ -31,12 +31,13 @@ func TestPipRunChildScopeKillStory(t *testing.T) {
 	}
 	if err = goaterr.ToError(goaterr.AppendError(nil, app.RegisterCommand(mapp, "killStatus", func(a app.App, ctx app.IOContext) (err error) {
 		time.Sleep(10 * time.Millisecond)
+		// it will never executed because return error by command stop pipeline
 		if ctx.Scope().IsKilled() {
 			return ctx.IO().Out().Printf("is_killed")
 		}
 		return ctx.IO().Out().Printf("is_not_killed")
 	}, ""), app.RegisterCommand(mapp, "kill", func(a app.App, ctx app.IOContext) (err error) {
-		//ctx.Scope().Kill()
+		// we kill pipeline by return "some error"
 		return fmt.Errorf("some error")
 	}, ""))); err != nil {
 		t.Error(err)
@@ -52,8 +53,8 @@ func TestPipRunChildScopeKillStory(t *testing.T) {
 		return
 	}
 	result := mapp.OutputBuffer().String()
-	if !strings.Contains(result, "is_killed") {
-		t.Errorf("expected 'is_killed' result and take '%s'", result)
+	if strings.Contains(result, "is_killed") || strings.Contains(result, "is_not_killed") {
+		t.Errorf("expected stopped pipeline before killStatus command and take '%s'", result)
 		return
 	}
 }

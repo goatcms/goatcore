@@ -1,16 +1,15 @@
 package goaterr
 
 import (
+	"fmt"
 	"runtime/debug"
-	"strings"
 )
 
 // Error is goat error object
 type Error struct {
-	msg        string
-	stack      string
-	wraps      []error
-	wrapsError error
+	msg   string
+	stack string
+	wraps []error
 }
 
 // newGoatError return goat error object with title and stacktrace
@@ -44,38 +43,42 @@ func Wrap(err error, msg string) error {
 // ToError return error object if error list is not empty or nil.
 // Otherwise return error object.
 func ToError(errs []error) error {
-	var msgs []string
 	if len(errs) == 0 {
 		return nil
 	}
 	if len(errs) == 1 {
 		return errs[0]
 	}
-	for _, err := range errs {
-		if messageError, ok := err.(MessageError); ok {
-			msgs = append(msgs, messageError.Message())
-		} else {
-			msgs = append(msgs, err.Error())
-		}
-	}
 	return &Error{
-		msg:   strings.Join(msgs, " && "),
+		msg:   fmt.Sprintf("Error wrapper (Contains %v errors).", len(errs)),
 		stack: string(debug.Stack()),
 		wraps: errs,
 	}
 }
 
 // Error return goat error object with title and stacktrace
-func (err *Error) Error() string {
-	return print(err)
+func (err *Error) Error() (s string) {
+	s = err.msg
+	if len(err.wraps) > 0 {
+		s += fmt.Sprintf(" Wraps %v errors:", len(err.wraps))
+		for _, e := range err.wraps {
+			switch v := e.(type) {
+			case MessageError:
+				s += fmt.Sprintf("\n - %s", v.ErrorMessage())
+			default:
+				s += fmt.Sprintf("\n - %s", v.Error())
+			}
+		}
+	}
+	return
 }
 
 // Unwrap return wrapped error
 func (err *Error) Unwrap() error {
-	if err.wrapsError == nil {
-		err.wrapsError = ToError(err.wraps)
+	if len(err.wraps) < 1 {
+		return nil
 	}
-	return err.wrapsError
+	return err.wraps[0]
 }
 
 // UnwrapAll return wrapped errors
@@ -88,7 +91,12 @@ func (err *Error) Stack() string {
 	return err.stack
 }
 
-// Message return error message
-func (err *Error) Message() string {
+// ErrorJSON return error json tree
+func (err *Error) ErrorJSON() string {
+	return printJSON(err)
+}
+
+// ErrorMessage return error json tree
+func (err *Error) ErrorMessage() string {
 	return err.msg
 }

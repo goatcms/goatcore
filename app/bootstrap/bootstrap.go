@@ -1,6 +1,9 @@
 package bootstrap
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
@@ -14,7 +17,7 @@ type Bootstrap struct {
 }
 
 // NewBootstrap create new Bootstrap object
-func NewBootstrap(gapp app.App) app.Bootstrap {
+func NewBootstrap(gapp app.App) *Bootstrap {
 	return &Bootstrap{
 		gapp:    gapp,
 		modules: []app.Module{},
@@ -77,4 +80,31 @@ func (b *Bootstrap) Run() (err error) {
 		errs = append(errs, err)
 	}
 	return goaterr.ToError(goaterr.AppendError(errs, app.CloseApp(b.gapp)))
+}
+
+// ShowError print error / errors to stderr
+func (b *Bootstrap) ShowError(inerr error) (code int, err error) {
+	var (
+		appScope = b.gapp.AppScope()
+		deps     struct {
+			ErrLVL string `argument:"errlvl"`
+		}
+		details   bool
+		errorCode = 1
+	)
+	if err = appScope.InjectTo(&deps); err != nil {
+		return errorCode, err
+	}
+	details = deps.ErrLVL == "details"
+	if details {
+		switch v := inerr.(type) {
+		case goaterr.JSONError:
+			fmt.Fprintf(os.Stderr, "\n%s", v.ErrorJSON())
+		default:
+			fmt.Fprintf(os.Stderr, "\n%s", v.Error())
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, "\n%s", inerr.Error())
+	}
+	return errorCode, nil
 }

@@ -12,41 +12,67 @@ func TestNewError(t *testing.T) {
 	if err == nil {
 		t.Errorf("Expected error (not nil)")
 	}
-	result := err.Error()
-	if !strings.Contains(result, "Some message") {
+	if err.Error() != "Some message" {
 		t.Errorf("Result should contains 'Some message'")
 	}
 }
 
 func TestToError(t *testing.T) {
 	t.Parallel()
-	var err = ToError([]error{
-		errors.New("First error"),
-		errors.New("Second error"),
-	})
+	var (
+		err = ToError([]error{
+			errors.New("First error"),
+			errors.New("Second error"),
+		})
+		errJSON JSONError
+		ok      bool
+	)
 	if err == nil {
 		t.Errorf("Expected error (not nil)")
+		return
 	}
-	result := err.Error()
-	if !strings.Contains(result, "First error") {
+	if errJSON, ok = err.(JSONError); !ok {
+		t.Errorf("Error should implement JSONError")
+		return
+	}
+	json := errJSON.ErrorJSON()
+	if !strings.Contains(json, "First error") {
 		t.Errorf("Result should contains 'First error'")
 	}
-	if !strings.Contains(result, "Second error") {
+	if !strings.Contains(json, "Second error") {
 		t.Errorf("Result should contains 'Second error'")
 	}
 }
 
-func TestWrap(t *testing.T) {
+func TestWrapToJSON(t *testing.T) {
+	var (
+		err     error
+		errJSON JSONError
+		ok      bool
+	)
 	t.Parallel()
-	var err = Wrap(errors.New("Parent error"), "Child error")
-	if err == nil {
+	if err = Wrap(errors.New("Parent error"), "Child error"); err == nil {
 		t.Errorf("Expected error (not nil)")
 	}
-	result := err.Error()
+	if errJSON, ok = err.(JSONError); !ok {
+		t.Errorf("Error should implement JSONError")
+		return
+	}
+	result := errJSON.ErrorJSON()
 	if !strings.Contains(result, "Parent error") {
 		t.Errorf("Result should contains 'Parent error' and take %s", result)
 	}
 	if !strings.Contains(result, "Child error") {
 		t.Errorf("Result should contains 'Child error' and take %s", result)
+	}
+}
+func TestWrapMessage(t *testing.T) {
+	t.Parallel()
+	var err = Wrap(errors.New("Parent error"), "Child error")
+	if err == nil {
+		t.Errorf("Expected error (not nil)")
+	}
+	if err.Error() == "Parent error" {
+		t.Errorf("err.Error() should be equal to 'Parent error' and it is %s", err.Error())
 	}
 }

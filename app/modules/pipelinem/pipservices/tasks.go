@@ -9,10 +9,14 @@ import (
 type Task interface {
 	// Name return task name
 	Name() string
+	// FullName return name with task namespace as prefix
+	FullName() string
 	// Description return task description
 	Description() string
-	// Logs return task result
-	Logs() string
+	// OBroadcast write task output (and error output) to broadcast
+	OBroadcast() app.BufferedBroadcast
+	// IOBroadcast write input, output and error output to broadcast
+	IOBroadcast() app.BufferedBroadcast
 	// Done return true if task is finished
 	Done() bool
 	// Status return task status description
@@ -40,10 +44,20 @@ type TaskWriter interface {
 
 // TasksManager contains tasks data
 type TasksManager interface {
-	Logs() string
+	// OBroadcast write all tasks output logs to broadcast
+	OBroadcast() app.BufferedBroadcast
+	// StatusBroadcast write tasks statuses changes to broadcast
+	StatusBroadcast() app.BufferedBroadcast
+	// Summary write summary log to output
+	Summary(out app.Output) (err error)
+	// Names return tasks names
 	Names() []string
+	// Get task by name
 	Get(name string) (task Task, ok bool)
+	// Create new task from Pip
 	Create(pip Pip) (task TaskWriter, err error)
+	// Wait
+	Wait() (err error)
 }
 
 // TasksUnit menage pipeline tasks

@@ -3,7 +3,6 @@ package gio
 import (
 	"fmt"
 	"io"
-	"sync"
 
 	"github.com/goatcms/goatcore/app"
 )
@@ -14,8 +13,8 @@ const (
 	errMode  = 3
 	nullMode = 4
 
-	inPrompt  = "\n>>>>>>>>>>>>>>>>>>>>:\n"
-	outPrompt = "\n<<<<<<<<<<<<<<<<<<<<:\n"
+	inPrompt  = "\n<<<<<<<<<<<<<<<<<<<<:\n"
+	outPrompt = "\n>>>>>>>>>>>>>>>>>>>>:\n"
 	errPrompt = "\n!!!!!!!!!!!!!!!!!!!!:\n"
 )
 
@@ -26,7 +25,6 @@ type Repeater struct {
 	input       app.Input
 	mode        byte
 	errRepeater errRepeater
-	mu          sync.Mutex
 }
 
 type errRepeater struct {
@@ -60,8 +58,6 @@ func NewRepeater(output, err app.Output, input app.Input) *Repeater {
 
 func (repeater *Repeater) Read(p []byte) (n int, err error) {
 	var err2 error
-	repeater.mu.Lock()
-	defer repeater.mu.Unlock()
 	if n, err = repeater.input.Read(p); err != nil && err != io.EOF {
 		return
 	}
@@ -82,8 +78,6 @@ func (repeater *Repeater) Read(p []byte) (n int, err error) {
 
 func (repeater *Repeater) ReadWord() (word string, err error) {
 	var err2 error
-	repeater.mu.Lock()
-	defer repeater.mu.Unlock()
 	if word, err = repeater.input.ReadWord(); err != nil && err != io.EOF {
 		return
 	}
@@ -104,8 +98,6 @@ func (repeater *Repeater) ReadWord() (word string, err error) {
 
 func (repeater *Repeater) ReadLine() (line string, err error) {
 	var err2 error
-	repeater.mu.Lock()
-	defer repeater.mu.Unlock()
 	if line, err = repeater.input.ReadLine(); err != nil && err != io.EOF {
 		return
 	}
@@ -127,8 +119,6 @@ func (repeater *Repeater) ReadLine() (line string, err error) {
 // Printf formats according to a format specifier and writes to standard output.
 // It returns the number of bytes written and any write error encountered.
 func (repeater *Repeater) Printf(format string, a ...interface{}) (err error) {
-	repeater.mu.Lock()
-	defer repeater.mu.Unlock()
 	if repeater.mode != outMode {
 		if err = repeater.output.Printf(outPrompt); err != nil {
 			return
@@ -140,8 +130,6 @@ func (repeater *Repeater) Printf(format string, a ...interface{}) (err error) {
 
 // Write data to output
 func (repeater *Repeater) Write(p []byte) (n int, err error) {
-	repeater.mu.Lock()
-	defer repeater.mu.Unlock()
 	if repeater.mode != outMode {
 		if n, err = repeater.output.Write([]byte(outPrompt)); err != nil {
 			return
@@ -154,8 +142,6 @@ func (repeater *Repeater) Write(p []byte) (n int, err error) {
 // PrintErrf formats according to a format specifier and writes to error output.
 // It returns the number of bytes written and any write error encountered.
 func (repeater *Repeater) PrintErrf(format string, a ...interface{}) (err error) {
-	repeater.mu.Lock()
-	defer repeater.mu.Unlock()
 	if repeater.mode != errMode {
 		if err = repeater.err.Printf(errPrompt); err != nil {
 			return
@@ -167,8 +153,6 @@ func (repeater *Repeater) PrintErrf(format string, a ...interface{}) (err error)
 
 // WriteErr write data to error output
 func (repeater *Repeater) WriteErr(p []byte) (n int, err error) {
-	repeater.mu.Lock()
-	defer repeater.mu.Unlock()
 	if repeater.mode != errMode {
 		if n, err = repeater.err.Write([]byte(errPrompt)); err != nil {
 			return

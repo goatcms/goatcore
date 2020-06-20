@@ -80,6 +80,7 @@ func (runner *Runner) runGo(tasksManager pipservices.TasksManager, sandbox pipse
 	if err = sandbox.Run(childCtx); err != nil {
 		childCtx.Scope().AppendError(err)
 		task.SetStatus("fail")
+		childCtx.IO().Err().Printf("%s", err)
 		return
 	}
 	if err = childCtx.Scope().Wait(); err != nil {

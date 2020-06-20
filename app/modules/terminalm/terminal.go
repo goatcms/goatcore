@@ -41,7 +41,9 @@ func (terminal *IOTerminal) RunLoop(ctx app.IOContext, prompt string) (err error
 		if ctx.Scope().IsKilled() {
 			return ctx.Scope().ToError()
 		}
-		io.Out().Printf(prompt)
+		if prompt != "" {
+			io.Out().Printf(prompt)
+		}
 		if args, eof, err = varutil.ReadArguments(io.In()); err != nil {
 			return err
 		}

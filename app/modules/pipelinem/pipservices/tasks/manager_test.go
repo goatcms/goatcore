@@ -68,7 +68,7 @@ func TestUnitStory(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if !strings.Contains(manager.Logs(), "sometext") {
+	if !strings.Contains(manager.OBroadcast().String(), "sometext") {
 		t.Errorf("expected 'sometext' in logs")
 	}
 	if !strings.Contains(buffer.String(), "sometext") {

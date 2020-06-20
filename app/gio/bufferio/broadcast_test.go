@@ -81,3 +81,7 @@ func TestBrodcastBuffer(t *testing.T) {
 func testBrodcastImplementsAppOutput() app.Output {
 	return NewBroadcast(nil, []io.Writer{})
 }
+
+func testBrodcastImplementsAppBrodcast() app.Broadcast {
+	return NewBroadcast(nil, []io.Writer{})
+}

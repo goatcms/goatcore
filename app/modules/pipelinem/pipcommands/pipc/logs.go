@@ -23,6 +23,6 @@ func Logs(a app.App, ctx app.IOContext) (err error) {
 		return err
 	}
 	out := ctx.IO().Out()
-	out.Printf(taskManager.Logs())
+	out.Printf(taskManager.OBroadcast().String())
 	return nil
 }
