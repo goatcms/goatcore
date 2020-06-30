@@ -35,6 +35,9 @@ func newApp(options mockupapp.MockupOptions) (mapp *mockupapp.App, bootstraper a
 	if err = app.RegisterCommand(mapp, "pip:run", Run, pipcommands.PipRun); err != nil {
 		return nil, nil, err
 	}
+	if err = app.RegisterCommand(mapp, "pip:try", Try, pipcommands.PipTry); err != nil {
+		return nil, nil, err
+	}
 	if err = app.RegisterCommand(mapp, "testCommand", func(a app.App, ctx app.IOContext) (err error) {
 		return ctx.IO().Out().Printf("output")
 	}, "description"); err != nil {

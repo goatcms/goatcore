@@ -98,9 +98,11 @@ func (manager *TaskManager) Create(pip pipservices.Pip) (result pipservices.Task
 	}
 	childScope = scope.NewChildScope(parentScope, scope.ChildParams{})
 	if err = manager.deps.NamespacesUnit.Define(childScope, childNamespaces); err != nil {
+		childScope.Close()
 		return nil, err
 	}
 	if err = childScope.Set(scopeKey, manager); err != nil {
+		childScope.Close()
 		return nil, err
 	}
 	taskCtx = gio.NewIOContext(childScope, gio.NewIO(gio.IOParams{
@@ -112,14 +114,19 @@ func (manager *TaskManager) Create(pip pipservices.Pip) (result pipservices.Task
 	task = NewTask(taskCtx, pip, manager.statusBroadcast, manager.doneTask)
 	oLogger := gio.NewLogger(manager.oBroadcast, taskname)
 	if err = task.OBroadcast().Add(oLogger); err != nil {
+		childScope.Close()
 		return nil, err
 	}
 	// add oLogger to oBroadcast
 	manager.tasks[taskname] = task
 	if err = manager.validWaitList([]string{taskname}, task, 100); err != nil {
+		childScope.Close()
 		return nil, err
 	}
-	manager.rootScope.AddTasks(1)
+	if err = manager.rootScope.AddTasks(1); err != nil {
+		childScope.Close()
+		return nil, err
+	}
 	manager.wg.Add(1)
 	return task, nil
 }
