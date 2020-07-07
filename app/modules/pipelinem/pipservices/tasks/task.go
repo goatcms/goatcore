@@ -62,9 +62,9 @@ func NewTask(ctx app.IOContext, pip pipservices.Pip, statusBroadcast app.Broadca
 	}
 	task.wg.Add(1)
 	if task.pip.Description != "" {
-		statusBroadcast.Printf("\n [%s]... Started: %s", task.FullName(), task.Description())
+		statusBroadcast.Printf("\n [%s] %s... started", task.FullName(), task.Description())
 	} else {
-		statusBroadcast.Printf("\n [%s]... Started", task.FullName())
+		statusBroadcast.Printf("\n [%s]... started", task.FullName())
 	}
 	return task
 }
