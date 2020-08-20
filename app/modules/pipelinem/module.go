@@ -4,13 +4,14 @@ import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
+	"github.com/goatcms/goatcore/app/modules/ocm/ocservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipcommands"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipcommands/pipc"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/namespaces"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/runner"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes"
-	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes/dockersb"
+	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes/containersb"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes/selfsb"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes/sshsb"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/tasks"
@@ -38,9 +39,6 @@ func (m *Module) RegisterDependencies(a app.App) error {
 		app.RegisterCommand(a, "pip:try", pipc.Try, pipcommands.PipTry),
 		app.RegisterCommand(a, "pip:logs", pipc.Logs, pipcommands.PipLogs),
 		app.RegisterCommand(a, "pip:summary", pipc.Summary, pipcommands.PipSummary),
-		// pip:run can be source of deadlocks well it is disable by default
-		// app.RegisterCommand(a, "pip:wait", pipc.Wait, pipcommands.PipWait),
-		app.RegisterHealthChecker(a, "docker", SandboxHealthChecker),
 	))
 }
 
@@ -51,6 +49,7 @@ func (m *Module) InitDependencies(a app.App) (err error) {
 			Manager          pipservices.SandboxesManager  `dependency:"PipSandboxesManager"`
 			Terminal         modules.Terminal              `dependency:"TerminalService"`
 			EnvironmentsUnit commservices.EnvironmentsUnit `dependency:"CommonEnvironmentsUnit"`
+			OCManager        ocservices.Manager            `dependency:"OCManager"`
 		}
 		builder pipservices.SandboxBuilder
 	)
@@ -61,7 +60,7 @@ func (m *Module) InitDependencies(a app.App) (err error) {
 		return err
 	}
 	deps.Manager.Add(builder)
-	deps.Manager.Add(dockersb.NewDockerSandboxBuilder(deps.EnvironmentsUnit))
+	deps.Manager.Add(containersb.NewContainerSandboxBuilder(deps.EnvironmentsUnit, deps.OCManager))
 	deps.Manager.Add(sshsb.NewSSHSandboxBuilder(deps.EnvironmentsUnit))
 	return nil
 }

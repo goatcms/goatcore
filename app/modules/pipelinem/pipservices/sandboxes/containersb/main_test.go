@@ -1,4 +1,4 @@
-package dockersb
+package containersb
 
 import (
 	"github.com/goatcms/goatcore/app"
@@ -7,6 +7,8 @@ import (
 	"github.com/goatcms/goatcore/app/modules"
 	"github.com/goatcms/goatcore/app/modules/commonm"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
+	"github.com/goatcms/goatcore/app/modules/ocm"
+	"github.com/goatcms/goatcore/app/modules/ocm/ocservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/namespaces"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/runner"
@@ -37,6 +39,9 @@ func newApp() (mapp app.App, err error) {
 	if err = bootstraper.Register(commonm.NewModule()); err != nil {
 		return nil, err
 	}
+	if err = bootstraper.Register(ocm.NewModule()); err != nil {
+		return nil, err
+	}
 	if err = bootstraper.Init(); err != nil {
 		return nil, err
 	}
@@ -52,6 +57,7 @@ func initDependencies(a app.App) (err error) {
 			Manager          pipservices.SandboxesManager  `dependency:"PipSandboxesManager"`
 			Terminal         modules.Terminal              `dependency:"TerminalService"`
 			EnvironmentsUnit commservices.EnvironmentsUnit `dependency:"CommonEnvironmentsUnit"`
+			OCManager        ocservices.Manager            `dependency:"OCManager"`
 		}
 		builder pipservices.SandboxBuilder
 	)
@@ -62,6 +68,6 @@ func initDependencies(a app.App) (err error) {
 		return err
 	}
 	deps.Manager.Add(builder)
-	deps.Manager.Add(NewDockerSandboxBuilder(deps.EnvironmentsUnit))
+	deps.Manager.Add(NewContainerSandboxBuilder(deps.EnvironmentsUnit, deps.OCManager))
 	return nil
 }

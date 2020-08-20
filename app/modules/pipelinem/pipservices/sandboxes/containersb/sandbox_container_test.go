@@ -1,4 +1,4 @@
-package dockersb
+package containersb
 
 import (
 	"strings"
@@ -16,7 +16,7 @@ import (
 	"github.com/goatcms/goatcore/testbase"
 )
 
-func TestDockerbSandbox(t *testing.T) {
+func TestContainerSandbox(t *testing.T) {
 	t.Parallel()
 	var (
 		err  error
@@ -58,7 +58,7 @@ func TestDockerbSandbox(t *testing.T) {
 			Task: "",
 			Lock: "",
 		}),
-		Sandbox: "dockerb:bash:latest",
+		Sandbox: "container:alpine",
 		Lock:    commservices.LockMap{},
 		Wait:    []string{},
 	}); err != nil {

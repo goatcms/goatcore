@@ -7,6 +7,7 @@ import (
 	"github.com/goatcms/goatcore/app/bootstrap"
 	"github.com/goatcms/goatcore/app/mockupapp"
 	"github.com/goatcms/goatcore/app/modules/commonm"
+	"github.com/goatcms/goatcore/app/modules/ocm"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 	"github.com/goatcms/goatcore/app/modules/terminalm"
 	"github.com/goatcms/goatcore/varutil/goaterr"
@@ -28,6 +29,7 @@ func TestSandboxes(t *testing.T) {
 		bootstrap.Register(NewModule()),
 		bootstrap.Register(terminalm.NewModule()),
 		bootstrap.Register(commonm.NewModule()),
+		bootstrap.Register(ocm.NewModule()),
 	)); err != nil {
 		t.Error(err)
 		return
@@ -63,7 +65,7 @@ func TestSandboxes(t *testing.T) {
 		t.Errorf("Expected terminal sandbox and take nil")
 		return
 	}
-	if sandbox, err = deps.SandboxesManager.Get("docker:ubuntu:disco"); err != nil {
+	if sandbox, err = deps.SandboxesManager.Get("container:ubuntu:disco"); err != nil {
 		t.Error(err)
 		return
 	}

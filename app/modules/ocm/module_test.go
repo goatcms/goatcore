@@ -1,4 +1,4 @@
-package pipelinem
+package ocm
 
 import (
 	"testing"
@@ -6,9 +6,7 @@ import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/bootstrap"
 	"github.com/goatcms/goatcore/app/mockupapp"
-	"github.com/goatcms/goatcore/app/modules/commonm"
-	"github.com/goatcms/goatcore/app/modules/ocm"
-	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
+	"github.com/goatcms/goatcore/app/modules/ocm/ocservices"
 	"github.com/goatcms/goatcore/app/modules/terminalm"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
@@ -27,8 +25,6 @@ func TestModule(t *testing.T) {
 	bootstrap := bootstrap.NewBootstrap(mapp)
 	if err = goaterr.ToError(goaterr.AppendError(nil,
 		bootstrap.Register(terminalm.NewModule()),
-		bootstrap.Register(commonm.NewModule()),
-		bootstrap.Register(ocm.NewModule()),
 		bootstrap.Register(NewModule()),
 	)); err != nil {
 		t.Error(err)
@@ -40,10 +36,7 @@ func TestModule(t *testing.T) {
 	}
 	// test
 	var deps struct {
-		SandboxesManager pipservices.SandboxesManager `dependency:"PipSandboxesManager"`
-		NamespacesUnit   pipservices.NamespacesUnit   `dependency:"PipNamespacesUnit"`
-		Runner           pipservices.Runner           `dependency:"PipRunner"`
-		TasksUnit        pipservices.TasksUnit        `dependency:"PipTasksUnit"`
+		Manager ocservices.Manager `dependency:"OCManager"`
 	}
 	if err = mapp.DependencyProvider().InjectTo(&deps); err != nil {
 		t.Error(err)

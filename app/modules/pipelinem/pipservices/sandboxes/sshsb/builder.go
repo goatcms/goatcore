@@ -10,7 +10,7 @@ import (
 	"github.com/goatcms/goatcore/dependency"
 )
 
-// SSHSandboxBuilder create new docker sandbox builder
+// SSHSandboxBuilder create new ssh sandbox builder
 type SSHSandboxBuilder struct {
 	deps deps
 }
