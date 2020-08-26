@@ -157,7 +157,9 @@ func (fs *Filespace) Writer(destPath string) (writer filesystem.Writer, err erro
 		node         os.FileInfo
 		ok           bool
 	)
-	destPath = varutil.CleanPath(destPath)
+	if destPath, err = reducePath(destPath); err != nil {
+		return nil, err
+	}
 	if destDirPath, destNodeName, err = splitContainsPath(destPath); err != nil {
 		return nil, err
 	}
@@ -233,7 +235,7 @@ func (fs *Filespace) WriteFile(destPath string, data []byte, filemode os.FileMod
 
 // Filespace get directory node and return it as filespace
 func (fs *Filespace) Filespace(basePath string) (filesystem.Filespace, error) {
-	return NewFilespaceWrapper(fs, basePath), nil
+	return NewFilespaceWrapper(fs, basePath)
 }
 
 // Remove delete node by path

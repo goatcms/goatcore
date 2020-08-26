@@ -1,6 +1,7 @@
 package varutil
 
 import (
+	"path"
 	"regexp"
 	"strings"
 
@@ -28,12 +29,13 @@ func IsArrContainStr(arr []string, s string) bool {
 }
 
 // FixDirPath autocorrect dir path to contains / at its end
-func FixDirPath(path *string) {
-	if *path == "" {
+func FixDirPath(p *string) {
+	if *p == "" {
 		return
 	}
-	if !strings.HasSuffix(*path, "/") {
-		*path = *path + "/"
+	*p = path.Clean(*p)
+	if !strings.HasSuffix(*p, "/") {
+		*p = *p + "/"
 	}
 }
 

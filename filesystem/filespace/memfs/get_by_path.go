@@ -63,13 +63,24 @@ func getFileByPathNodes(dir *Dir, pathNodes []string) (out *File, err error) {
 
 // getNodeByPathNodes return node by path nodes
 func getNodeByPathNodes(dir *Dir, pathNodes []string) (node os.FileInfo, err error) {
-	if len(pathNodes) == 0 {
+	var (
+		nodeName string
+		i        = 0
+	)
+	for ; i < len(pathNodes) && pathNodes[i] == ""; i++ {
+	}
+	if len(pathNodes) == i {
 		return dir, nil
 	}
-	if node, err = dir.getNode(pathNodes[0]); err != nil {
+	if node, err = dir.getNode(pathNodes[i]); err != nil {
 		return nil, err
 	}
-	for _, nodeName := range pathNodes[1:] {
+	i++
+	for ; i < len(pathNodes); i++ {
+		nodeName = pathNodes[i]
+		if nodeName == "" {
+			continue
+		}
 		if node.IsDir() != true {
 			return nil, goaterr.Errorf("Node by name %s must be dir to get sub node (path %v )", node.Name(), pathNodes)
 		}

@@ -5,6 +5,7 @@ npm-debug.log
 .vscode
 
 # generated files
+teststmp
 tests/smtp.json
 tests/db_postgres.json
 /bin
