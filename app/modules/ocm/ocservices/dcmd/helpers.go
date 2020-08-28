@@ -68,6 +68,7 @@ func MapVolumens(volumens map[string]ocservices.FSVolume) (args []string, err er
 		}
 		all[i*rowSieze] = "-v"
 		all[i*rowSieze+1] = volumePath + ":" + containerPath
+		i++
 	}
 	return all, nil
 }
