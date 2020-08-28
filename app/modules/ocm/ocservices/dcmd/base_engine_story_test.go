@@ -72,7 +72,7 @@ func engineSimpleStory(t *testing.T, engine ocservices.Engine) {
 				Filespace: cwd,
 			},
 		},
-		Provilages: false,
+		Privileged: false,
 	}); err != nil {
 		t.Error(err)
 		return

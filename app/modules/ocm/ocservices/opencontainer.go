@@ -29,7 +29,7 @@ type Container struct {
 	Entrypoint string
 	Envs       commservices.Environments
 	Engine     string
-	Provilages bool
+	Privileged bool
 	FSVolumes  map[string]FSVolume
 }
 

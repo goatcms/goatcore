@@ -39,6 +39,9 @@ func (engine *Engine) Run(container ocservices.Container) (err error) {
 		"-i",
 		"--rm",
 	}
+	if container.Privileged {
+		command = append(command, "--privileged")
+	}
 	// map volumes
 	if args, err = MapVolumens(container.FSVolumes); err != nil {
 		return err

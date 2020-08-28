@@ -50,6 +50,6 @@ func (sandbox *ContainerSandbox) Run(ctx app.IOContext) (err error) {
 				Filespace: ctx.IO().CWD(),
 			},
 		},
-		Provilages: false,
+		Privileged: false,
 	})
 }
