@@ -157,7 +157,7 @@ func (fs *Filespace) Writer(destPath string) (writer filesystem.Writer, err erro
 		node         os.FileInfo
 		ok           bool
 	)
-	if destPath, err = reducePath(destPath); err != nil {
+	if destPath, err = varutil.ReduceAbsPath(destPath); err != nil {
 		return nil, err
 	}
 	if destDirPath, destNodeName, err = splitContainsPath(destPath); err != nil {

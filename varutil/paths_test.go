@@ -31,3 +31,52 @@ func TestCleanPath(t *testing.T) {
 		t.Errorf("expect '%s' value and take '%s'", expect, result)
 	}
 }
+
+func TestReduceAbsPathFails(t *testing.T) {
+	t.Parallel()
+	var err error
+	if _, err = ReduceAbsPath(".."); err == nil {
+		t.Errorf("expected error for path '..'")
+	}
+	if _, err = ReduceAbsPath("/a/../.."); err == nil {
+		t.Errorf("expected error for path '/a/../..'")
+	}
+	if _, err = ReduceAbsPath("./../.."); err == nil {
+		t.Errorf("expected error for path './../..'")
+	}
+	if _, err = ReduceAbsPath("./.."); err == nil {
+		t.Errorf("expected error for path './..'")
+	}
+}
+
+func TestReduceAbsPathSuccess(t *testing.T) {
+	t.Parallel()
+	var (
+		err  error
+		path string
+	)
+	if path, err = ReduceAbsPath("./a"); err != nil {
+		t.Error(err)
+		return
+	}
+	if path != "a" {
+		t.Errorf("expected a and take %s", path)
+		return
+	}
+	if path, err = ReduceAbsPath("a/b/c"); err != nil {
+		t.Error(err)
+		return
+	}
+	if path != "a/b/c" {
+		t.Errorf("expected a/b/c and take %s", path)
+		return
+	}
+	if path, err = ReduceAbsPath("some/../result/path"); err != nil {
+		t.Error(err)
+		return
+	}
+	if path != "result/path" {
+		t.Errorf("expected result/path and take %s", path)
+		return
+	}
+}

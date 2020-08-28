@@ -3,6 +3,8 @@ package varutil
 import (
 	"path"
 	"strings"
+
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // GOPath return golang path like host.com/user/repo
@@ -38,4 +40,30 @@ func CleanPath(p string) (w string) {
 		p = p[1:]
 	}
 	return p
+}
+
+// ReduceAbsPath return shorter path version.
+// Return error if the path refers to a parent directory.
+func ReduceAbsPath(path string) (result string, err error) {
+	var (
+		baseNodes   = strings.Split(path, "/")
+		resultNodes = make([]string, len(baseNodes))
+		resultLen   = 0
+	)
+	for _, v := range baseNodes {
+		if v == "" || v == "." {
+			continue
+		}
+		if v == ".." {
+			if resultLen == 0 {
+				return "", goaterr.Errorf("%s: break isolation space", path)
+			}
+			resultLen--
+			continue
+		}
+		resultNodes[resultLen] = v
+		resultLen++
+	}
+	resultNodes = resultNodes[:resultLen]
+	return strings.Join(resultNodes, "/"), nil
 }
