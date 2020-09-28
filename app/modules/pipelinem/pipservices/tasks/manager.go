@@ -184,7 +184,7 @@ func (manager *TaskManager) Wait() (err error) {
 }
 
 func (manager *TaskManager) validWaitList(path []string, task pipservices.Task, counter int) (err error) {
-	var childTask pipservices.Task
+	var childTask *Task
 	if counter < 0 {
 		return goaterr.Errorf("Too many depth. Your wait has to many depth %s", strings.Join(path, "->"))
 	}

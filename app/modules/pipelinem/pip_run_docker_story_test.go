@@ -32,7 +32,7 @@ func TestPipRunDockerStory(t *testing.T) {
 	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
 		RootFilespace: cwd,
 		Input: strings.NewReader(`
-			pip:run --name=first --sandbox="docker:alpine" --body=<<FIRSTEND
+			pip:run --name=first --sandbox="container:alpine" --body=<<FIRSTEND
 echo "outputAla"
 FIRSTEND --silent=false
 			pip:run --name=second --wait=first --body="echoMa" --silent=false
@@ -68,7 +68,7 @@ FIRSTEND --silent=false
 	posMa := strings.Index(result, "outputMa")
 	posKota := strings.Index(result, "outputKota")
 	if posAla == -1 && posMa == -1 || posKota == -1 {
-		t.Errorf("expected outputcontains 'outputAla' 'outputMa' and  'outputKota' and take '%s'", result)
+		t.Errorf("expected output contains 'outputAla', 'outputMa' and 'outputKota' and take '%s'\n and error output '%s'", result, mapp.ErrorBuffer().String())
 		return
 	}
 	if posAla > posMa || posMa > posKota {

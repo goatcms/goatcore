@@ -2,11 +2,17 @@ package dcmd
 
 import (
 	"bytes"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/goatcms/goatcore/app/scope"
+	"github.com/goatcms/goatcore/testbase"
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/filesystem"
+	"github.com/goatcms/goatcore/goatnet"
 
 	"github.com/goatcms/goatcore/filesystem/filespace/diskfs"
 
@@ -90,4 +96,56 @@ func engineSimpleStory(t *testing.T, engine ocservices.Engine) {
 		t.Errorf("Expected mapped /cwd/test directore \nOutput:%s", output)
 		return
 	}
+}
+
+func enginePortStory(t *testing.T, engine ocservices.Engine) {
+	t.Parallel()
+	var (
+		err       error
+		io        app.IO
+		freePort  int
+		output    string
+		scp       = scope.NewScope(scope.Params{})
+		outBuffer = bytes.NewBuffer(make([]byte, 10000))
+		errBuffer = bytes.NewBuffer(make([]byte, 10000))
+		cwd       filesystem.Filespace
+	)
+	if cwd, err = diskfs.NewFilespace("."); err != nil {
+		t.Error(err)
+		return
+	}
+	if freePort, err = goatnet.GetFreePort(); err != nil {
+		t.Error(err)
+		return
+	}
+	io = gio.NewIO(gio.IOParams{
+		In:  gio.NewAppInput(strings.NewReader(``)),
+		Out: gio.NewOutput(outBuffer),
+		Err: gio.NewOutput(errBuffer),
+		CWD: cwd,
+	})
+	go func() {
+		engine.Run(ocservices.Container{
+			IO:         io,
+			Image:      "tutum/hello-world",
+			Privileged: false,
+			Ports: map[int]int{
+				80: freePort,
+			},
+			Scope: scp,
+		})
+	}()
+	if output, err = testbase.ReadURLLoop("http://localhost:"+strconv.Itoa(freePort), 20, time.Second/2); err != nil {
+		scp.Kill()
+		t.Error(err)
+		return
+	}
+	expected := "Hello world!"
+	if !strings.Contains(output, expected) {
+		scp.Kill()
+		t.Errorf("Expected output contains '%s' \nOutput:%s", expected, output)
+		return
+	}
+	scp.Kill()
+	scp.Close()
 }

@@ -51,5 +51,6 @@ func (sandbox *ContainerSandbox) Run(ctx app.IOContext) (err error) {
 			},
 		},
 		Privileged: false,
+		Scope:      ctx.Scope(),
 	})
 }

@@ -73,6 +73,14 @@ func (scp *Scope) Close() (err error) {
 	return scp.ToError()
 }
 
+// Kill scope
+func (scp *Scope) Kill() {
+	scp.SyncScope.Kill()
+	if err := scp.Trigger(app.KillEvent, nil); err != nil {
+		scp.AppendError(err)
+	}
+}
+
 func (scp *Scope) destroy() {
 	scp.EventScope = nil
 	scp.DataScope = nil

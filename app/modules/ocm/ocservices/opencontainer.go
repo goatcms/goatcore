@@ -30,7 +30,9 @@ type Container struct {
 	Envs       commservices.Environments
 	Engine     string
 	Privileged bool
+	Ports      map[int]int
 	FSVolumes  map[string]FSVolume
+	Scope      app.Scope
 }
 
 // Engine provide container engine wrapper
