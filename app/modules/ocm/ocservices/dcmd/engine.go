@@ -39,7 +39,7 @@ func (engine *Engine) Run(container ocservices.Container) (err error) {
 	)
 	// prepare name
 	cTime := time.Now()
-	name = "dcmd" + cTime.Format("2006_01_02_15_04_05") + varutil.RandString(7, varutil.AlphaNumericBytes)
+	name = "dcmd" + cTime.Format("20060102150405") + varutil.RandString(7, varutil.AlphaNumericBytes)
 	// prepare command
 	command = []string{
 		engine.appName,
@@ -80,7 +80,7 @@ func (engine *Engine) Run(container ocservices.Container) (err error) {
 		}
 		defer container.Scope.DoneTask()
 		container.Scope.On(app.KillEvent, func(interface{}) error {
-			return killContainer(name)
+			return killContainer(engine.appName, name)
 		})
 	}
 	cmd.Stdin = gio.NewSafeReader(io.MultiReader(initReader, cio.In()))
@@ -98,7 +98,7 @@ func (engine *Engine) Run(container ocservices.Container) (err error) {
 	return nil
 }
 
-func killContainer(name string) (err error) {
-	killCmd := exec.Command("docker", "kill", name)
+func killContainer(appName, name string) (err error) {
+	killCmd := exec.Command(appName, "kill", name)
 	return killCmd.Run()
 }

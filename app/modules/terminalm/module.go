@@ -53,6 +53,9 @@ func (m *Module) Run(a app.App) (err error) {
 		return deps.Terminal.RunCommand(a.IOContext(), args[1:])
 	}
 	for {
+		if a.AppScope().IsKilled() {
+			return
+		}
 		if err = m.runLoop(a.IOContext(), deps.Terminal); err == nil {
 			return nil
 		}
@@ -79,6 +82,16 @@ func (m *Module) runLoop(parentCtx app.IOContext, terminal modules.Terminal) (er
 		//EventScope: parentScope, <- event scope is not shared to prevent memory leaks
 	})
 	relatedCtx = gio.NewIOContext(relatedScope, parentCtx.IO())
+	go func() {
+		select {
+		case <-parentCtx.Scope().Context().Done():
+			// the gorutine kill related context if parent die.
+			relatedCtx.Scope().Kill()
+		case <-relatedCtx.Scope().Context().Done():
+			// stop if related context die (prevent memory leaks)
+			return
+		}
+	}()
 	defer relatedCtx.Close()
 	if err = terminal.RunLoop(relatedCtx, "\n>"); err != nil {
 		return err

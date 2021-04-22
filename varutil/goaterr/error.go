@@ -58,19 +58,10 @@ func ToError(errs []error) error {
 
 // Error return goat error object with title and stacktrace
 func (err *Error) Error() (s string) {
-	s = err.msg
-	if len(err.wraps) > 0 {
-		s += fmt.Sprintf(" Wraps %v errors:", len(err.wraps))
-		for _, e := range err.wraps {
-			switch v := e.(type) {
-			case MessageError:
-				s += fmt.Sprintf("\n - %s", v.ErrorMessage())
-			default:
-				s += fmt.Sprintf("\n - %s", v.Error())
-			}
-		}
+	if len(err.wraps) == 0 {
+		return err.msg
 	}
-	return
+	return printError(err, errorDep)
 }
 
 // Unwrap return wrapped error
@@ -99,4 +90,9 @@ func (err *Error) ErrorJSON() string {
 // ErrorMessage return error json tree
 func (err *Error) ErrorMessage() string {
 	return err.msg
+}
+
+// Format to string
+func (err *Error) String() string {
+	return printError(err, errorDep)
 }

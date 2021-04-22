@@ -37,7 +37,6 @@ echo "outputAla"
 FIRSTEND --silent=false
 			pip:run --name=second --wait=first --body="echoMa" --silent=false
 			pip:run --name=last --wait=second --body="echoKota" --silent=false
-			pip:wait
 			`),
 		Args: []string{`appname`, `terminal`},
 	}); err != nil {

@@ -20,21 +20,35 @@ func CloseApp(a App) error {
 
 // RegisterCommand add new command to application
 func RegisterCommand(a App, name string, callback CommandCallback, help string) (err error) {
+	return RegisterScopeCommand(a.CommandScope(), name, callback, help)
+}
+
+// RegisterScopeCommand add new command to scope
+func RegisterScopeCommand(scp Scope, name string, callback CommandCallback, help string) (err error) {
 	name = strings.ToLower(name)
-	commandScope := a.CommandScope()
-	commandScope.Set("help.command."+name, help)
-	commandScope.Set("command."+name, callback)
+	scp.Set("help.command."+name, help)
+	scp.Set("command."+name, callback)
 	return nil
 }
 
 // RegisterHealthChecker add new health checker to application
 func RegisterHealthChecker(a App, name string, callback HealthCheckerCallback) (err error) {
-	a.CommandScope().Set("health."+name, callback)
+	return RegisterScopeHealthChecker(a.CommandScope(), name, callback)
+}
+
+// RegisterHealthChecker add new health checker to scope
+func RegisterScopeHealthChecker(scp Scope, name string, callback HealthCheckerCallback) (err error) {
+	scp.Set("health."+name, callback)
 	return nil
 }
 
 // RegisterArgument add new argument definition to application
 func RegisterArgument(a App, name string, help string) (err error) {
-	a.CommandScope().Set("help.argument."+name, help)
+	return RegisterScopeArgument(a.CommandScope(), name, help)
+}
+
+// RegisterScopeArgument add new argument definition to scope
+func RegisterScopeArgument(scp Scope, name string, help string) (err error) {
+	scp.Set("help.argument."+name, help)
 	return nil
 }

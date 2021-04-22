@@ -23,7 +23,7 @@ func InitSequence(envs commservices.Environments) (reader io.Reader, err error) 
 		return strings.NewReader(initCode), nil
 	}
 	for key, value := range envs.All() {
-		initCode += key + "=$(cat <<" + eofTag + "\n" + value + "\n" + eofTag + "\n)\n"
+		initCode += key + "=$(cat <<'" + eofTag + "'\n" + value + "\n" + eofTag + "\n)\n"
 		initCode += "export " + key + "\n"
 	}
 	sshCert := envs.SSHCert()

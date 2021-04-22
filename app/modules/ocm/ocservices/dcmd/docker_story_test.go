@@ -33,3 +33,16 @@ func TestDockerPortStory(t *testing.T) {
 	engine = NewEngine("docker")
 	enginePortStory(t, engine)
 }
+
+func TestDockerEscapeEnvStory(t *testing.T) {
+	var (
+		engine ocservices.Engine
+		err    error
+	)
+	if _, err = testbase.LoadDockerTestConfig(); err != nil {
+		t.Skip(err.Error())
+		return
+	}
+	engine = NewEngine("docker")
+	engineEscapeEnvStory(t, engine)
+}

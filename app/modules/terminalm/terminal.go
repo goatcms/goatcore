@@ -14,47 +14,93 @@ import (
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
+type arguments struct {
+	args []string
+	eof  bool
+}
+
 // IOTerminal is user communication interface
 type IOTerminal struct {
-	deps struct {
-		App app.App `dependency:"App"`
-	}
+	app          app.App
+	commandScope app.Scope
+}
+
+// NewIOTerminal create new IOTerminal instance for specified app and command scope
+func NewIOTerminal(a app.App, commandScope app.Scope) (term modules.Terminal, err error) {
+	return modules.Terminal(&IOTerminal{
+		app:          a,
+		commandScope: commandScope,
+	}), nil
 }
 
 // IOTerminalFactory create new IOTerminal instance
 func IOTerminalFactory(dp dependency.Provider) (in interface{}, err error) {
-	instance := &IOTerminal{}
-	if err = dp.InjectTo(&instance.deps); err != nil {
+	var deps struct {
+		App app.App `dependency:"App"`
+	}
+	if err = dp.InjectTo(&deps); err != nil {
 		return nil, err
 	}
-	return modules.Terminal(instance), nil
+	return modules.Terminal(&IOTerminal{
+		app:          deps.App,
+		commandScope: deps.App.CommandScope(),
+	}), nil
 }
 
 // RunLoop run terminal loop
 func (terminal *IOTerminal) RunLoop(ctx app.IOContext, prompt string) (err error) {
 	var (
-		args []string
-		eof  = false
-		io   = ctx.IO()
+		in       = ctx.IO().In()
+		out      = ctx.IO().Out()
+		argChan  = make(chan arguments, 1)
+		doneChan = make(chan bool, 1)
 	)
-	for !eof {
-		if ctx.Scope().IsKilled() {
-			return ctx.Scope().ToError()
+	go func() {
+		for {
+			select {
+			case <-ctx.Scope().Context().Done():
+				return
+			case <-doneChan:
+				return
+			default:
+				if prompt != "" {
+					out.Printf(prompt)
+				}
+				args, eof, err := varutil.ReadArguments(in)
+				if err != nil {
+					ctx.Scope().AppendError(err)
+					return
+				}
+				if len(args) != 0 {
+					argChan <- arguments{
+						args: args,
+						eof:  eof,
+					}
+				}
+				if eof {
+					close(argChan)
+					return
+				}
+			}
 		}
-		if prompt != "" {
-			io.Out().Printf(prompt)
-		}
-		if args, eof, err = varutil.ReadArguments(io.In()); err != nil {
-			return err
-		}
-		if len(args) == 0 {
-			continue
-		}
-		if err = terminal.RunCommand(ctx, args); err != nil {
-			return err
+	}()
+	defer func() {
+		doneChan <- true
+	}()
+	for {
+		select {
+		case <-ctx.Scope().Context().Done():
+			return
+		case a, more := <-argChan:
+			if !more {
+				return
+			}
+			if err = terminal.RunCommand(ctx, a.args); err != nil {
+				ctx.Scope().AppendError(err)
+				return
+			}
 		}
 	}
-	return err
 }
 
 // RunString execute single command
@@ -81,7 +127,6 @@ func (terminal *IOTerminal) RunCommand(ctx app.IOContext, args []string) (err er
 		commandName    string
 		cbIns          interface{}
 		cb             app.CommandCallback
-		commandScope   = terminal.deps.App.CommandScope()
 		commandContext app.IOContext
 	)
 	if len(args) != 0 {
@@ -89,9 +134,9 @@ func (terminal *IOTerminal) RunCommand(ctx app.IOContext, args []string) (err er
 	}
 	// find command
 	if commandName == "" {
-		return HelpComamnd(terminal.deps.App, ctx)
+		return HelpComamnd(terminal.app, ctx)
 	}
-	if cbIns, err = commandScope.Get("command." + commandName); err != nil || cbIns == nil {
+	if cbIns, err = terminal.commandScope.Get("command." + commandName); err != nil || cbIns == nil {
 		return goaterr.Errorf("Error: unknown command %s", commandName)
 	}
 	cb = cbIns.(app.CommandCallback)
@@ -113,5 +158,5 @@ func (terminal *IOTerminal) RunCommand(ctx app.IOContext, args []string) (err er
 	})
 	commandContext = gio.NewIOContext(injectableScope, ctx.IO())
 	// run
-	return cb(terminal.deps.App, commandContext)
+	return cb(terminal.app, commandContext)
 }

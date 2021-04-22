@@ -10,7 +10,7 @@ import (
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
-func TestPipRunChildScopeKillStory(t *testing.T) {
+func TestTerminalPipRunChildScopeKillStory(t *testing.T) {
 	t.Parallel()
 	var (
 		err         error

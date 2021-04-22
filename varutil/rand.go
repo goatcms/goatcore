@@ -16,6 +16,10 @@ const (
 	AlphaBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	// AlphaNumericBytes is set of numeric and alphabetic characters for RandString function
 	AlphaNumericBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+	// LowerAlphaNumericBytes is set of numeric and only lower alphabetic characters for RandString function
+	LowerAlphaNumericBytes = "abcdefghijklmnopqrstuvwxyz1234567890"
+	// UpperAlphaNumericBytes is set of numeric and only upper alphabetic characters for RandString function
+	UpperAlphaNumericBytes = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 	// StrongBytes is set of numeric, alphabetic and special characters for RandString function
 	StrongBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()`~<>?:[]{}-=_+|\\/,."
 

@@ -83,28 +83,11 @@ func (b *Bootstrap) Run() (err error) {
 }
 
 // ShowError print error / errors to stderr
-func (b *Bootstrap) ShowError(inerr error) (code int, err error) {
-	var (
-		appScope = b.gapp.AppScope()
-		deps     struct {
-			ErrLVL string `argument:"errlvl"`
-		}
-		details   bool
-		errorCode = 1
-	)
-	if err = appScope.InjectTo(&deps); err != nil {
-		return errorCode, err
+func (b *Bootstrap) ShowError(e error) (code int, err error) {
+	code = 1
+	if cError, ok := e.(goaterr.CodeError); ok {
+		code = cError.ErrorCode()
 	}
-	details = deps.ErrLVL == "details"
-	if details {
-		switch v := inerr.(type) {
-		case goaterr.JSONError:
-			fmt.Fprintf(os.Stderr, "\n%s", v.ErrorJSON())
-		default:
-			fmt.Fprintf(os.Stderr, "\n%s", v.Error())
-		}
-	} else {
-		fmt.Fprintf(os.Stderr, "\n%s", inerr.Error())
-	}
-	return errorCode, nil
+	fmt.Fprintf(os.Stderr, "\n%s", e.Error())
+	return code, nil
 }

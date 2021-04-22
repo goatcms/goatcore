@@ -33,3 +33,16 @@ func TestPodmanPortStory(t *testing.T) {
 	engine = NewEngine("podman")
 	enginePortStory(t, engine)
 }
+
+func TestPodmanEscapeEnvStory(t *testing.T) {
+	var (
+		engine ocservices.Engine
+		err    error
+	)
+	if _, err = testbase.LoadPodmanTestConfig(); err != nil {
+		t.Skip(err.Error())
+		return
+	}
+	engine = NewEngine("podman")
+	engineEscapeEnvStory(t, engine)
+}
