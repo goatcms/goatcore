@@ -14,10 +14,10 @@ func TestChildDataGetOverwritedValue(t *testing.T) {
 		childScp  app.DataScope
 	)
 	t.Parallel()
-	parentScp = NewDataScope(map[string]interface{}{
+	parentScp = NewDataScope(map[interface{}]interface{}{
 		"overwritedKey": "value",
 	})
-	childScp = NewChildDataScope(parentScp, map[string]interface{}{
+	childScp = NewChildDataScope(parentScp, map[interface{}]interface{}{
 		"overwritedKey": "overwrited-value",
 	})
 	if value, err = GetString(childScp, "overwritedKey"); err != nil {
@@ -37,10 +37,10 @@ func TestChildDataGetParentValue(t *testing.T) {
 		childScp  app.DataScope
 	)
 	t.Parallel()
-	parentScp = NewDataScope(map[string]interface{}{
+	parentScp = NewDataScope(map[interface{}]interface{}{
 		"parentKey": "parent-value",
 	})
-	childScp = NewChildDataScope(parentScp, map[string]interface{}{})
+	childScp = NewChildDataScope(parentScp, map[interface{}]interface{}{})
 	if value, err = GetString(childScp, "parentKey"); err != nil {
 		t.Error(err)
 		return
@@ -58,10 +58,10 @@ func TestChildDataOverwriteParentValue(t *testing.T) {
 		childScp  app.DataScope
 	)
 	t.Parallel()
-	parentScp = NewDataScope(map[string]interface{}{
+	parentScp = NewDataScope(map[interface{}]interface{}{
 		"key": "parent-value",
 	})
-	childScp = NewChildDataScope(parentScp, map[string]interface{}{})
+	childScp = NewChildDataScope(parentScp, map[interface{}]interface{}{})
 	if value, err = GetString(childScp, "key"); err != nil {
 		t.Error(err)
 		return
@@ -69,7 +69,7 @@ func TestChildDataOverwriteParentValue(t *testing.T) {
 	if value != "parent-value" {
 		t.Errorf("Before overwrite expected value equals to 'parent-value' and take %s", value)
 	}
-	childScp.Set("key", "child-value")
+	childScp.SetValue("key", "child-value")
 	if value, err = GetString(childScp, "key"); err != nil {
 		t.Error(err)
 		return

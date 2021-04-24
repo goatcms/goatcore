@@ -40,25 +40,23 @@ func (unit *Unit) FromScope(scp app.Scope) (tasks pipservices.TasksManager, err 
 	)
 	locker := scp.LockData()
 	defer locker.Commit()
-	if ins, err = locker.Get(scopeKey); err != nil {
-		return nil, err
-	}
+	ins = locker.Value(scopeKey)
 	if ins != nil {
 		return ins.(pipservices.TasksManager), nil
 	}
 	manager = NewTaskManager(unit.deps, scp)
-	if err = locker.Set(scopeKey, manager); err != nil {
-		return nil, err
-	}
+	locker.SetValue(scopeKey, manager)
 	return manager, nil
 }
 
 // BindScope bind scope to task manager
 func (unit *Unit) BindScope(scp app.Scope, manager pipservices.TasksManager) (err error) {
-	return scp.Set(scopeKey, manager)
+	scp.SetValue(scopeKey, manager)
+	return nil
 }
 
 // Clear remove pipelines scope data
 func (unit *Unit) Clear(scp app.Scope) (err error) {
-	return scp.Set(scopeKey, nil)
+	scp.SetValue(scopeKey, nil)
+	return nil
 }

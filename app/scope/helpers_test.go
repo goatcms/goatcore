@@ -13,7 +13,7 @@ func TestGetString(t *testing.T) {
 		scp   app.DataScope
 	)
 	t.Parallel()
-	scp = NewDataScope(map[string]interface{}{
+	scp = NewDataScope(map[interface{}]interface{}{
 		"key": "value",
 	})
 	if value, err = GetString(scp, "key"); err != nil {
@@ -32,7 +32,7 @@ func TestGetBool(t *testing.T) {
 		err   error
 	)
 	t.Parallel()
-	scp = NewDataScope(map[string]interface{}{
+	scp = NewDataScope(map[interface{}]interface{}{
 		"key": true,
 	})
 	if value, err = GetBool(scp, "key"); err != nil {
@@ -51,7 +51,7 @@ func TestGetInt(t *testing.T) {
 		err   error
 	)
 	t.Parallel()
-	scp = NewDataScope(map[string]interface{}{
+	scp = NewDataScope(map[interface{}]interface{}{
 		"key": 1991,
 	})
 	if value, err = GetInt(scp, "key"); err != nil {
@@ -70,7 +70,7 @@ func TestGetInt64(t *testing.T) {
 		err   error
 	)
 	t.Parallel()
-	scp = NewDataScope(map[string]interface{}{
+	scp = NewDataScope(map[interface{}]interface{}{
 		"key": int64(1991),
 	})
 	if value, err = GetInt64(scp, "key"); err != nil {
@@ -89,7 +89,7 @@ func TestGetUint(t *testing.T) {
 		err   error
 	)
 	t.Parallel()
-	scp = NewDataScope(map[string]interface{}{
+	scp = NewDataScope(map[interface{}]interface{}{
 		"key": uint(1991),
 	})
 	if value, err = GetUint(scp, "key"); err != nil {
@@ -108,7 +108,7 @@ func TestGetUint64(t *testing.T) {
 		err   error
 	)
 	t.Parallel()
-	scp = NewDataScope(map[string]interface{}{
+	scp = NewDataScope(map[interface{}]interface{}{
 		"key": uint64(1991),
 	})
 	if value, err = GetUint64(scp, "key"); err != nil {
@@ -127,7 +127,7 @@ func TestGetFloat32(t *testing.T) {
 		err   error
 	)
 	t.Parallel()
-	scp = NewDataScope(map[string]interface{}{
+	scp = NewDataScope(map[interface{}]interface{}{
 		"key": float32(6.9),
 	})
 	if value, err = GetFloat32(scp, "key"); err != nil {
@@ -146,7 +146,7 @@ func TestGetFloat64(t *testing.T) {
 		err   error
 	)
 	t.Parallel()
-	scp = NewDataScope(map[string]interface{}{
+	scp = NewDataScope(map[interface{}]interface{}{
 		"key": float64(6.9),
 	})
 	if value, err = GetFloat64(scp, "key"); err != nil {
@@ -165,7 +165,7 @@ func TestGetComplex64(t *testing.T) {
 		err   error
 	)
 	t.Parallel()
-	scp = NewDataScope(map[string]interface{}{
+	scp = NewDataScope(map[interface{}]interface{}{
 		"key": complex64(6.9),
 	})
 	if value, err = GetComplex64(scp, "key"); err != nil {
@@ -184,7 +184,7 @@ func TestGetComplex128(t *testing.T) {
 		err   error
 	)
 	t.Parallel()
-	scp = NewDataScope(map[string]interface{}{
+	scp = NewDataScope(map[interface{}]interface{}{
 		"key": complex128(6.9),
 	})
 	if value, err = GetComplex128(scp, "key"); err != nil {

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/varutil"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -26,9 +27,7 @@ func HealthComamnd(a app.App, ctx app.IOContext) (err error) {
 	if err = a.DependencyProvider().InjectTo(&deps); err != nil {
 		return err
 	}
-	if keys, err = deps.CommandScope.Keys(); err != nil {
-		return err
-	}
+	keys = varutil.ToStringArr(deps.CommandScope.Keys())
 	sort.Strings(keys)
 	for _, key := range keys {
 		if !strings.HasPrefix(key, healthPrefix) {
@@ -38,9 +37,7 @@ func HealthComamnd(a app.App, ctx app.IOContext) (err error) {
 			io.Out().Printf("\nHealth:\n")
 			first = false
 		}
-		if ins, err = deps.CommandScope.Get(key); err != nil {
-			return err
-		}
+		ins = deps.CommandScope.Value(key)
 		cb = ins.(app.HealthCheckerCallback)
 		if msg, err = cb(a, ctxScope); err != nil {
 			errs = append(errs, err)

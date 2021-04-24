@@ -53,7 +53,7 @@ func (m *Module) Run(a app.App) (err error) {
 		return deps.Terminal.RunCommand(a.IOContext(), args[1:])
 	}
 	for {
-		if a.AppScope().IsKilled() {
+		if a.AppScope().IsDone() {
 			return
 		}
 		if err = m.runLoop(a.IOContext(), deps.Terminal); err == nil {
@@ -63,7 +63,7 @@ func (m *Module) Run(a app.App) (err error) {
 			a.IOContext().Scope().AppendError(err)
 			return err
 		}
-		io.Err().Printf("ERROR: %v", err)
+		io.Err().Printf("ERROR: %v\n", err)
 	}
 }
 
@@ -84,16 +84,16 @@ func (m *Module) runLoop(parentCtx app.IOContext, terminal modules.Terminal) (er
 	relatedCtx = gio.NewIOContext(relatedScope, parentCtx.IO())
 	go func() {
 		select {
-		case <-parentCtx.Scope().Context().Done():
+		case <-parentCtx.Scope().Done():
 			// the gorutine kill related context if parent die.
-			relatedCtx.Scope().Kill()
-		case <-relatedCtx.Scope().Context().Done():
-			// stop if related context die (prevent memory leaks)
+			relatedCtx.Scope().Stop()
+		case <-relatedCtx.Scope().Done():
+			// stop gorutine if related context die (prevent memory leaks)
 			return
 		}
 	}()
 	defer relatedCtx.Close()
-	if err = terminal.RunLoop(relatedCtx, "\n>"); err != nil {
+	if err = terminal.RunLoop(relatedCtx, ">"); err != nil {
 		return err
 	}
 	return relatedCtx.Scope().Wait()

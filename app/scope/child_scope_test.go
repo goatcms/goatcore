@@ -11,18 +11,14 @@ import (
 
 func TestParentScopeIsKillByChildWhenFail(t *testing.T) {
 	var (
-		parentScope app.Scope
+		parentScope = NewScope(Params{})
 		childScope  app.Scope
 	)
 	t.Parallel()
-	parentScope = NewScope(Params{})
-	childScope = NewChildScope(parentScope, ChildParams{
-		EventScope: parentScope,
-		DataScope:  parentScope,
-	})
-	defer childScope.Close()
+	childScope = NewChildScope(parentScope, ChildParams{})
 	childScope.Kill()
-	if parentScope.IsKilled() != true {
+	childScope.Close()
+	if parentScope.IsDone() != true {
 		t.Errorf("parent scope should be killed when chilld die")
 	}
 }
@@ -60,7 +56,7 @@ func TestChildScopeAppendErrors(t *testing.T) {
 		DataScope:  parentScope,
 	})
 	defer childScope.Close()
-	childScope.AppendErrors(fmt.Errorf("some err"), fmt.Errorf("some err2"))
+	childScope.AppendError(fmt.Errorf("some err"), fmt.Errorf("some err2"))
 	if len(childScope.Errors()) == 0 {
 		t.Errorf("expected error in child scope and take: %v", childScope.Errors())
 	}
@@ -112,10 +108,7 @@ func TestParentScopeWait(t *testing.T) {
 	)
 	t.Parallel()
 	parentScope = NewScope(Params{})
-	childScope = NewChildScope(parentScope, ChildParams{
-		EventScope: parentScope,
-		DataScope:  parentScope,
-	})
+	childScope = NewChildScope(parentScope, ChildParams{})
 	go (func() {
 		time.Sleep(1 * time.Millisecond)
 		childScope.Close()
@@ -138,14 +131,12 @@ func TestChildScopeInjector(t *testing.T) {
 	t.Parallel()
 	parentScope = NewScope(Params{})
 	ds := &DataScope{
-		Data: map[string]interface{}{
+		Data: map[interface{}]interface{}{
 			"key": "value",
 		},
 	}
 	childScope = NewChildScope(parentScope, ChildParams{
-		Injectors: []app.Injector{
-			ds.Injector("tagname"),
-		},
+		Injector: NewScopeInjector("tagname", ds),
 	})
 	if err = childScope.InjectTo(&result); err != nil {
 		t.Error(err)

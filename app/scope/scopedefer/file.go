@@ -21,11 +21,7 @@ func (d *FileDefer) Remove(interface{}) error {
 			errors = append(errors, err)
 		}
 	}
-	if len(errors) > 0 {
-		// TODO: Add suport to containing multiple errors
-		return goaterr.Errorf("%v", errors)
-	}
-	return nil
+	return goaterr.ToError(errors)
 }
 
 // Add append file to remove on error
@@ -37,8 +33,8 @@ func (d *FileDefer) Add(file filesystem.File) {
 func RemoveOn(scope app.Scope, eventID int, file filesystem.File) error {
 	var def *FileDefer
 	insKey := "_scopedefer.FileDefer:" + strconv.Itoa(eventID)
-	fileDeferIns, err := scope.Get(insKey)
-	if err != nil || fileDeferIns == nil {
+	fileDeferIns := scope.Value(insKey)
+	if fileDeferIns == nil {
 		def = &FileDefer{
 			files: []filesystem.File{file},
 		}

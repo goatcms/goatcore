@@ -4,7 +4,6 @@ import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/dependency"
-	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // Unit SandboxesUnit is a tool to menage sandboxes.
@@ -21,14 +20,10 @@ func (unit *Unit) Envs(scp app.Scope) (envs commservices.Environments, err error
 		envsi  interface{}
 		locker = scp.LockData()
 	)
-	if envsi, err = locker.Get(envKey); err != nil {
-		return nil, goaterr.ToError(goaterr.AppendError(nil, err, locker.Commit()))
-	}
+	envsi = locker.Value(envKey)
 	if envsi == nil {
 		envs = NewEnvironments()
-		if err = locker.Set(envKey, envs); err != nil {
-			return nil, goaterr.ToError(goaterr.AppendError(nil, err, locker.Commit()))
-		}
+		locker.SetValue(envKey, envs)
 	} else {
 		envs = envsi.(commservices.Environments)
 	}

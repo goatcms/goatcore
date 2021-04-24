@@ -1,13 +1,6 @@
 package scope
 
-import (
-	"context"
-	"sync"
-
-	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/varutil/goaterr"
-)
-
+/*
 // ParallelScope represent sub-scope
 type ParallelScope struct {
 	app.DataScope
@@ -91,7 +84,7 @@ func (scp *ParallelScope) AppendErrors(errs ...error) {
 	scp.errorsMU.Lock()
 	defer scp.errorsMU.Unlock()
 	scp.Kill()
-	scp.parent.AppendErrors(errs...)
+	scp.parent.AppendError(errs...)
 	scp.errors = append(scp.errors, errs...)
 }
 
@@ -108,4 +101,4 @@ func (scp *ParallelScope) InjectTo(obj interface{}) (err error) {
 // Close child scope
 func (scp *ParallelScope) Close() (err error) {
 	return scp.Wait()
-}
+*/

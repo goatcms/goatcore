@@ -4,53 +4,47 @@ import (
 	"sync"
 
 	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/app/injector"
 )
 
 // DataScope represent scope data
 type DataScope struct {
-	Data map[string]interface{}
+	Data map[interface{}]interface{}
 	mu   sync.RWMutex
 }
 
 // NewDataScope create new instance of data scope
-func NewDataScope(data map[string]interface{}) app.DataScope {
+func NewDataScope(data map[interface{}]interface{}) app.DataScope {
 	return app.DataScope(&DataScope{
 		Data: data,
 	})
 }
 
 // Set new scope value
-func (ds *DataScope) Set(key string, v interface{}) error {
+func (ds *DataScope) SetValue(key interface{}, v interface{}) {
 	ds.mu.Lock()
-	defer ds.mu.Unlock()
 	ds.Data[key] = v
-	return nil
+	ds.mu.Unlock()
 }
 
 // Get get value from context
-func (ds *DataScope) Get(key string) (value interface{}, err error) {
+func (ds *DataScope) Value(key interface{}) (value interface{}) {
 	ds.mu.RLock()
-	defer ds.mu.RUnlock()
-	return ds.Data[key], nil
+	value = ds.Data[key]
+	ds.mu.RUnlock()
+	return
 }
 
 // Keys get map data
-func (ds *DataScope) Keys() ([]string, error) {
+func (ds *DataScope) Keys() (keys []interface{}) {
 	ds.mu.RLock()
-	defer ds.mu.RUnlock()
-	keys := make([]string, len(ds.Data))
+	keys = make([]interface{}, len(ds.Data))
 	i := 0
 	for key := range ds.Data {
 		keys[i] = key
 		i++
 	}
-	return keys, nil
-}
-
-// Injector create new injector for the data scope
-func (ds *DataScope) Injector(tagname string) app.Injector {
-	return injector.NewMapInjector(tagname, ds.Data)
+	ds.mu.RUnlock()
+	return
 }
 
 // LockData return new data locker

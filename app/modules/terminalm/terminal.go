@@ -6,6 +6,7 @@ import (
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/gio"
+	"github.com/goatcms/goatcore/app/injector"
 	"github.com/goatcms/goatcore/app/modules"
 	"github.com/goatcms/goatcore/app/scope"
 	"github.com/goatcms/goatcore/app/scope/argscope"
@@ -16,7 +17,6 @@ import (
 
 type arguments struct {
 	args []string
-	eof  bool
 }
 
 // IOTerminal is user communication interface
@@ -50,32 +50,43 @@ func IOTerminalFactory(dp dependency.Provider) (in interface{}, err error) {
 // RunLoop run terminal loop
 func (terminal *IOTerminal) RunLoop(ctx app.IOContext, prompt string) (err error) {
 	var (
-		in       = ctx.IO().In()
-		out      = ctx.IO().Out()
-		argChan  = make(chan arguments, 1)
-		doneChan = make(chan bool, 1)
+		in      = ctx.IO().In()
+		out     = ctx.IO().Out()
+		argChan = make(chan arguments, 1)
+		next    = make(chan struct{}, 1)
 	)
 	go func() {
 		for {
 			select {
-			case <-ctx.Scope().Context().Done():
+			case <-ctx.Scope().Done():
 				return
-			case <-doneChan:
-				return
-			default:
-				if prompt != "" {
-					out.Printf(prompt)
-				}
-				args, eof, err := varutil.ReadArguments(in)
-				if err != nil {
-					ctx.Scope().AppendError(err)
+			case _, more := <-next:
+				var (
+					args []string
+					eof  bool
+					err  error
+				)
+				if !more {
 					return
 				}
-				if len(args) != 0 {
-					argChan <- arguments{
-						args: args,
-						eof:  eof,
+				for {
+					if prompt != "" {
+						out.Printf(prompt)
 					}
+					if args, eof, err = varutil.ReadArguments(in); err != nil {
+						ctx.Scope().AppendError(err)
+						return
+					}
+					if len(args) != 0 {
+						break
+					}
+					if eof {
+						close(argChan)
+						return
+					}
+				}
+				argChan <- arguments{
+					args: args,
 				}
 				if eof {
 					close(argChan)
@@ -85,11 +96,12 @@ func (terminal *IOTerminal) RunLoop(ctx app.IOContext, prompt string) (err error
 		}
 	}()
 	defer func() {
-		doneChan <- true
+		close(next)
 	}()
 	for {
+		next <- struct{}{}
 		select {
-		case <-ctx.Scope().Context().Done():
+		case <-ctx.Scope().Done():
 			return
 		case a, more := <-argChan:
 			if !more {
@@ -136,25 +148,28 @@ func (terminal *IOTerminal) RunCommand(ctx app.IOContext, args []string) (err er
 	if commandName == "" {
 		return HelpComamnd(terminal.app, ctx)
 	}
-	if cbIns, err = terminal.commandScope.Get("command." + commandName); err != nil || cbIns == nil {
+	if cbIns = terminal.commandScope.Value("command." + commandName); cbIns == nil {
 		return goaterr.Errorf("Error: unknown command %s", commandName)
 	}
 	cb = cbIns.(app.CommandCallback)
 	//prepare command child context
 	argsData := &scope.DataScope{
-		Data: make(map[string]interface{}),
+		Data: make(map[interface{}]interface{}),
 	}
 	if err = argscope.InjectArgsToScope(args, argsData); err != nil {
 		return err
 	}
 	baseScope := ctx.Scope()
 	injectableScope := scope.NewScope(scope.Params{
-		DataScope:  baseScope,
-		EventScope: baseScope,
-		SyncScope:  baseScope,
-		Injectors: []app.Injector{
-			argsData.Injector("command"),
-		},
+		DataScope:    baseScope,
+		EventScope:   baseScope,
+		ContextScope: baseScope,
+		Injector: injector.NewMultiInjector([]app.Injector{
+			// reset injector to AppScope lvl
+			terminal.app.AppScope(),
+			// add command injector
+			scope.NewScopeInjector("command", argsData),
+		}),
 	})
 	commandContext = gio.NewIOContext(injectableScope, ctx.IO())
 	// run

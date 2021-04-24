@@ -10,7 +10,7 @@ func TestSimpleInject(t *testing.T) {
 		SomeString string `tagname:"SomeStringKey"`
 		SomeInt    int    `tagname:"SomeIntKey"`
 	}
-	dataScope := NewDataScope(map[string]interface{}{
+	dataScope := NewDataScope(map[interface{}]interface{}{
 		"SomeStringKey": "SomeStringValue",
 		"SomeIntKey":    int(11),
 	})

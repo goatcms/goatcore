@@ -32,7 +32,7 @@ func TestPipRunChildScopeKillStory(t *testing.T) {
 	if err = goaterr.ToError(goaterr.AppendError(nil, app.RegisterCommand(mapp, "killStatus", func(a app.App, ctx app.IOContext) (err error) {
 		time.Sleep(10 * time.Millisecond)
 		// it will never executed because return error by command stop pipeline
-		if ctx.Scope().IsKilled() {
+		if ctx.Scope().IsDone() {
 			return ctx.IO().Out().Printf("is_killed")
 		}
 		return ctx.IO().Out().Printf("is_not_killed")

@@ -121,7 +121,7 @@ func (task *Task) Close() (err error) {
 // Wait for task finish
 func (task *Task) Wait() error {
 	task.wg.Wait()
-	return task.ctx.Scope().ToError()
+	return task.ctx.Scope().Err()
 }
 
 // WaitList return list of related tasks to wait for

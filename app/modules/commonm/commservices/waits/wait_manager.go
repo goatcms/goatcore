@@ -26,17 +26,13 @@ func (manager WaitManager) ForScope(ctxScope app.Scope) (swm commservices.ScopeW
 		v      interface{}
 	)
 	locker = ctxScope.LockData()
-	defer locker.Commit()
-	if v, err = ctxScope.Get(waitManagerKey); err != nil {
-		return nil, err
-	}
+	v = locker.Value(waitManagerKey)
 	if v == nil {
 		swm = NewScopeWaitManager(ctxScope)
-		if err = ctxScope.Set(waitManagerKey, swm); err != nil {
-			return nil, err
-		}
+		locker.SetValue(waitManagerKey, swm)
 	} else {
 		swm = v.(commservices.ScopeWaitManager)
 	}
+	locker.Commit()
 	return swm, nil
 }

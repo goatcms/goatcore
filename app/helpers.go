@@ -26,8 +26,8 @@ func RegisterCommand(a App, name string, callback CommandCallback, help string) 
 // RegisterScopeCommand add new command to scope
 func RegisterScopeCommand(scp Scope, name string, callback CommandCallback, help string) (err error) {
 	name = strings.ToLower(name)
-	scp.Set("help.command."+name, help)
-	scp.Set("command."+name, callback)
+	scp.SetValue("help.command."+name, help)
+	scp.SetValue("command."+name, callback)
 	return nil
 }
 
@@ -38,7 +38,7 @@ func RegisterHealthChecker(a App, name string, callback HealthCheckerCallback) (
 
 // RegisterHealthChecker add new health checker to scope
 func RegisterScopeHealthChecker(scp Scope, name string, callback HealthCheckerCallback) (err error) {
-	scp.Set("health."+name, callback)
+	scp.SetValue("health."+name, callback)
 	return nil
 }
 
@@ -49,6 +49,6 @@ func RegisterArgument(a App, name string, help string) (err error) {
 
 // RegisterScopeArgument add new argument definition to scope
 func RegisterScopeArgument(scp Scope, name string, help string) (err error) {
-	scp.Set("help.argument."+name, help)
+	scp.SetValue("help.argument."+name, help)
 	return nil
 }

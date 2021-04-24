@@ -14,9 +14,9 @@ func TestDataLocker(t *testing.T) {
 		locker app.DataScopeLocker
 	)
 	t.Parallel()
-	scp = NewDataScope(make(map[string]interface{}))
+	scp = NewDataScope(make(map[interface{}]interface{}))
 	locker = scp.LockData()
-	locker.Set("key", "value")
+	locker.SetValue("key", "value")
 	if err = locker.Commit(); err != nil {
 		t.Error(err)
 		return

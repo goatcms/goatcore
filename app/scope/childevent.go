@@ -9,7 +9,7 @@ import (
 // ChildEventScope is event scope interface
 type ChildEventScope struct {
 	parent    app.EventScope
-	callbacks map[int][]app.EventCallback
+	callbacks map[interface{}][]app.EventCallback
 	mu        sync.RWMutex
 }
 
@@ -17,12 +17,12 @@ type ChildEventScope struct {
 func NewChildEventScope(parent app.EventScope) app.EventScope {
 	return app.EventScope(&ChildEventScope{
 		parent:    parent,
-		callbacks: make(map[int][]app.EventCallback),
+		callbacks: make(map[interface{}][]app.EventCallback),
 	})
 }
 
 // Trigger run all function connected to event
-func (es *ChildEventScope) Trigger(eID int, data interface{}) (err error) {
+func (es *ChildEventScope) Trigger(eID interface{}, data interface{}) (err error) {
 	if err = es.parent.Trigger(eID, data); err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func (es *ChildEventScope) Trigger(eID int, data interface{}) (err error) {
 }
 
 // On connect a function to event
-func (es *ChildEventScope) On(eID int, callback app.EventCallback) {
+func (es *ChildEventScope) On(eID interface{}, callback app.EventCallback) {
 	es.mu.Lock()
 	defer es.mu.Unlock()
 	callbacks, ok := es.callbacks[eID]

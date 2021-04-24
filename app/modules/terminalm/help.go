@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/varutil"
 )
 
 // HelpComamnd show help message
@@ -19,7 +20,8 @@ func HelpComamnd(a app.App, ctx app.IOContext) (err error) {
 			CommandName  string    `argument:"?$1"`
 			CommandScope app.Scope `dependency:"CommandScope"`
 		}
-		io = ctx.IO()
+		io   = ctx.IO()
+		keys []string
 	)
 	if err = a.DependencyProvider().InjectTo(&deps); err != nil {
 		return err
@@ -34,10 +36,7 @@ func HelpComamnd(a app.App, ctx app.IOContext) (err error) {
 		io.Out().Printf("\n%s\n", deps.Welcome)
 	}
 	// content
-	keys, err := deps.CommandScope.Keys()
-	if err != nil {
-		return err
-	}
+	keys = varutil.ToStringArr(deps.CommandScope.Keys())
 	isFirstCommand := true
 	maxLength := 0
 	for _, key := range keys {
@@ -53,10 +52,7 @@ func HelpComamnd(a app.App, ctx app.IOContext) (err error) {
 				io.Out().Printf("\nCommands:\n")
 				isFirstCommand = false
 			}
-			helpStr, err := deps.CommandScope.Get(key)
-			if err != nil {
-				return err
-			}
+			helpStr := deps.CommandScope.Value(key)
 			io.Out().Printf("%s  %s\n", fixSpace(key[len(commandPrefix):], maxLength), helpStr)
 		}
 	}
@@ -67,11 +63,8 @@ func HelpComamnd(a app.App, ctx app.IOContext) (err error) {
 				io.Out().Printf("\nArguments:\n")
 				isFirstArgument = false
 			}
-			helpStr, err := deps.CommandScope.Get(key)
-			if err != nil {
-				return err
-			}
-			io.Out().Printf("%11s  %s\n", fixSpace(key[len(argumentPrefix):], maxLength), helpStr)
+			helpStr := deps.CommandScope.Value(key)
+			io.Out().Printf("%11s  %s\n", fixSpace("--"+key[len(argumentPrefix):], maxLength), helpStr)
 		}
 	}
 	HealthComamnd(a, ctx)

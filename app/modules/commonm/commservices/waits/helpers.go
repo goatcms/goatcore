@@ -12,10 +12,7 @@ func GetScopeWaitManager(scp app.DataScope, name string) (value commservices.Sco
 		ins interface{}
 		ok  bool
 	)
-	if ins, err = scp.Get(name); err != nil {
-		return nil, err
-	}
-	if value, ok = ins.(commservices.ScopeWaitManager); !ok {
+	if value, ok = scp.Value(name).(commservices.ScopeWaitManager); !ok {
 		return nil, goaterr.Errorf("%v %T is not a ScopeWaitManager", ins, ins)
 	}
 	return value, nil

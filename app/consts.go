@@ -5,22 +5,32 @@ import (
 )
 
 const (
-	// KillEvent is kill action for current event
+	// KillEvent is an kill event (for scope etc)
 	KillEvent = iota
-	// ErrorEvent is action for a error
+	// StopEvent is a stop event (for scope etc)
+	StopEvent = iota
+
+	// ErrorEvent is an error event (for scope etc)
 	ErrorEvent = iota
-	// CommitEvent is a action run when data is persist
+
+	// BeforeCommitEvent is an event trigger befor commit action (for scope etc)
+	BeforeCommitEvent = iota
+	// CommitEvent is an event trigger commit action (for scope etc)
 	CommitEvent = iota
-	// AfterCommitEvent is a action run after data persist
+	// AfterCommitEvent is an event trigger after commit action (for scope etc)
 	AfterCommitEvent = iota
-	// RollbackEvent is a action run when data is restore
+
+	// BeforeCommitEvent is an event trigger befor rollback action (for scope etc)
+	BeforeRollbackEvent = iota
+	// RollbackEvent is an event trigger rollback action (for scope etc)
 	RollbackEvent = iota
-	// AfterRollbackEvent is a action run when after restore
+	// BeforeCommitEvent is an event trigger befor rollback action (for scope etc)
 	AfterRollbackEvent = iota
-	// BeforeCloseEvent is a action run before application/scope close
+
+	// BeforeCommitEvent is an event trigger befor close action (for aplication/scope etc)
 	BeforeCloseEvent = iota
-	// CloseEvent is a action run to close application/scope
-	CloseEvent = iota
+	// BeforeCommitEvent is an event trigger after close action (for aplication/scope etc)
+	AfterCloseEvent = iota
 
 	// Error is key for error value
 	Error = "error"

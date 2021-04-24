@@ -101,10 +101,7 @@ func (manager *TaskManager) Create(pip pipservices.Pip) (result pipservices.Task
 		childScope.Close()
 		return nil, err
 	}
-	if err = childScope.Set(scopeKey, manager); err != nil {
-		childScope.Close()
-		return nil, err
-	}
+	childScope.SetValue(scopeKey, manager)
 	taskCtx = gio.NewIOContext(childScope, gio.NewIO(gio.IOParams{
 		In:  pip.Context.In,
 		Out: pip.Context.Out,

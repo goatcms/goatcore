@@ -26,9 +26,7 @@ func UnitFactory(dp dependency.Provider) (ri interface{}, err error) {
 // FromScope return scope namespaces
 func (unit Unit) FromScope(scp app.Scope, defaultNamespace pipservices.Namespaces) (namespace pipservices.Namespaces, err error) {
 	var ins interface{}
-	if ins, err = scp.Get(scopeKey); err != nil {
-		return nil, err
-	}
+	ins = scp.Value(scopeKey)
 	if ins == nil {
 		return defaultNamespace, nil
 	}
@@ -37,7 +35,8 @@ func (unit Unit) FromScope(scp app.Scope, defaultNamespace pipservices.Namespace
 
 // Define define scope namespaces
 func (unit Unit) Define(scp app.Scope, namespaces pipservices.Namespaces) (err error) {
-	return scp.Set(scopeKey, namespaces)
+	scp.SetValue(scopeKey, namespaces)
+	return nil
 }
 
 // Bind set child scope namespace from parent
@@ -46,5 +45,6 @@ func (unit Unit) Bind(parent, child app.Scope) (err error) {
 	if namespace, err = unit.FromScope(parent, DefaultNamespace); err != nil {
 		return err
 	}
-	return child.Set(scopeKey, namespace)
+	child.SetValue(scopeKey, namespace)
+	return nil
 }

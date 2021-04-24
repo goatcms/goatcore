@@ -42,7 +42,7 @@ func (m *Module) Run(a app.App) (err error) {
 			return
 		}
 		if sig == syscall.SIGINT || sig == syscall.SIGTERM {
-			appScope.Kill()
+			appScope.Stop()
 		}
 	}()
 	appScope.On(app.KillEvent, func(i interface{}) error {

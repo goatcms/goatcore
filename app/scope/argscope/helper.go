@@ -12,7 +12,7 @@ func InjectArgsToScope(args []string, scope app.DataScope) (err error) {
 	for i, value := range args {
 		// position keys
 		ikey := "$" + strconv.Itoa(i)
-		scope.Set(ikey, value)
+		scope.SetValue(ikey, value)
 		// reduce prefixes
 		if strings.HasPrefix(value, "--") {
 			value = value[2:]
@@ -24,9 +24,9 @@ func InjectArgsToScope(args []string, scope app.DataScope) (err error) {
 		if index != -1 {
 			key := value[:index]
 			value = value[index+1:]
-			scope.Set(key, value)
+			scope.SetValue(key, value)
 		} else {
-			scope.Set(value, "true")
+			scope.SetValue(value, "true")
 		}
 	}
 	return nil

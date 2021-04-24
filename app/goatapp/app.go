@@ -5,7 +5,9 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/goatcms/goatcore/varutil"
 	"github.com/goatcms/goatcore/varutil/goaterr"
+	"github.com/goatcms/goatcore/varutil/plainmap"
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/gio"
@@ -17,7 +19,6 @@ import (
 	"github.com/goatcms/goatcore/filesystem/disk"
 	"github.com/goatcms/goatcore/filesystem/filespace/diskfs"
 	"github.com/goatcms/goatcore/filesystem/json"
-	"github.com/goatcms/goatcore/varutil/plainmap"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -118,7 +119,7 @@ func (gapp *GoatApp) initEngineScope() error {
 	gapp.engineScope = scope.NewScope(scope.Params{
 		Tag: app.EngineTagName,
 	})
-	gapp.engineScope.Set(app.GoatVersion, app.GoatVersionValue)
+	gapp.engineScope.SetValue(app.GoatVersion, app.GoatVersionValue)
 	return nil
 }
 
@@ -136,7 +137,6 @@ func (gapp *GoatApp) initFilespaceScope(defaultCWDPath string) (err error) {
 		tmpFS     filesystem.Filespace
 		homeFS    filesystem.Filespace
 		currentFS filesystem.Filespace
-		cwdi      interface{}
 	)
 	// create scope
 	gapp.filespaceScope = scope.NewScope(scope.Params{
@@ -151,7 +151,7 @@ func (gapp *GoatApp) initFilespaceScope(defaultCWDPath string) (err error) {
 	if gapp.rootFilespace, err = diskfs.NewFilespace(rootPath); err != nil {
 		return err
 	}
-	gapp.filespaceScope.Set(app.RootFilespace, gapp.rootFilespace)
+	gapp.filespaceScope.SetValue(app.RootFilespace, gapp.rootFilespace)
 	// tmp filespace
 	if err = gapp.rootFilespace.MkdirAll("tmp", 0766); err != nil {
 		return err
@@ -159,7 +159,7 @@ func (gapp *GoatApp) initFilespaceScope(defaultCWDPath string) (err error) {
 	if tmpFS, err = gapp.rootFilespace.Filespace("tmp"); err != nil {
 		return err
 	}
-	gapp.filespaceScope.Set(app.TmpFilespace, tmpFS)
+	gapp.filespaceScope.SetValue(app.TmpFilespace, tmpFS)
 	// home filespace
 	if homePath, err = homedir.Dir(); err != nil {
 		return err
@@ -170,12 +170,10 @@ func (gapp *GoatApp) initFilespaceScope(defaultCWDPath string) (err error) {
 	if homeFS, err = gapp.rootFilespace.Filespace(homePath); err != nil {
 		return err
 	}
-	gapp.filespaceScope.Set(app.HomeFilespace, homeFS)
+	gapp.filespaceScope.SetValue(app.HomeFilespace, homeFS)
 	// CWD (Current Working Directory)
-	if cwdi, _ = gapp.argsScope.Get("cwd"); cwdi == nil {
+	if cwdPath, err = scope.GetString(gapp.argsScope, "cwd"); cwdPath == "" || err != nil {
 		cwdPath = defaultCWDPath
-	} else {
-		cwdPath = cwdi.(string)
 	}
 	if !disk.IsDir(cwdPath) {
 		return goaterr.Errorf("CWD (Current Working directory) path (%s) is not a directory", cwdPath)
@@ -183,7 +181,7 @@ func (gapp *GoatApp) initFilespaceScope(defaultCWDPath string) (err error) {
 	if currentFS, err = diskfs.NewFilespace(cwdPath); err != nil {
 		return err
 	}
-	gapp.filespaceScope.Set(app.CurrentFilespace, currentFS)
+	gapp.filespaceScope.SetValue(app.CurrentFilespace, currentFS)
 	gapp.currentFilespace = currentFS
 	return nil
 }
@@ -193,7 +191,8 @@ func (gapp *GoatApp) initConfigScope() error {
 		deps struct {
 			Env string `argument:"?env"`
 		}
-		err error
+		pmap map[string]interface{}
+		err  error
 	)
 	if err = gapp.argsScope.InjectTo(&deps); err != nil {
 		return err
@@ -208,17 +207,14 @@ func (gapp *GoatApp) initConfigScope() error {
 			return err
 		}
 	}
-	plainmap, err := plainmap.RecursiveMapToPlainMap(fullmap)
-	if err != nil {
+	if pmap, err = plainmap.RecursiveMapToPlainMap(fullmap); err != nil {
 		return err
 	}
-	ds := &scope.DataScope{
-		Data: plainmap,
-	}
+	ds := scope.NewDataScope(varutil.ToMapInterfaceInterface(pmap))
 	gapp.configScope = &scope.Scope{
 		EventScope: scope.NewEventScope(),
 		DataScope:  ds,
-		Injector:   ds.Injector(app.ConfigTagName),
+		Injector:   scope.NewScopeInjector(app.ConfigTagName, ds),
 	}
 	return nil
 }
@@ -234,8 +230,8 @@ func (gapp *GoatApp) initAppScope() error {
 	gapp.appScope = scope.NewScope(scope.Params{
 		Tag: app.AppTagName,
 	})
-	gapp.appScope.Set(app.AppName, gapp.name)
-	gapp.appScope.Set(app.AppVersion, gapp.version)
+	gapp.appScope.SetValue(app.AppName, gapp.name)
+	gapp.appScope.SetValue(app.AppVersion, gapp.version)
 	return nil
 }
 

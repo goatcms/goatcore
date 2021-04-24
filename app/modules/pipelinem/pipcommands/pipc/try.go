@@ -3,6 +3,7 @@ package pipc
 import (
 	"strings"
 
+	"github.com/goatcms/goatcore/app/injector"
 	"github.com/goatcms/goatcore/app/scope"
 
 	"github.com/goatcms/goatcore/app"
@@ -84,7 +85,7 @@ func Try(a app.App, ctx app.IOContext) (err error) {
 	separatedScope := scope.NewScope(scope.Params{
 		DataScope:  parentScope,
 		EventScope: parentScope,
-		Injectors:  []app.Injector{parentScope},
+		Injector:   injector.NewMultiInjector([]app.Injector{parentScope}),
 	})
 	if err = deps.Runner.Run(pipservices.Pip{
 		Context: pipservices.PipContext{

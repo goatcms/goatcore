@@ -74,7 +74,7 @@ func (engine *Engine) Run(container ocservices.Container) (err error) {
 	if container.Scope == nil {
 		cmd = exec.Command(command[0], command[1:]...)
 	} else {
-		cmd = exec.CommandContext(container.Scope.Context(), command[0], command[1:]...)
+		cmd = exec.CommandContext(container.Scope.GoContext(), command[0], command[1:]...)
 		if err = container.Scope.AddTasks(1); err != nil {
 			return err
 		}

@@ -44,9 +44,7 @@ func (ds ScopeInjector) InjectTo(obj interface{}) (err error) {
 		if !valueField.CanSet() {
 			return goaterr.Errorf("ScopeInjector.InjectTo: Cannot set %s field value", structField.Name)
 		}
-		if newValue, err = ds.data.Get(key); err != nil {
-			return err
-		}
+		newValue = ds.data.Value(key)
 		if newValue == nil {
 			if !isRequired {
 				continue

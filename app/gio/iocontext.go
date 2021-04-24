@@ -68,36 +68,6 @@ func NewChildIOContext(parent app.IOContext, params ChildIOContextParams) (ioc a
 	}
 }
 
-// NewParallelIOContext create new parallel io context related to current.
-func NewParallelIOContext(parent app.IOContext, params IOContextParams) (ioc app.IOContext) {
-	var (
-		parentIO app.IO
-		childIO  app.IO
-	)
-	parentIO = parent.IO()
-	if params.IO.In == nil && params.IO.Out == nil && params.IO.Err == nil && params.IO.CWD == nil {
-		childIO = parentIO
-	} else {
-		if params.IO.In == nil {
-			params.IO.In = parentIO.In()
-		}
-		if params.IO.Out == nil {
-			params.IO.Out = parentIO.Out()
-		}
-		if params.IO.Err == nil {
-			params.IO.Err = parentIO.Err()
-		}
-		if params.IO.CWD == nil {
-			params.IO.CWD = parentIO.CWD()
-		}
-		childIO = NewIO(params.IO)
-	}
-	return IOContext{
-		scope: scope.NewParallelScope(parent.Scope(), params.Scope),
-		io:    childIO,
-	}
-}
-
 // Scope return task context scope
 func (ioc IOContext) Scope() app.Scope {
 	return ioc.scope

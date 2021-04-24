@@ -110,7 +110,7 @@ func (mapp *App) initEngineScope() error {
 	mapp.options.EngineScope = scope.NewScope(scope.Params{
 		Tag: app.EngineTagName,
 	})
-	mapp.options.EngineScope.Set(app.GoatVersion, app.GoatVersionValue)
+	mapp.options.EngineScope.SetValue(app.GoatVersion, app.GoatVersionValue)
 	return nil
 }
 
@@ -136,14 +136,14 @@ func (mapp *App) initFilespaceScope() (err error) {
 		})
 	}
 	fsscope := mapp.options.FilespaceScope
-	if value, _ = fsscope.Get(app.RootFilespace); value == nil {
-		mapp.options.FilespaceScope.Set(app.RootFilespace, mapp.options.RootFilespace)
+	if value = fsscope.Value(app.RootFilespace); value == nil {
+		mapp.options.FilespaceScope.SetValue(app.RootFilespace, mapp.options.RootFilespace)
 	}
-	if value, _ = fsscope.Get(app.TmpFilespace); value == nil {
-		mapp.options.FilespaceScope.Set(app.TmpFilespace, mapp.options.TMPFilespace)
+	if value = fsscope.Value(app.TmpFilespace); value == nil {
+		mapp.options.FilespaceScope.SetValue(app.TmpFilespace, mapp.options.TMPFilespace)
 	}
-	if value, _ = fsscope.Get(app.CurrentFilespace); value == nil {
-		mapp.options.FilespaceScope.Set(app.CurrentFilespace, mapp.io.CWD())
+	if value = fsscope.Value(app.CurrentFilespace); value == nil {
+		mapp.options.FilespaceScope.SetValue(app.CurrentFilespace, mapp.io.CWD())
 	}
 	return nil
 }
@@ -182,8 +182,8 @@ func (mapp *App) initAppScope() error {
 	mapp.options.AppScope = scope.NewScope(scope.Params{
 		Tag: app.AppTagName,
 	})
-	mapp.options.AppScope.Set(app.AppName, mapp.options.Name)
-	mapp.options.AppScope.Set(app.AppVersion, mapp.options.Version)
+	mapp.options.AppScope.SetValue(app.AppName, mapp.options.Name)
+	mapp.options.AppScope.SetValue(app.AppVersion, mapp.options.Version)
 	return nil
 }
 

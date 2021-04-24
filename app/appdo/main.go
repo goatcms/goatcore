@@ -4,14 +4,7 @@ import "github.com/goatcms/goatcore/app"
 
 // Close shutdown application by send close event
 func Close(a app.App) (err error) {
-	if err = a.AppScope().Trigger(app.BeforeCloseEvent, nil); err != nil {
-		return err
-	}
-	if err = a.AppScope().Trigger(app.CloseEvent, nil); err != nil {
-		return err
-	}
-	// no life after close ;-)
-	return nil
+	return a.AppScope().Close()
 }
 
 // Emit a event to all application scopes

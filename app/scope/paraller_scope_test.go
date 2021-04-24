@@ -1,14 +1,6 @@
 package scope
 
-import (
-	"fmt"
-	"sync"
-	"testing"
-	"time"
-
-	"github.com/goatcms/goatcore/app"
-)
-
+/*
 func TestParentScopeIsKillByChildParallerWhenFail(t *testing.T) {
 	var (
 		parentScope   app.Scope
@@ -160,3 +152,4 @@ func TestParallelScopeInjector(t *testing.T) {
 		t.Errorf("expected result.Value equals to 'value'")
 	}
 }
+*/

@@ -8,19 +8,19 @@ import (
 
 // EventScope is event scope interface
 type EventScope struct {
-	eventsCallbacks map[int][]app.EventCallback
+	eventsCallbacks map[interface{}][]app.EventCallback
 	mu              sync.RWMutex
 }
 
 // NewEventScope create new instance of event scope
 func NewEventScope() app.EventScope {
 	return app.EventScope(&EventScope{
-		eventsCallbacks: make(map[int][]app.EventCallback),
+		eventsCallbacks: make(map[interface{}][]app.EventCallback),
 	})
 }
 
 // Trigger run all function connected to event
-func (es *EventScope) Trigger(eID int, data interface{}) error {
+func (es *EventScope) Trigger(eID interface{}, data interface{}) error {
 	es.mu.RLock()
 	defer es.mu.RUnlock()
 	for _, onFunc := range es.eventsCallbacks[eID] {
@@ -32,7 +32,7 @@ func (es *EventScope) Trigger(eID int, data interface{}) error {
 }
 
 // On connect a function to event
-func (es *EventScope) On(eID int, callback app.EventCallback) {
+func (es *EventScope) On(eID interface{}, callback app.EventCallback) {
 	es.mu.Lock()
 	defer es.mu.Unlock()
 	callbacks, ok := es.eventsCallbacks[eID]

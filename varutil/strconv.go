@@ -1,6 +1,7 @@
 package varutil
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -37,4 +38,31 @@ func FormatIntArray(arr []int64, base int, sep string) string {
 		quoted[i] = strconv.FormatInt(value, base)
 	}
 	return strings.Join(quoted, sep)
+}
+
+// ToMapStringInterface convert map[interface{}]interface{} to map[string]interface{}
+func ToMapStringInterface(in map[interface{}]interface{}) (out map[string]interface{}) {
+	out = make(map[string]interface{})
+	for key, value := range in {
+		out[fmt.Sprintf("%v", key)] = value
+	}
+	return
+}
+
+// ToMapInterfaceInterface convert map[string]interface{} to map[interface{}]interface{}
+func ToMapInterfaceInterface(in map[string]interface{}) (out map[interface{}]interface{}) {
+	out = make(map[interface{}]interface{})
+	for key, value := range in {
+		out[key] = value
+	}
+	return
+}
+
+// ToStringArr convert []interface{} to []string{}
+func ToStringArr(in []interface{}) (out []string) {
+	out = make([]string, len(in))
+	for key, value := range in {
+		out[key] = fmt.Sprintf("%v", value)
+	}
+	return
 }
