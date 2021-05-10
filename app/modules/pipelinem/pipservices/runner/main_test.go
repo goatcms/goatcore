@@ -3,8 +3,7 @@ package runner
 import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/bootstrap"
-	"github.com/goatcms/goatcore/app/mockupapp"
-	"github.com/goatcms/goatcore/app/modules"
+	"github.com/goatcms/goatcore/app/goatapp"
 	"github.com/goatcms/goatcore/app/modules/commonm"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/ocm"
@@ -16,11 +15,12 @@ import (
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes/selfsb"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/tasks"
 	"github.com/goatcms/goatcore/app/modules/terminalm"
+	"github.com/goatcms/goatcore/app/modules/terminalm/termservices"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 func newApp() (mapp app.App, err error) {
-	if mapp, err = mockupapp.NewApp(mockupapp.MockupOptions{}); err != nil {
+	if mapp, err = goatapp.NewMockupApp(goatapp.Params{}); err != nil {
 		return nil, err
 	}
 	dp := mapp.DependencyProvider()
@@ -33,29 +33,20 @@ func newApp() (mapp app.App, err error) {
 		return nil, err
 	}
 	bootstraper := bootstrap.NewBootstrap(mapp)
-	if err = bootstraper.Register(terminalm.NewModule()); err != nil {
-		return nil, err
-	}
-	if err = bootstraper.Register(commonm.NewModule()); err != nil {
-		return nil, err
-	}
-	if err = bootstraper.Register(ocm.NewModule()); err != nil {
-		return nil, err
-	}
-	if err = bootstraper.Init(); err != nil {
-		return nil, err
-	}
-	if err = initDependencies(mapp); err != nil {
-		return nil, err
-	}
-	return mapp, nil
+	return mapp, goaterr.ToError(goaterr.AppendError(nil,
+		bootstraper.Register(terminalm.NewModule()),
+		bootstraper.Register(commonm.NewModule()),
+		bootstraper.Register(ocm.NewModule()),
+		bootstraper.Init(),
+		initDependencies(mapp),
+	))
 }
 
 func initDependencies(a app.App) (err error) {
 	var (
 		deps struct {
 			Manager          pipservices.SandboxesManager  `dependency:"PipSandboxesManager"`
-			Terminal         modules.Terminal              `dependency:"TerminalService"`
+			Terminal         termservices.Terminal         `dependency:"TerminalService"`
 			EnvironmentsUnit commservices.EnvironmentsUnit `dependency:"CommonEnvironmentsUnit"`
 			OCManager        ocservices.Manager            `dependency:"OCManager"`
 		}

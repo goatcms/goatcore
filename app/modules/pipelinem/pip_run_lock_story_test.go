@@ -6,44 +6,53 @@ import (
 	"time"
 
 	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/app/mockupapp"
-	"github.com/goatcms/goatcore/varutil/goaterr"
+	"github.com/goatcms/goatcore/app/gio"
+	"github.com/goatcms/goatcore/app/goatapp"
+	"github.com/goatcms/goatcore/app/terminal"
 )
 
 func TestPipRunLockStory(t *testing.T) {
 	t.Parallel()
 	var (
 		err         error
-		mapp        *mockupapp.App
+		mapp        *goatapp.MockupApp
 		bootstraper app.Bootstrap
 	)
-	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
-		Input: strings.NewReader(`
+	if mapp, bootstraper, err = newApp(goatapp.Params{
+		IO: goatapp.IO{
+			In: gio.NewAppInput(strings.NewReader(`
 			pip:run --name=first --rlock=resource --body="long" --silent=false
 			pip:run --name=second --wlock=resource --body="short" --silent=false
-			`),
-		Args: []string{`appname`, `terminal`},
+			`)),
+		},
+		Arguments: []string{`appname`, `terminal`},
 	}); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = goaterr.ToError(goaterr.AppendError(nil, app.RegisterCommand(mapp, "long", func(a app.App, ctx app.IOContext) (err error) {
-		ctx.IO().Out().Printf("lock")
-		time.Sleep(30 * time.Millisecond)
-		return ctx.IO().Out().Printf("unlock")
-	}, ""), app.RegisterCommand(mapp, "short", func(a app.App, ctx app.IOContext) (err error) {
-		time.Sleep(10 * time.Millisecond)
-		return ctx.IO().Out().Printf("write")
-	}, ""))); err != nil {
-		t.Error(err)
-		return
-	}
+	mapp.Terminal().SetCommand(
+		terminal.NewCommand(terminal.CommandParams{
+			Name: "long",
+			Callback: func(a app.App, ctx app.IOContext) (err error) {
+				ctx.IO().Out().Printf("lock")
+				time.Sleep(30 * time.Millisecond)
+				return ctx.IO().Out().Printf("unlock")
+			},
+		}),
+		terminal.NewCommand(terminal.CommandParams{
+			Name: "short",
+			Callback: func(a app.App, ctx app.IOContext) (err error) {
+				time.Sleep(10 * time.Millisecond)
+				return ctx.IO().Out().Printf("write")
+			},
+		}),
+	)
 	// test
 	if err = bootstraper.Run(); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = mapp.AppScope().Wait(); err != nil {
+	if err = mapp.Scopes().App().Wait(); err != nil {
 		t.Error(err)
 		return
 	}

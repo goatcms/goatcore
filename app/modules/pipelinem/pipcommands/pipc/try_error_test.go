@@ -2,40 +2,41 @@ package pipc
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/app/mockupapp"
+	"github.com/goatcms/goatcore/app/goatapp"
+	"github.com/goatcms/goatcore/app/terminal"
 )
 
 func TestTryErrorOnSuccess(t *testing.T) {
 	t.Parallel()
 	var (
 		err         error
-		mapp        *mockupapp.App
+		mapp        *goatapp.MockupApp
 		bootstraper app.Bootstrap
 	)
-	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
-		Input: strings.NewReader(` `),
-		Args:  []string{`appname`, `pip:try`, `--name=name`, `--body="emptyCommand"`, `--success=errorCommand`, `--silent=false`},
+	if mapp, bootstraper, err = newApp(goatapp.Params{
+		Arguments: []string{`appname`, `pip:try`, `--name=name`, `--body="emptyCommand"`, `--success=errorCommand`, `--silent=false`},
 	}); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = app.RegisterCommand(mapp, "emptyCommand", func(a app.App, ctx app.IOContext) (err error) {
-		return nil
-	}, "description"); err != nil {
-		t.Error(err)
-		return
-	}
-	if err = app.RegisterCommand(mapp, "errorCommand", func(a app.App, ctx app.IOContext) (err error) {
-		return fmt.Errorf("Some error")
-	}, "description"); err != nil {
-		t.Error(err)
-		return
-	}
-	// test
+	term := mapp.Terminal()
+	term.SetCommand(terminal.NewCommand(terminal.CommandParams{
+		Name: "emptyCommand",
+		Callback: func(a app.App, ctx app.IOContext) (err error) {
+			return nil
+		},
+		Help: "Return success",
+	}))
+	term.SetCommand(terminal.NewCommand(terminal.CommandParams{
+		Name: "errorCommand",
+		Callback: func(a app.App, ctx app.IOContext) (err error) {
+			return fmt.Errorf("Some error")
+		},
+		Help: "Fail since execution",
+	}))
 	if err = bootstraper.Run(); err == nil {
 		t.Errorf("expected error")
 		return
@@ -46,28 +47,30 @@ func TestTryErrorOnFail(t *testing.T) {
 	t.Parallel()
 	var (
 		err         error
-		mapp        *mockupapp.App
+		mapp        *goatapp.MockupApp
 		bootstraper app.Bootstrap
 	)
-	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
-		Input: strings.NewReader(` `),
-		Args:  []string{`appname`, `pip:try`, `--name=name`, `--body="errorCommand"`, `--fail=errorCommand`, `--silent=false`},
+	if mapp, bootstraper, err = newApp(goatapp.Params{
+		Arguments: []string{`appname`, `pip:try`, `--name=name`, `--body="errorCommand"`, `--fail=errorCommand`, `--silent=false`},
 	}); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = app.RegisterCommand(mapp, "emptyCommand", func(a app.App, ctx app.IOContext) (err error) {
-		return nil
-	}, "description"); err != nil {
-		t.Error(err)
-		return
-	}
-	if err = app.RegisterCommand(mapp, "errorCommand", func(a app.App, ctx app.IOContext) (err error) {
-		return fmt.Errorf("Some error")
-	}, "description"); err != nil {
-		t.Error(err)
-		return
-	}
+	term := mapp.Terminal()
+	term.SetCommand(terminal.NewCommand(terminal.CommandParams{
+		Name: "emptyCommand",
+		Callback: func(a app.App, ctx app.IOContext) (err error) {
+			return nil
+		},
+		Help: "Return success",
+	}))
+	term.SetCommand(terminal.NewCommand(terminal.CommandParams{
+		Name: "errorCommand",
+		Callback: func(a app.App, ctx app.IOContext) (err error) {
+			return fmt.Errorf("Some error")
+		},
+		Help: "Fail since execution",
+	}))
 	// test
 	if err = bootstraper.Run(); err == nil {
 		t.Errorf("expected error")
@@ -79,28 +82,30 @@ func TestTryErrorOnFinally(t *testing.T) {
 	t.Parallel()
 	var (
 		err         error
-		mapp        *mockupapp.App
+		mapp        *goatapp.MockupApp
 		bootstraper app.Bootstrap
 	)
-	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
-		Input: strings.NewReader(` `),
-		Args:  []string{`appname`, `pip:try`, `--name=name`, `--body="emptyCommand"`, `--finally=errorCommand`, `--silent=false`},
+	if mapp, bootstraper, err = newApp(goatapp.Params{
+		Arguments: []string{`appname`, `pip:try`, `--name=name`, `--body="emptyCommand"`, `--finally=errorCommand`, `--silent=false`},
 	}); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = app.RegisterCommand(mapp, "emptyCommand", func(a app.App, ctx app.IOContext) (err error) {
-		return nil
-	}, "description"); err != nil {
-		t.Error(err)
-		return
-	}
-	if err = app.RegisterCommand(mapp, "errorCommand", func(a app.App, ctx app.IOContext) (err error) {
-		return fmt.Errorf("Some error")
-	}, "description"); err != nil {
-		t.Error(err)
-		return
-	}
+	term := mapp.Terminal()
+	term.SetCommand(terminal.NewCommand(terminal.CommandParams{
+		Name: "emptyCommand",
+		Callback: func(a app.App, ctx app.IOContext) (err error) {
+			return nil
+		},
+		Help: "Return success",
+	}))
+	term.SetCommand(terminal.NewCommand(terminal.CommandParams{
+		Name: "errorCommand",
+		Callback: func(a app.App, ctx app.IOContext) (err error) {
+			return fmt.Errorf("Some error")
+		},
+		Help: "Fail since execution",
+	}))
 	// test
 	if err = bootstraper.Run(); err == nil {
 		t.Errorf("expected error")

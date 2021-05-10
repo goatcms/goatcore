@@ -3,8 +3,7 @@ package pipc
 import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/bootstrap"
-	"github.com/goatcms/goatcore/app/mockupapp"
-	"github.com/goatcms/goatcore/app/modules"
+	"github.com/goatcms/goatcore/app/goatapp"
 	"github.com/goatcms/goatcore/app/modules/commonm"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/ocm"
@@ -18,11 +17,13 @@ import (
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes/selfsb"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/tasks"
 	"github.com/goatcms/goatcore/app/modules/terminalm"
+	"github.com/goatcms/goatcore/app/modules/terminalm/termservices"
+	"github.com/goatcms/goatcore/app/terminal"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
-func newApp(options mockupapp.MockupOptions) (mapp *mockupapp.App, bootstraper app.Bootstrap, err error) {
-	if mapp, err = mockupapp.NewApp(options); err != nil {
+func newApp(params goatapp.Params) (mapp *goatapp.MockupApp, bootstraper app.Bootstrap, err error) {
+	if mapp, err = goatapp.NewMockupApp(params); err != nil {
 		return nil, nil, err
 	}
 	dp := mapp.DependencyProvider()
@@ -34,31 +35,32 @@ func newApp(options mockupapp.MockupOptions) (mapp *mockupapp.App, bootstraper a
 	)); err != nil {
 		return nil, nil, err
 	}
-	if err = app.RegisterCommand(mapp, "pip:run", Run, pipcommands.PipRun); err != nil {
-		return nil, nil, err
-	}
-	if err = app.RegisterCommand(mapp, "pip:try", Try, pipcommands.PipTry); err != nil {
-		return nil, nil, err
-	}
-	if err = app.RegisterCommand(mapp, "testCommand", func(a app.App, ctx app.IOContext) (err error) {
-		return ctx.IO().Out().Printf("output")
-	}, "description"); err != nil {
-		return nil, nil, err
-	}
+	term := mapp.Terminal()
+	term.SetCommand(terminal.NewCommand(terminal.CommandParams{
+		Name:     "pip:run",
+		Callback: Run,
+		Help:     pipcommands.PipRun,
+	}))
+	term.SetCommand(terminal.NewCommand(terminal.CommandParams{
+		Name:     "pip:try",
+		Callback: Try,
+		Help:     pipcommands.PipTry,
+	}))
+	term.SetCommand(terminal.NewCommand(terminal.CommandParams{
+		Name: "testCommand",
+		Callback: func(a app.App, ctx app.IOContext) (err error) {
+			return ctx.IO().Out().Printf("output")
+		},
+		Help: "print 'output'",
+	}))
 	bootstraper = bootstrap.NewBootstrap(mapp)
-	if err = bootstraper.Register(terminalm.NewModule()); err != nil {
-		return nil, nil, err
-	}
-	if err = bootstraper.Register(commonm.NewModule()); err != nil {
-		return nil, nil, err
-	}
-	if err = bootstraper.Register(ocm.NewModule()); err != nil {
-		return nil, nil, err
-	}
-	if err = bootstraper.Init(); err != nil {
-		return nil, nil, err
-	}
-	if err = initDependencies(mapp); err != nil {
+	if err = goaterr.ToError(goaterr.AppendError(nil,
+		bootstraper.Register(terminalm.NewModule()),
+		bootstraper.Register(commonm.NewModule()),
+		bootstraper.Register(ocm.NewModule()),
+		bootstraper.Init(),
+		initDependencies(mapp),
+	)); err != nil {
 		return nil, nil, err
 	}
 	return mapp, bootstraper, nil
@@ -68,7 +70,7 @@ func initDependencies(a app.App) (err error) {
 	var (
 		deps struct {
 			Manager          pipservices.SandboxesManager  `dependency:"PipSandboxesManager"`
-			Terminal         modules.Terminal              `dependency:"TerminalService"`
+			Terminal         termservices.Terminal         `dependency:"TerminalService"`
 			EnvironmentsUnit commservices.EnvironmentsUnit `dependency:"CommonEnvironmentsUnit"`
 			OCManager        ocservices.Manager            `dependency:"OCManager"`
 		}

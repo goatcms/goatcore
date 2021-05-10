@@ -2,7 +2,6 @@ package pipelinem
 
 import (
 	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/app/modules"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/ocm/ocservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipcommands"
@@ -15,6 +14,8 @@ import (
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes/selfsb"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes/sshsb"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/tasks"
+	"github.com/goatcms/goatcore/app/modules/terminalm/termservices"
+	"github.com/goatcms/goatcore/app/terminal"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -29,16 +30,39 @@ func NewModule() app.Module {
 // RegisterDependencies is init callback to register module dependencies
 func (m *Module) RegisterDependencies(a app.App) error {
 	dp := a.DependencyProvider()
+	term := a.Terminal()
+	term.SetCommand(
+		terminal.NewCommand(terminal.CommandParams{
+			Name:     "pip:clear",
+			Callback: pipc.Clear,
+			Help:     pipcommands.PipClear,
+		}),
+		terminal.NewCommand(terminal.CommandParams{
+			Name:     "pip:run",
+			Callback: pipc.Run,
+			Help:     pipcommands.PipRun,
+		}),
+		terminal.NewCommand(terminal.CommandParams{
+			Name:     "pip:try",
+			Callback: pipc.Try,
+			Help:     pipcommands.PipTry,
+		}),
+		terminal.NewCommand(terminal.CommandParams{
+			Name:     "pip:logs",
+			Callback: pipc.Logs,
+			Help:     pipcommands.PipLogs,
+		}),
+		terminal.NewCommand(terminal.CommandParams{
+			Name:     "pip:summary",
+			Callback: pipc.Summary,
+			Help:     pipcommands.PipSummary,
+		}),
+	)
 	return goaterr.ToError(goaterr.AppendError(nil,
 		dp.AddDefaultFactory(pipservices.SandboxesManagerService, sandboxes.ManagerFactory),
 		dp.AddDefaultFactory(pipservices.NamespacesUnitService, namespaces.UnitFactory),
 		dp.AddDefaultFactory(pipservices.RunnerService, runner.Factory),
 		dp.AddDefaultFactory(pipservices.TasksUnitService, tasks.UnitFactory),
-		app.RegisterCommand(a, "pip:clear", pipc.Clear, pipcommands.PipClear),
-		app.RegisterCommand(a, "pip:run", pipc.Run, pipcommands.PipRun),
-		app.RegisterCommand(a, "pip:try", pipc.Try, pipcommands.PipTry),
-		app.RegisterCommand(a, "pip:logs", pipc.Logs, pipcommands.PipLogs),
-		app.RegisterCommand(a, "pip:summary", pipc.Summary, pipcommands.PipSummary),
 	))
 }
 
@@ -47,7 +71,7 @@ func (m *Module) InitDependencies(a app.App) (err error) {
 	var (
 		deps struct {
 			Manager          pipservices.SandboxesManager  `dependency:"PipSandboxesManager"`
-			Terminal         modules.Terminal              `dependency:"TerminalService"`
+			Terminal         termservices.Terminal         `dependency:"TerminalService"`
 			EnvironmentsUnit commservices.EnvironmentsUnit `dependency:"CommonEnvironmentsUnit"`
 			OCManager        ocservices.Manager            `dependency:"OCManager"`
 		}

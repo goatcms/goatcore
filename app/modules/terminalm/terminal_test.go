@@ -4,27 +4,34 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/bootstrap"
-	"github.com/goatcms/goatcore/app/mockupapp"
-	"github.com/goatcms/goatcore/app/modules"
+	"github.com/goatcms/goatcore/app/gio"
+	"github.com/goatcms/goatcore/app/goatapp"
+	"github.com/goatcms/goatcore/app/modules/commonm"
+	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 func TestRunLoop(t *testing.T) {
 	var (
 		err  error
-		mapp *mockupapp.App
+		mapp *goatapp.MockupApp
 	)
 	t.Parallel()
 	// prepare mockup application
-	if mapp, err = mockupapp.NewApp(mockupapp.MockupOptions{
-		Input: strings.NewReader("help"),
+	if mapp, err = goatapp.NewMockupApp(goatapp.Params{
+		Arguments: []string{"terminal"},
+		IO: goatapp.IO{
+			In: gio.NewAppInput(strings.NewReader("help")),
+		},
 	}); err != nil {
 		t.Error(err)
 		return
 	}
 	bootstrap := bootstrap.NewBootstrap(mapp)
-	if err = bootstrap.Register(NewModule()); err != nil {
+	if err = goaterr.ToError(goaterr.AppendError(nil,
+		bootstrap.Register(NewModule()),
+		bootstrap.Register(commonm.NewModule()),
+	)); err != nil {
 		t.Error(err)
 		return
 	}
@@ -32,16 +39,7 @@ func TestRunLoop(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	// test
-	var deps struct {
-		Terminal modules.Terminal `dependency:"TerminalService"`
-		AppScope app.Scope        `dependency:"AppScope"`
-	}
-	if err = mapp.DependencyProvider().InjectTo(&deps); err != nil {
-		t.Error(err)
-		return
-	}
-	if err = deps.Terminal.RunLoop(mapp.IOContext(), "\n>"); err != nil {
+	if err = bootstrap.Run(); err != nil {
 		t.Error(err)
 		return
 	}

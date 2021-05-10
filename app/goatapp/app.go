@@ -6,17 +6,16 @@ import (
 	"strings"
 
 	"github.com/goatcms/goatcore/varutil"
-	"github.com/goatcms/goatcore/varutil/goaterr"
 	"github.com/goatcms/goatcore/varutil/plainmap"
 
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/gio"
 	"github.com/goatcms/goatcore/app/scope"
 	"github.com/goatcms/goatcore/app/scope/argscope"
+	"github.com/goatcms/goatcore/app/terminal"
 	"github.com/goatcms/goatcore/dependency"
 	"github.com/goatcms/goatcore/dependency/provider"
 	"github.com/goatcms/goatcore/filesystem"
-	"github.com/goatcms/goatcore/filesystem/disk"
 	"github.com/goatcms/goatcore/filesystem/filespace/diskfs"
 	"github.com/goatcms/goatcore/filesystem/json"
 	"github.com/mitchellh/go-homedir"
@@ -24,283 +23,215 @@ import (
 
 // GoatApp is base app template
 type GoatApp struct {
-	name    string
-	version string
+	app.AppHealthCheckers
 
-	arguments []string
-
-	rootFilespace    filesystem.Filespace
-	currentFilespace filesystem.Filespace
-	homeFilespace    filesystem.Filespace
-
-	engineScope    app.Scope
-	argsScope      app.Scope
-	filespaceScope app.Scope
-	configScope    app.Scope
-	appScope       app.Scope
-	commandScope   app.Scope
-	io             app.IO
-	ioContext      app.IOContext
-	dp             dependency.Provider
+	filespaces filespacesProvider
+	injectors  []dependency.Injector
+	ioContext  app.IOContext
+	params     Params
+	scopes     scopesProvider
 }
-
-const (
-	// ConfigJSONPath is path to main config file
-	ConfigJSONPath = "/config/config_{{env}}.json"
-)
 
 // NewGoatApp create new app instance
-func NewGoatApp(name, version, defaultCWDPath string) (a app.App, err error) {
+func NewGoatApp(params Params) (a app.App, err error) {
 	var (
-		in   = gio.NewAppInput(os.Stdin)
-		out  = gio.NewAppOutput(os.Stdout)
-		eout = gio.NewAppOutput(os.Stderr)
+		rootPath string
 	)
-	gapp := &GoatApp{
-		name:      name,
-		version:   version,
-		arguments: os.Args,
-	}
-
-	if err = gapp.initEngineScope(); err != nil {
-		return nil, err
-	}
-	if err = gapp.initArgsScope(); err != nil {
-		return nil, err
-	}
-	if err = gapp.initFilespaceScope(defaultCWDPath); err != nil {
-		return nil, err
-	}
-	if err = gapp.initConfigScope(); err != nil {
-		return nil, err
-	}
-	if err = gapp.initAppScope(); err != nil {
-		return nil, err
-	}
-	if err = gapp.initCommandScope(); err != nil {
-		return nil, err
-	}
-
-	gapp.dp = provider.NewProvider(app.DependencyTagName)
-
-	gapp.dp.SetDefault(app.EngineScope, gapp.engineScope)
-	gapp.dp.SetDefault(app.ArgsScope, gapp.argsScope)
-	gapp.dp.SetDefault(app.FilespaceScope, gapp.filespaceScope)
-	gapp.dp.SetDefault(app.ConfigScope, gapp.configScope)
-	gapp.dp.SetDefault(app.AppScope, gapp.appScope)
-	gapp.dp.SetDefault(app.CommandScope, gapp.commandScope)
-
-	gapp.io = gio.NewIO(gio.IOParams{
-		In:  in,
-		Out: out,
-		Err: eout,
-		CWD: gapp.currentFilespace,
-	})
-	gapp.ioContext = gio.NewIOContext(gapp.appScope, gapp.io)
-
-	gapp.dp.SetDefault(app.InputService, gapp.io.In())
-	gapp.dp.SetDefault(app.OutputService, gapp.io.Out())
-	gapp.dp.SetDefault(app.ErrorService, gapp.io.Err())
-
-	gapp.dp.AddInjectors([]dependency.Injector{
-		gapp.commandScope,
-		gapp.appScope,
-		gapp.configScope,
-		gapp.filespaceScope,
-		gapp.argsScope,
-		gapp.engineScope,
-	})
-
-	gapp.dp.SetDefault(app.AppService, app.App(gapp))
-	return gapp, nil
-}
-
-func (gapp *GoatApp) initEngineScope() error {
-	gapp.engineScope = scope.NewScope(scope.Params{
-		Tag: app.EngineTagName,
-	})
-	gapp.engineScope.SetValue(app.GoatVersion, app.GoatVersionValue)
-	return nil
-}
-
-func (gapp *GoatApp) initArgsScope() error {
-	var err error
-	gapp.argsScope, err = argscope.NewScope(gapp.arguments, app.ArgsTagName)
-	return err
-}
-
-func (gapp *GoatApp) initFilespaceScope(defaultCWDPath string) (err error) {
-	var (
-		rootPath  string
-		homePath  string
-		cwdPath   string
-		tmpFS     filesystem.Filespace
-		homeFS    filesystem.Filespace
-		currentFS filesystem.Filespace
-	)
-	// create scope
-	gapp.filespaceScope = scope.NewScope(scope.Params{
-		Tag: app.FilespaceTagName,
-	})
-	// root filespace
 	if runtime.GOOS == "windows" {
 		rootPath = os.Getenv("SYSTEMDRIVE") + "\\"
 	} else {
 		rootPath = "/"
 	}
-	if gapp.rootFilespace, err = diskfs.NewFilespace(rootPath); err != nil {
-		return err
+	if params.Arguments == nil {
+		params.Arguments = os.Args
 	}
-	gapp.filespaceScope.SetValue(app.RootFilespace, gapp.rootFilespace)
-	// tmp filespace
-	if err = gapp.rootFilespace.MkdirAll("tmp", 0766); err != nil {
-		return err
+	if params.Name == "" {
+		panic(ErrAppNameIsRequired)
 	}
-	if tmpFS, err = gapp.rootFilespace.Filespace("tmp"); err != nil {
-		return err
+	if params.IO.Err == nil {
+		params.IO.Err = gio.NewAppOutput(os.Stderr)
 	}
-	gapp.filespaceScope.SetValue(app.TmpFilespace, tmpFS)
-	// home filespace
-	if homePath, err = homedir.Dir(); err != nil {
-		return err
+	if params.IO.In == nil {
+		params.IO.In = gio.NewAppInput(os.Stdin)
 	}
-	if err = gapp.rootFilespace.MkdirAll(homePath, filesystem.SafeDirPermissions); err != nil {
-		return err
+	if params.IO.Out == nil {
+		params.IO.Out = gio.NewAppOutput(os.Stdout)
 	}
-	if homeFS, err = gapp.rootFilespace.Filespace(homePath); err != nil {
-		return err
+	if params.Terminal == nil {
+		params.Terminal = terminal.NewTerminalManager()
 	}
-	gapp.filespaceScope.SetValue(app.HomeFilespace, homeFS)
-	// CWD (Current Working Directory)
-	if cwdPath, err = scope.GetString(gapp.argsScope, "cwd"); cwdPath == "" || err != nil {
-		cwdPath = defaultCWDPath
+	if params.Version == nil {
+		params.Version = NilVersion
 	}
-	if !disk.IsDir(cwdPath) {
-		return goaterr.Errorf("CWD (Current Working directory) path (%s) is not a directory", cwdPath)
-	}
-	if currentFS, err = diskfs.NewFilespace(cwdPath); err != nil {
-		return err
-	}
-	gapp.filespaceScope.SetValue(app.CurrentFilespace, currentFS)
-	gapp.currentFilespace = currentFS
-	return nil
-}
-
-func (gapp *GoatApp) initConfigScope() error {
-	var (
-		deps struct {
-			Env string `argument:"?env"`
-		}
-		pmap map[string]interface{}
-		err  error
-	)
-	if err = gapp.argsScope.InjectTo(&deps); err != nil {
-		return err
-	}
-	if deps.Env == "" {
-		deps.Env = app.DefaultEnv
-	}
-	fullmap := make(map[string]interface{})
-	path := strings.Replace(ConfigJSONPath, "{{env}}", deps.Env, -1)
-	if gapp.currentFilespace.IsFile(path) {
-		if err = json.ReadJSON(gapp.currentFilespace, path, &fullmap); err != nil {
-			return err
+	// filespaces
+	if params.Filespaces.Root == nil {
+		if params.Filespaces.Root, err = diskfs.NewFilespace(rootPath); err != nil {
+			return
 		}
 	}
-	if pmap, err = plainmap.RecursiveMapToPlainMap(fullmap); err != nil {
-		return err
+	if params.Filespaces.CWD == nil {
+		if params.Filespaces.CWD, err = diskfs.NewFilespace(CWDPath); err != nil {
+			return
+		}
 	}
-	ds := scope.NewDataScope(varutil.ToMapInterfaceInterface(pmap))
-	gapp.configScope = &scope.Scope{
-		EventScope: scope.NewEventScope(),
-		DataScope:  ds,
-		Injector:   scope.NewScopeInjector(app.ConfigTagName, ds),
+	if params.Filespaces.Home == nil {
+		var homePath string
+		if homePath, err = homedir.Dir(); err != nil {
+			return
+		}
+		if err = params.Filespaces.Root.MkdirAll(homePath, filesystem.SafeDirPermissions); err != nil {
+			return
+		}
+		if params.Filespaces.Home, err = params.Filespaces.Root.Filespace(homePath); err != nil {
+			return
+		}
 	}
-	return nil
-}
-
-func (gapp *GoatApp) initCommandScope() error {
-	gapp.commandScope = scope.NewScope(scope.Params{
-		Tag: app.CommandTagName,
+	if params.Filespaces.Tmp == nil {
+		var (
+			randID  = varutil.RandString(20, varutil.AlphaNumericBytes)
+			tmpPath = rootPath + "/tmp/" + randID
+		)
+		if err = params.Filespaces.Root.MkdirAll(tmpPath, filesystem.SafeDirPermissions); err != nil {
+			return
+		}
+		if params.Filespaces.Tmp, err = params.Filespaces.Root.Filespace(tmpPath); err != nil {
+			return
+		}
+	}
+	// filespace scopes
+	fsCope := scope.NewScope(scope.Params{
+		Tag: app.FilespaceTagName,
 	})
-	return nil
-}
-
-func (gapp *GoatApp) initAppScope() error {
-	gapp.appScope = scope.NewScope(scope.Params{
+	fsCope.SetValue(app.RootFilespace, params.Filespaces.Root)
+	fsCope.SetValue(app.TmpFilespace, params.Filespaces.Tmp)
+	fsCope.SetValue(app.HomeFilespace, params.Filespaces.Home)
+	fsCope.SetValue(app.CurrentFilespace, params.Filespaces.CWD)
+	params.Scopes.filespace = fsCope
+	// args scope
+	if params.Scopes.args, err = argscope.NewScope(params.Arguments, app.ArgsTagName); err != nil {
+		return
+	}
+	// args scope - init envs
+	if params.Env == "" {
+		params.Env, _ = scope.GetString(params.Scopes.args, "env")
+		if params.Env == "" {
+			params.Env = app.DefaultEnv
+		}
+	}
+	// config scopes
+	if params.Scopes.config == nil {
+		var (
+			configPlainMap map[string]interface{}
+			configMap      = make(map[string]interface{})
+			configPath     = strings.Replace(ConfigFilePath, "{{env}}", params.Env, -1)
+		)
+		if params.Filespaces.CWD.IsFile(configPath) {
+			if err = json.ReadJSON(params.Filespaces.CWD, configPath, &configMap); err != nil {
+				return
+			}
+		}
+		if configPlainMap, err = plainmap.RecursiveMapToPlainMap(configMap); err != nil {
+			return
+		}
+		params.Scopes.config = scope.NewDataScope(varutil.ToMapInterfaceInterface(configPlainMap))
+	}
+	// filespace scopes
+	fsScope := scope.NewScope(scope.Params{
+		Tag: app.FilespaceTagName,
+	})
+	fsScope.SetValue(app.RootFilespace, params.Filespaces.Root)
+	fsScope.SetValue(app.TmpFilespace, params.Filespaces.Tmp)
+	fsScope.SetValue(app.HomeFilespace, params.Filespaces.Home)
+	fsScope.SetValue(app.CurrentFilespace, params.Filespaces.CWD)
+	params.Scopes.filespace = fsScope
+	// app scope
+	params.Scopes.App = scope.NewScope(scope.Params{
 		Tag: app.AppTagName,
 	})
-	gapp.appScope.SetValue(app.AppName, gapp.name)
-	gapp.appScope.SetValue(app.AppVersion, gapp.version)
-	return nil
+	// Dependency provider
+	if params.DP == nil {
+		params.DP = provider.NewProvider(app.DependencyTagName)
+	}
+	params.DP.SetDefault(app.AppScope, params.Scopes.App)
+	params.DP.SetDefault(app.ArgsScope, params.Scopes.args)
+	params.DP.SetDefault(app.ConfigScope, params.Scopes.config)
+	params.DP.SetDefault(app.ErrorService, params.IO.Err)
+	params.DP.SetDefault(app.FilespaceScope, params.Scopes.filespace)
+	params.DP.SetDefault(app.InputService, params.IO.In)
+	params.DP.SetDefault(app.OutputService, params.IO.Out)
+	params.DP.AddInjectors([]dependency.Injector{
+		params.Scopes.App,
+		scope.NewScopeInjector(app.ArgsTagName, params.Scopes.args),
+		scope.NewScopeInjector(app.ConfigTagName, params.Scopes.config),
+		scope.NewScopeInjector(app.FilespaceTagName, params.Scopes.filespace),
+	})
+	// helth
+	if params.HealthCheckers == nil {
+		params.HealthCheckers = newHealthCheckers()
+	}
+	// app object
+	gapp := &GoatApp{
+		AppHealthCheckers: params.HealthCheckers,
+
+		filespaces: filespacesProvider{
+			fs: params.Filespaces,
+		},
+		ioContext: gio.NewIOContext(params.Scopes.App, gio.NewIO(gio.IOParams{
+			CWD: params.Filespaces.CWD,
+			Err: params.IO.Err,
+			In:  params.IO.In,
+			Out: params.IO.Out,
+		})),
+		params: params,
+		scopes: scopesProvider{
+			scopes: params.Scopes,
+		},
+	}
+	gapp.params.DP.SetDefault(app.AppService, app.App(gapp))
+	return gapp, nil
 }
 
-// Name return app name
-func (gapp *GoatApp) Name() string {
-	return gapp.name
-}
-
-// Version return app version
-func (gapp *GoatApp) Version() string {
-	return gapp.version
+// InjectTo inject application dependencies, arguments, config and filespaces to
+func (gapp *GoatApp) InjectTo(obj interface{}) error {
+	return gapp.params.DP.InjectTo(obj)
 }
 
 // Arguments return application arguments
 func (gapp *GoatApp) Arguments() []string {
-	return gapp.arguments
-}
-
-// EngineScope return engine scope
-func (gapp *GoatApp) EngineScope() app.Scope {
-	return gapp.engineScope
-}
-
-// ArgsScope return app scope
-func (gapp *GoatApp) ArgsScope() app.Scope {
-	return gapp.argsScope
-}
-
-// FilespaceScope return filespace scope
-func (gapp *GoatApp) FilespaceScope() app.Scope {
-	return gapp.filespaceScope
-}
-
-// ConfigScope return config scope
-func (gapp *GoatApp) ConfigScope() app.Scope {
-	return gapp.configScope
-}
-
-// AppScope return app scope
-func (gapp *GoatApp) AppScope() app.Scope {
-	return gapp.appScope
-}
-
-// CommandScope return command scope
-func (gapp *GoatApp) CommandScope() app.Scope {
-	return gapp.commandScope
+	return gapp.params.Arguments
 }
 
 // DependencyProvider return dependency provider
 func (gapp *GoatApp) DependencyProvider() dependency.Provider {
-	return gapp.dp
+	return gapp.params.DP
 }
 
-// RootFilespace return root filespace for application ('/' directory by default)
-func (gapp *GoatApp) RootFilespace() filesystem.Filespace {
-	return gapp.rootFilespace
-}
-
-// HomeFilespace return user home directory filespace (like '/Users/username')
-func (gapp *GoatApp) HomeFilespace() filesystem.Filespace {
-	return gapp.homeFilespace
-}
-
-// IO return main IO fo application
-func (gapp *GoatApp) IO() app.IO {
-	return gapp.io
+// Filespaces return filespaces
+func (gapp *GoatApp) Filespaces() app.AppFilespaces {
+	return gapp.filespaces
 }
 
 // IOContext return main IOContext fo application
 func (gapp *GoatApp) IOContext() app.IOContext {
 	return gapp.ioContext
+}
+
+// Name return app name
+func (gapp *GoatApp) Name() string {
+	return gapp.params.Name
+}
+
+// AppScope return app scope
+func (gapp *GoatApp) Scopes() app.AppScopes {
+	return gapp.scopes
+}
+
+// Terminal return app terminal manager
+func (gapp *GoatApp) Terminal() app.TerminalManager {
+	return gapp.params.Terminal
+}
+
+// Version return app version
+func (gapp *GoatApp) Version() app.Version {
+	return gapp.params.Version
 }

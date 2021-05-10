@@ -1,8 +1,8 @@
 package selfsb
 
 import (
-	"github.com/goatcms/goatcore/app/modules"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
+	"github.com/goatcms/goatcore/app/modules/terminalm/termservices"
 	"github.com/goatcms/goatcore/dependency"
 )
 
@@ -12,7 +12,7 @@ type SandboxBuilder struct {
 }
 
 // NewSandboxBuilder create new SandboxBuilder instance
-func NewSandboxBuilder(terminal modules.Terminal) (ins *SandboxBuilder, err error) {
+func NewSandboxBuilder(terminal termservices.Terminal) (ins *SandboxBuilder, err error) {
 	instance := &SandboxBuilder{}
 	if instance.sandbox, err = NewSelfSandbox(terminal); err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func NewSandboxBuilder(terminal modules.Terminal) (ins *SandboxBuilder, err erro
 // SandboxBuilderFactory create a SandboxBuilder instance
 func SandboxBuilderFactory(dp dependency.Provider) (ins interface{}, err error) {
 	var deps struct {
-		Terminal modules.Terminal `dependency:"TerminalService"`
+		Terminal termservices.Terminal `dependency:"TerminalService"`
 	}
 	instance := &SandboxBuilder{}
 	if err = dp.InjectTo(&deps); err != nil {

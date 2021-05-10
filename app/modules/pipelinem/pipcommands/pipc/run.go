@@ -37,8 +37,7 @@ func Run(a app.App, ctx app.IOContext) (err error) {
 	)
 	if err = goaterr.ToError(goaterr.AppendError(nil,
 		ctx.Scope().InjectTo(&deps),
-		a.DependencyProvider().InjectTo(&deps),
-		a.ArgsScope().InjectTo(&deps),
+		a.InjectTo(&deps),
 	)); err != nil {
 		return err
 	}

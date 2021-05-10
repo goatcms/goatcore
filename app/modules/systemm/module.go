@@ -29,7 +29,7 @@ func (m *Module) InitDependencies(a app.App) error {
 // Run start command line loop
 func (m *Module) Run(a app.App) (err error) {
 	var (
-		appScope = a.AppScope()
+		appScope = a.Scopes().App()
 		sigs     = make(chan os.Signal, 1)
 	)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)

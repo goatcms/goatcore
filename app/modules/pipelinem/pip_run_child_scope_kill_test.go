@@ -7,48 +7,56 @@ import (
 	"time"
 
 	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/app/mockupapp"
-	"github.com/goatcms/goatcore/varutil/goaterr"
+	"github.com/goatcms/goatcore/app/gio"
+	"github.com/goatcms/goatcore/app/goatapp"
+	"github.com/goatcms/goatcore/app/terminal"
 )
 
 func TestPipRunChildScopeKillStory(t *testing.T) {
 	t.Parallel()
 	var (
 		err         error
-		mapp        *mockupapp.App
+		mapp        *goatapp.MockupApp
 		bootstraper app.Bootstrap
 	)
 	// it check async execution
-	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
-		Input: strings.NewReader(`
+	if mapp, bootstraper, err = newApp(goatapp.Params{
+		IO: goatapp.IO{
+			In: gio.NewAppInput(strings.NewReader(`
 			pip:run --name=first --body="kill" --silent=false
 			pip:run --name=second --wait=first --body="killStatus" --silent=false
-			`),
-		Args: []string{`appname`, `terminal`},
+			`)),
+		},
+		Arguments: []string{`appname`, `terminal`},
 	}); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = goaterr.ToError(goaterr.AppendError(nil, app.RegisterCommand(mapp, "killStatus", func(a app.App, ctx app.IOContext) (err error) {
-		time.Sleep(10 * time.Millisecond)
-		// it will never executed because return error by command stop pipeline
-		if ctx.Scope().IsDone() {
-			return ctx.IO().Out().Printf("is_killed")
-		}
-		return ctx.IO().Out().Printf("is_not_killed")
-	}, ""), app.RegisterCommand(mapp, "kill", func(a app.App, ctx app.IOContext) (err error) {
-		// we kill pipeline by return "some error"
-		return fmt.Errorf("some error")
-	}, ""))); err != nil {
-		t.Error(err)
-		return
-	}
+	mapp.Terminal().SetCommand(
+		terminal.NewCommand(terminal.CommandParams{
+			Name: "killStatus",
+			Callback: func(a app.App, ctx app.IOContext) (err error) {
+				time.Sleep(10 * time.Millisecond)
+				// it will never executed because return error by command stop pipeline
+				if ctx.Scope().IsDone() {
+					return ctx.IO().Out().Printf("is_killed")
+				}
+				return ctx.IO().Out().Printf("is_not_killed")
+			},
+		}),
+		terminal.NewCommand(terminal.CommandParams{
+			Name: "kill",
+			Callback: func(a app.App, ctx app.IOContext) (err error) {
+				return fmt.Errorf("some error")
+			},
+		}),
+	)
 	// test
 	if err = bootstraper.Run(); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = mapp.AppScope().Wait(); err != nil {
+	if err = mapp.Scopes().App().Wait(); err != nil {
 		t.Error(err)
 		return
 	}

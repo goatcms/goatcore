@@ -21,7 +21,7 @@ func (m *Module) RegisterDependencies(a app.App) error {
 	dp := a.DependencyProvider()
 	return goaterr.ToError(goaterr.AppendError(nil,
 		dp.AddDefaultFactory(ocservices.OCManagerService, ocmanager.ManagerFactory),
-		app.RegisterHealthChecker(a, "container", ContainerHealthChecker),
+		a.SetHealthChecker("container", ContainerHealthChecker),
 	))
 }
 

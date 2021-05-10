@@ -6,18 +6,19 @@ import (
 	"time"
 
 	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/app/mockupapp"
+	"github.com/goatcms/goatcore/app/gio"
+	"github.com/goatcms/goatcore/app/goatapp"
+	"github.com/goatcms/goatcore/app/terminal"
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/filesystem/filespace/diskfs"
 	"github.com/goatcms/goatcore/testbase"
-	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 func TestPipRunDockerStory(t *testing.T) {
 	t.Parallel()
 	var (
 		err         error
-		mapp        *mockupapp.App
+		mapp        *goatapp.MockupApp
 		bootstraper app.Bootstrap
 		cwd         filesystem.Filespace
 	)
@@ -29,35 +30,46 @@ func TestPipRunDockerStory(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
-		RootFilespace: cwd,
-		Input: strings.NewReader(`
+	if mapp, bootstraper, err = newApp(goatapp.Params{
+		Filespaces: goatapp.Filespaces{
+			Root: cwd,
+		},
+		IO: goatapp.IO{
+			In: gio.NewAppInput(strings.NewReader(`
 			pip:run --name=first --sandbox="container:alpine" --body=<<FIRSTEND
 echo "outputAla"
 FIRSTEND --silent=false
 			pip:run --name=second --wait=first --body="echoMa" --silent=false
 			pip:run --name=last --wait=second --body="echoKota" --silent=false
-			`),
-		Args: []string{`appname`, `terminal`},
+			`)),
+		},
+		Arguments: []string{`appname`, `terminal`},
 	}); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = goaterr.ToError(goaterr.AppendError(nil, app.RegisterCommand(mapp, "echoMa", func(a app.App, ctx app.IOContext) (err error) {
-		time.Sleep(20 * time.Millisecond)
-		return ctx.IO().Out().Printf("outputMa")
-	}, ""), app.RegisterCommand(mapp, "echoKota", func(a app.App, ctx app.IOContext) (err error) {
-		return ctx.IO().Out().Printf("outputKota")
-	}, ""))); err != nil {
-		t.Error(err)
-		return
-	}
+	mapp.Terminal().SetCommand(
+		terminal.NewCommand(terminal.CommandParams{
+			Name: "echoMa",
+			Callback: func(a app.App, ctx app.IOContext) (err error) {
+				time.Sleep(20 * time.Millisecond)
+				return ctx.IO().Out().Printf("outputMa")
+			},
+		}),
+		terminal.NewCommand(terminal.CommandParams{
+			Name: "echoKota",
+			Callback: func(a app.App, ctx app.IOContext) (err error) {
+				time.Sleep(20 * time.Millisecond)
+				return ctx.IO().Out().Printf("outputKota")
+			},
+		}),
+	)
 	// test
 	if err = bootstraper.Run(); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = mapp.AppScope().Wait(); err != nil {
+	if err = mapp.Scopes().App().Wait(); err != nil {
 		t.Error(err)
 		return
 	}

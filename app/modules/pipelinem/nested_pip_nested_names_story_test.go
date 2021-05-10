@@ -6,19 +6,21 @@ import (
 	"time"
 
 	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/app/mockupapp"
-	"github.com/goatcms/goatcore/varutil/goaterr"
+	"github.com/goatcms/goatcore/app/gio"
+	"github.com/goatcms/goatcore/app/goatapp"
+	"github.com/goatcms/goatcore/app/terminal"
 )
 
 func TestNestedPipNestedNamesStory(t *testing.T) {
 	t.Parallel()
 	var (
 		err         error
-		mapp        *mockupapp.App
+		mapp        *goatapp.MockupApp
 		bootstraper app.Bootstrap
 	)
-	if mapp, bootstraper, err = newApp(mockupapp.MockupOptions{
-		Input: strings.NewReader(`
+	if mapp, bootstraper, err = newApp(goatapp.Params{
+		IO: goatapp.IO{
+			In: gio.NewAppInput(strings.NewReader(`
 pip:run --name=first --silent=false --body=<<EOF
 				echoOne
 				pip:run --name=first --body="echoTwo" --silent=false
@@ -26,34 +28,53 @@ pip:run --name=first --silent=false --body=<<EOF
 EOF
 			pip:run --name=second --wait=first --body="echoFour" --silent=false
 			pip:run --name=last --wait=second --body="echoFive" --silent=false
-			`),
-		Args: []string{`appname`, `terminal`},
+			`)),
+		},
+		Arguments: []string{`appname`, `terminal`},
 	}); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = goaterr.ToError(goaterr.AppendError(nil, app.RegisterCommand(mapp, "echoOne", func(a app.App, ctx app.IOContext) (err error) {
-		time.Sleep(10 * time.Millisecond)
-		return ctx.IO().Out().Printf("1")
-	}, ""), app.RegisterCommand(mapp, "echoTwo", func(a app.App, ctx app.IOContext) (err error) {
-		time.Sleep(20 * time.Millisecond)
-		return ctx.IO().Out().Printf("2")
-	}, ""), app.RegisterCommand(mapp, "echoThree", func(a app.App, ctx app.IOContext) (err error) {
-		return ctx.IO().Out().Printf("3")
-	}, ""), app.RegisterCommand(mapp, "echoFour", func(a app.App, ctx app.IOContext) (err error) {
-		return ctx.IO().Out().Printf("4")
-	}, ""), app.RegisterCommand(mapp, "echoFive", func(a app.App, ctx app.IOContext) (err error) {
-		return ctx.IO().Out().Printf("5")
-	}, ""))); err != nil {
-		t.Error(err)
-		return
-	}
+	mapp.Terminal().SetCommand(
+		terminal.NewCommand(terminal.CommandParams{
+			Name: "echoOne",
+			Callback: func(a app.App, ctx app.IOContext) (err error) {
+				time.Sleep(10 * time.Millisecond)
+				return ctx.IO().Out().Printf("1")
+			},
+		}),
+		terminal.NewCommand(terminal.CommandParams{
+			Name: "echoTwo",
+			Callback: func(a app.App, ctx app.IOContext) (err error) {
+				time.Sleep(20 * time.Millisecond)
+				return ctx.IO().Out().Printf("2")
+			},
+		}),
+		terminal.NewCommand(terminal.CommandParams{
+			Name: "echoThree",
+			Callback: func(a app.App, ctx app.IOContext) (err error) {
+				return ctx.IO().Out().Printf("3")
+			},
+		}),
+		terminal.NewCommand(terminal.CommandParams{
+			Name: "echoFour",
+			Callback: func(a app.App, ctx app.IOContext) (err error) {
+				return ctx.IO().Out().Printf("4")
+			},
+		}),
+		terminal.NewCommand(terminal.CommandParams{
+			Name: "echoFive",
+			Callback: func(a app.App, ctx app.IOContext) (err error) {
+				return ctx.IO().Out().Printf("5")
+			},
+		}),
+	)
 	// test
 	if err = bootstraper.Run(); err != nil {
 		t.Error(err)
 		return
 	}
-	if err = mapp.AppScope().Wait(); err != nil {
+	if err = mapp.Scopes().App().Wait(); err != nil {
 		t.Error(err)
 		return
 	}

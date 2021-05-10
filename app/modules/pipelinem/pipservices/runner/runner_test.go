@@ -11,6 +11,7 @@ import (
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/namespaces"
 	"github.com/goatcms/goatcore/app/scope"
+	"github.com/goatcms/goatcore/app/terminal"
 	"github.com/goatcms/goatcore/filesystem"
 	"github.com/goatcms/goatcore/filesystem/filespace/memfs"
 )
@@ -40,12 +41,13 @@ func TestRunner(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if err = app.RegisterCommand(mapp, "testCommand", func(a app.App, ctx app.IOContext) (err error) {
-		return ctx.IO().Out().Printf("output")
-	}, "description"); err != nil {
-		t.Error(err)
-		return
-	}
+	term := mapp.Terminal()
+	term.SetCommand(terminal.NewCommand(terminal.CommandParams{
+		Name: "testCommand",
+		Callback: func(a app.App, ctx app.IOContext) (err error) {
+			return ctx.IO().Out().Printf("output")
+		},
+	}))
 	if err = deps.Runner.Run(pipservices.Pip{
 		Context: pipservices.PipContext{
 			In:    gio.NewInput(strings.NewReader("testCommand")),

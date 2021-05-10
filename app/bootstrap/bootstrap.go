@@ -57,7 +57,7 @@ func (b *Bootstrap) Init() error {
 // Run all modules
 func (b *Bootstrap) Run() (err error) {
 	var (
-		appScope = b.gapp.AppScope()
+		appScope = b.gapp.Scopes().App()
 		errs     []error
 	)
 	if !b.inited {
@@ -76,10 +76,8 @@ func (b *Bootstrap) Run() (err error) {
 			}
 		}(module)
 	}
-	if err = appScope.Wait(); err != nil {
-		errs = append(errs, err)
-	}
-	return goaterr.ToError(goaterr.AppendError(errs, app.CloseApp(b.gapp)))
+	appScope.Wait()
+	return goaterr.ToError(goaterr.AppendError(errs, appScope.Close()))
 }
 
 // ShowError print error / errors to stderr

@@ -2,18 +2,18 @@ package selfsb
 
 import (
 	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/app/modules"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
+	"github.com/goatcms/goatcore/app/modules/terminalm/termservices"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // SelfSandbox is termal sandbox
 type SelfSandbox struct {
-	terminal modules.Terminal
+	terminal termservices.Terminal
 }
 
 // NewSelfSandbox create a SelfSandbox instance
-func NewSelfSandbox(terminal modules.Terminal) (ins pipservices.Sandbox, err error) {
+func NewSelfSandbox(terminal termservices.Terminal) (ins pipservices.Sandbox, err error) {
 	if terminal == nil {
 		return nil, goaterr.Errorf("terminal argument is required")
 	}

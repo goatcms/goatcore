@@ -1,11 +1,12 @@
 package terminalm
 
 import (
-	"strings"
-
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/gio"
-	"github.com/goatcms/goatcore/app/modules"
+	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
+	"github.com/goatcms/goatcore/app/modules/terminalm/termcommands/termc"
+	"github.com/goatcms/goatcore/app/modules/terminalm/termservices"
+	"github.com/goatcms/goatcore/app/modules/terminalm/termservices/terminals"
 	"github.com/goatcms/goatcore/app/scope"
 )
 
@@ -20,10 +21,7 @@ func NewModule() app.Module {
 // RegisterDependencies is init callback to register module dependencies
 func (m *Module) RegisterDependencies(a app.App) error {
 	dp := a.DependencyProvider()
-	dp.AddDefaultFactory(modules.TerminalService, IOTerminalFactory)
-	app.RegisterCommand(a, "health", HealthComamnd, "chack and show application health")
-	app.RegisterCommand(a, "help", HelpComamnd, "Show help")
-	return nil
+	return dp.AddDefaultFactory(termservices.TerminalService, terminals.IOTerminalFactory)
 }
 
 // InitDependencies is init callback to inject dependencies inside module
@@ -35,25 +33,26 @@ func (m *Module) InitDependencies(a app.App) error {
 func (m *Module) Run(a app.App) (err error) {
 	var (
 		deps struct {
-			Terminal   modules.Terminal `dependency:"TerminalService"`
-			StrictMode string           `argument:"?strict"`
-			ctx        app.IOContext
+			Arguments commservices.Arguments `dependency:"CommonArguments"`
+			Terminal  termservices.Terminal  `dependency:"TerminalService"`
 		}
+		exTerm     termservices.Terminal
 		io         = a.IOContext().IO()
 		strictMode bool
 	)
 	if err = a.DependencyProvider().InjectTo(&deps); err != nil {
 		return err
 	}
-	strictMode = strings.ToLower(deps.StrictMode) == "true"
+	strictMode = deps.Arguments.StrictMode()
+	exTerm = deps.Terminal.Extends(termc.Commands()...)
 	args := a.Arguments()
 	if len(args) < 2 {
-		return deps.Terminal.RunCommand(a.IOContext(), []string{"help"})
+		return exTerm.RunCommand(a.IOContext(), []string{"help"})
 	} else if args[1] != "terminal" {
-		return deps.Terminal.RunCommand(a.IOContext(), args[1:])
+		return exTerm.RunCommand(a.IOContext(), args[1:])
 	}
 	for {
-		if a.AppScope().IsDone() {
+		if a.Scopes().App().IsDone() {
 			return
 		}
 		if err = m.runLoop(a.IOContext(), deps.Terminal); err == nil {
@@ -67,7 +66,7 @@ func (m *Module) Run(a app.App) (err error) {
 	}
 }
 
-func (m *Module) runLoop(parentCtx app.IOContext, terminal modules.Terminal) (err error) {
+func (m *Module) runLoop(parentCtx app.IOContext, terminal termservices.Terminal) (err error) {
 	var (
 		relatedScope app.Scope
 		relatedCtx   app.IOContext
