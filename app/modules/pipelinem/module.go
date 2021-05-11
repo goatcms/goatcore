@@ -4,7 +4,6 @@ import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/ocm/ocservices"
-	"github.com/goatcms/goatcore/app/modules/pipelinem/pipcommands"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipcommands/pipc"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/namespaces"
@@ -15,7 +14,6 @@ import (
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/sandboxes/sshsb"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/tasks"
 	"github.com/goatcms/goatcore/app/modules/terminalm/termservices"
-	"github.com/goatcms/goatcore/app/terminal"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -31,33 +29,7 @@ func NewModule() app.Module {
 func (m *Module) RegisterDependencies(a app.App) error {
 	dp := a.DependencyProvider()
 	term := a.Terminal()
-	term.SetCommand(
-		terminal.NewCommand(terminal.CommandParams{
-			Name:     "pip:clear",
-			Callback: pipc.Clear,
-			Help:     pipcommands.PipClear,
-		}),
-		terminal.NewCommand(terminal.CommandParams{
-			Name:     "pip:run",
-			Callback: pipc.Run,
-			Help:     pipcommands.PipRun,
-		}),
-		terminal.NewCommand(terminal.CommandParams{
-			Name:     "pip:try",
-			Callback: pipc.Try,
-			Help:     pipcommands.PipTry,
-		}),
-		terminal.NewCommand(terminal.CommandParams{
-			Name:     "pip:logs",
-			Callback: pipc.Logs,
-			Help:     pipcommands.PipLogs,
-		}),
-		terminal.NewCommand(terminal.CommandParams{
-			Name:     "pip:summary",
-			Callback: pipc.Summary,
-			Help:     pipcommands.PipSummary,
-		}),
-	)
+	term.SetCommand(pipc.Commands()...)
 	return goaterr.ToError(goaterr.AppendError(nil,
 		dp.AddDefaultFactory(pipservices.SandboxesManagerService, sandboxes.ManagerFactory),
 		dp.AddDefaultFactory(pipservices.NamespacesUnitService, namespaces.UnitFactory),

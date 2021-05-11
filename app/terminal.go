@@ -3,11 +3,13 @@ package app
 const (
 	TerminalUndefinedArgument = 0
 	TerminalIntArgument       = 1
-	TerminalFloatArgument     = 1 << 1
-	TerminalTextArgument      = 1 << 2
-	TerminalBoolArgument      = 1 << 3
-	TerminalPIPArgument       = 1 << 4
-	TerminalOtherArgument     = 1 << 5
+	TerminalFloatArgument     = iota
+	TerminalTextArgument      = iota
+	TerminalBoolArgument      = iota
+	TerminalPIPArgument       = iota
+	TerminalOtherArgument     = iota
+	TerminalURLArgument       = iota
+	TerminalEmailrgument      = iota
 )
 
 func NilCommandCallback(App, IOContext) (err error) {
@@ -29,9 +31,10 @@ type TerminalArgument interface {
 // TerminalCommand is a command read-only interface
 type TerminalCommand interface {
 	TerminalArguments
-	Name() string
 	Callback() CommandCallback
 	Help() string
+	MainArguments() []string
+	Name() string
 }
 
 // ArgumentReader is interface provided arguments set

@@ -8,7 +8,6 @@ import (
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/ocm"
 	"github.com/goatcms/goatcore/app/modules/ocm/ocservices"
-	"github.com/goatcms/goatcore/app/modules/pipelinem/pipcommands"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/namespaces"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices/runner"
@@ -36,16 +35,10 @@ func newApp(params goatapp.Params) (mapp *goatapp.MockupApp, bootstraper app.Boo
 		return nil, nil, err
 	}
 	term := mapp.Terminal()
-	term.SetCommand(terminal.NewCommand(terminal.CommandParams{
-		Name:     "pip:run",
-		Callback: Run,
-		Help:     pipcommands.PipRun,
-	}))
-	term.SetCommand(terminal.NewCommand(terminal.CommandParams{
-		Name:     "pip:try",
-		Callback: Try,
-		Help:     pipcommands.PipTry,
-	}))
+	term.SetCommand(
+		RunCommand(),
+		TryCommand(),
+	)
 	term.SetCommand(terminal.NewCommand(terminal.CommandParams{
 		Name: "testCommand",
 		Callback: func(a app.App, ctx app.IOContext) (err error) {

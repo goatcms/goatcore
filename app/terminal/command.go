@@ -5,10 +5,11 @@ import (
 )
 
 type CommandParams struct {
-	Name      string
-	Help      string
-	Callback  app.CommandCallback
-	Arguments app.TerminalArguments
+	Arguments     app.TerminalArguments
+	Callback      app.CommandCallback
+	Help          string
+	MainArguments []string
+	Name          string
 }
 
 // Command implements app.Command
@@ -41,4 +42,8 @@ func (command *Command) Callback() app.CommandCallback {
 
 func (command *Command) Help() string {
 	return command.params.Help
+}
+
+func (command *Command) MainArguments() []string {
+	return command.params.MainArguments
 }
