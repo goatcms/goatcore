@@ -1,4 +1,4 @@
-package scope
+package contextscope
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 
 func TestContextScopeStopStory(t *testing.T) {
 	t.Parallel()
-	scp := NewContextScope()
+	scp := New()
 	if scp.IsDone() == true {
 		t.Errorf("expeted undone scope")
 	}
@@ -25,7 +25,7 @@ func TestContextScopeStopStory(t *testing.T) {
 
 func TestContextScopeKillStory(t *testing.T) {
 	t.Parallel()
-	scp := NewContextScope()
+	scp := New()
 	if scp.IsDone() == true {
 		t.Errorf("expeted undone scope")
 	}
@@ -38,17 +38,5 @@ func TestContextScopeKillStory(t *testing.T) {
 	}
 	if len(scp.Errors()) == 0 {
 		t.Errorf("expected scp.Errors() = [context.Canceled]")
-	}
-}
-
-func TestContextWaitStory(t *testing.T) {
-	t.Parallel()
-	scp := NewContextScope()
-	scp.AddTasks(1)
-	go func() {
-		scp.DoneTask()
-	}()
-	if err := scp.Wait(); err != nil {
-		t.Errorf("unexpected error: %v", err)
 	}
 }

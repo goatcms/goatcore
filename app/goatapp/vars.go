@@ -10,5 +10,5 @@ const (
 )
 
 var (
-	ErrAppNameIsRequired = fmt.Errorf("Application name is required")
+	ErrAppNameIsRequired = fmt.Errorf("application name is required")
 )

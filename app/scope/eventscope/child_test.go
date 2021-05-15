@@ -1,4 +1,4 @@
-package scope
+package eventscope
 
 import (
 	"testing"
@@ -11,7 +11,7 @@ func TestChildEventScopeDoneStory(t *testing.T) {
 	t.Parallel()
 	var called1 = false
 	var called2 = false
-	c := NewChildEventScope(NewEventScope())
+	c := NewChild(New())
 	c.On(app.KillEvent, func(interface{}) error {
 		called1 = true
 		return nil
@@ -33,8 +33,8 @@ func TestChildEventScopeParentDoneStory(t *testing.T) {
 	t.Parallel()
 	var called1 = false
 	var called2 = false
-	parentScp := NewEventScope()
-	childScp := NewChildEventScope(parentScp)
+	parentScp := New()
+	childScp := NewChild(parentScp)
 	parentScp.On(app.KillEvent, func(interface{}) error {
 		called1 = true
 		return nil
@@ -54,7 +54,7 @@ func TestChildEventScopeParentDoneStory(t *testing.T) {
 
 func TestChildEventScopeErrorStory(t *testing.T) {
 	t.Parallel()
-	c := NewChildEventScope(NewEventScope())
+	c := NewChild(New())
 	c.On(app.KillEvent, func(interface{}) error {
 		return goaterr.Errorf("something is wrong")
 	})
@@ -65,8 +65,8 @@ func TestChildEventScopeErrorStory(t *testing.T) {
 
 func TestChildEventScopeParentErrorStory(t *testing.T) {
 	t.Parallel()
-	parentScp := NewEventScope()
-	childScp := NewChildEventScope(parentScp)
+	parentScp := New()
+	childScp := NewChild(parentScp)
 	parentScp.On(app.KillEvent, func(interface{}) error {
 		return goaterr.Errorf("something is wrong")
 	})

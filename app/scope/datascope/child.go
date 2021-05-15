@@ -1,4 +1,4 @@
-package scope
+package datascope
 
 import (
 	"sync"
@@ -13,8 +13,8 @@ type DataChildScope struct {
 	mu     sync.RWMutex
 }
 
-// NewChildDataScope create new instance of child data scope
-func NewChildDataScope(parent app.DataScope, data map[interface{}]interface{}) app.DataScope {
+// NewChild create new instance of child data scope
+func NewChild(parent app.DataScope, data map[interface{}]interface{}) app.DataScope {
 	return app.DataScope(&DataChildScope{
 		parent: parent,
 		data:   data,

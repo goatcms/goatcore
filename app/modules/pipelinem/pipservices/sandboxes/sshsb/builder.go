@@ -3,11 +3,11 @@ package sshsb
 import (
 	"strings"
 
+	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
-	"github.com/goatcms/goatcore/dependency"
 )
 
 // SSHSandboxBuilder create new ssh sandbox builder
@@ -25,7 +25,7 @@ func NewSSHSandboxBuilder(envUnit commservices.EnvironmentsUnit) *SSHSandboxBuil
 }
 
 // SSHSandboxBuilderFactory create SSHSandboxBuilder
-func SSHSandboxBuilderFactory(dp dependency.Provider) (ins interface{}, err error) {
+func SSHSandboxBuilderFactory(dp app.DependencyProvider) (ins interface{}, err error) {
 	builder := &SSHSandboxBuilder{}
 	if err = dp.InjectTo(&builder.deps); err != nil {
 		return nil, err

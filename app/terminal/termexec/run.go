@@ -1,6 +1,7 @@
 package termexec
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/goatcms/goatcore/app"
@@ -8,6 +9,7 @@ import (
 	"github.com/goatcms/goatcore/app/injector"
 	"github.com/goatcms/goatcore/app/scope"
 	"github.com/goatcms/goatcore/app/scope/argscope"
+	"github.com/goatcms/goatcore/app/scope/datascope"
 	"github.com/goatcms/goatcore/varutil"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
@@ -139,28 +141,23 @@ func RunCommand(rctx RunCtx, args []string) (err error) {
 		return goaterr.Errorf("Error: unknown command %s", commandName)
 	}
 	//prepare command child context
-	argsData := &scope.DataScope{
-		Data: make(map[interface{}]interface{}),
-	}
-	if err = argscope.InjectArgsToScope(args, argsData); err != nil {
+	argsData := datascope.New(make(map[interface{}]interface{}))
+	if err = argscope.InjectArgs(argsData, args...); err != nil {
 		return err
 	}
-	childScope := scope.NewChildScope(rctx.ctx.Scope(), scope.ChildParams{
-		DataScope:  rctx.ctx.Scope(),
-		EventScope: rctx.ctx.Scope(),
-	})
-	injectableScope := scope.NewScope(scope.Params{
-		DataScope:    childScope,
-		EventScope:   childScope,
-		ContextScope: childScope,
+	parentScope := rctx.ctx.Scope()
+	childScope := scope.NewChild(parentScope, scope.ChildParams{
+		DataScope:  parentScope.BaseDataScope(),
+		EventScope: parentScope.BaseEventScope(),
 		Injector: injector.NewMultiInjector([]app.Injector{
-			// reset injectors to applicatio lvl
+			// reset injectors to application lvl
 			rctx.application,
 			// add command injector
-			scope.NewScopeInjector("command", argsData),
+			datascope.NewInjector("command", argsData),
 		}),
+		Name: fmt.Sprintf("command:%s", commandName),
 	})
-	commandContext = gio.NewIOContext(injectableScope, rctx.ctx.IO())
+	commandContext = gio.NewIOContext(childScope, rctx.ctx.IO())
 	// run
 	if err = command.Callback()(rctx.application, commandContext); err != nil {
 		return goaterr.ToError(goaterr.AppendError([]error{err}, childScope.Close()))

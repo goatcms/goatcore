@@ -99,10 +99,7 @@ func TestIORequireErrorOutput(t *testing.T) {
 
 func TestIORequireCWD(t *testing.T) {
 	t.Parallel()
-	var (
-		baseIO app.IO
-	)
-	baseIO = newEmptyIO()
+	baseIO := newEmptyIO()
 	defer func() {
 		if r := recover(); r == nil {
 			t.Errorf("The code did not panic")

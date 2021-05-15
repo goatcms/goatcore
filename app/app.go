@@ -1,7 +1,6 @@
 package app
 
 import (
-	"github.com/goatcms/goatcore/dependency"
 	"github.com/goatcms/goatcore/filesystem"
 )
 
@@ -34,7 +33,7 @@ type App interface {
 	AppHealthCheckers
 
 	Arguments() []string
-	DependencyProvider() dependency.Provider
+	DependencyProvider() DependencyProvider
 	Filespaces() AppFilespaces
 	IOContext() IOContext
 	Name() string

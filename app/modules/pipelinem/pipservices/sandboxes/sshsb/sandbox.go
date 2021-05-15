@@ -18,7 +18,6 @@ import (
 type SSHSandbox struct {
 	username   string
 	host       string
-	cwd        string
 	entrypoint string
 	deps       deps
 }
@@ -74,7 +73,7 @@ func (sandbox *SSHSandbox) Run(ctx app.IOContext) (err error) {
 		return goaterr.Errorf("SSHCert: Secret key is required")
 	}
 	if sshKey, err = ssh.ParsePrivateKey([]byte(sshCert.Secret)); err != nil {
-		return goaterr.Wrap(err, "SSH Sandbox: ParsePrivateKey error")
+		return goaterr.Wrap("SSH Sandbox: ParsePrivateKey error", err)
 	}
 	if sshClient, err = ssh.Dial("tcp", sandbox.host, &ssh.ClientConfig{
 		User: sandbox.username,
@@ -83,11 +82,11 @@ func (sandbox *SSHSandbox) Run(ctx app.IOContext) (err error) {
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}); err != nil {
-		return goaterr.Wrapf("SSH Sandbox: Connect to %s@%s error", err, sandbox.username, sandbox.host)
+		return goaterr.Wrapf(err, "SSH Sandbox: Connect to %s@%s error", sandbox.username, sandbox.host)
 	}
 	defer sshClient.Close()
 	if sshSession, err = sshClient.NewSession(); err != nil {
-		return goaterr.Wrapf("SSH Sandbox: %s@%s session error", err, sandbox.username, sandbox.host)
+		return goaterr.Wrapf(err, "SSH Sandbox: %s@%s session error", sandbox.username, sandbox.host)
 	}
 	defer sshSession.Close()
 	repeatIO := gio.NewRepeatIO(gio.IOParams{
@@ -100,10 +99,10 @@ func (sandbox *SSHSandbox) Run(ctx app.IOContext) (err error) {
 	sshSession.Stdout = io.MultiWriter(repeatIO.Out(), cio.Out())
 	sshSession.Stderr = io.MultiWriter(repeatIO.Err(), cio.Err())
 	if err = sshSession.Shell(); err != nil {
-		return goaterr.Wrapf("SSH Sandbox: %s@%s Execution error", err, sandbox.username, sandbox.host, buf.String())
+		return goaterr.Wrapf(err, "SSH Sandbox: %s@%s Execution error\n%s", sandbox.username, sandbox.host, buf.String())
 	}
 	if err = sshSession.Wait(); err != nil {
-		return goaterr.Wrapf("SSH Sandbox: %s@%s Execution error\n%s", err, sandbox.username, sandbox.host, buf.String())
+		return goaterr.Wrapf(err, "SSH Sandbox: %s@%s Execution error\n%s", sandbox.username, sandbox.host, buf.String())
 	}
 	return nil
 }

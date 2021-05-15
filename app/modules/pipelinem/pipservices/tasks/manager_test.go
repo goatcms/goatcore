@@ -18,7 +18,7 @@ func TestUnitStory(t *testing.T) {
 	var (
 		err     error
 		mapp    app.App
-		scp     = scope.NewScope(scope.Params{})
+		scp     = scope.New(scope.Params{})
 		manager pipservices.TasksManager
 		task    pipservices.TaskWriter
 	)

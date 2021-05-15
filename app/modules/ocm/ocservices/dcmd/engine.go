@@ -88,7 +88,7 @@ func (engine *Engine) Run(container ocservices.Container) (err error) {
 	cmd.Stderr = gio.NewSafeWriter(cio.Err())
 	cmd.Dir = cwdAbs
 	if err = cmd.Run(); err != nil {
-		err = goaterr.Wrapf("`%s` error: %s", err, strings.Join(command, " "), err.Error())
+		err = goaterr.Wrapf(err, "`%s` error: %s", strings.Join(command, " "), err.Error())
 		cio.Err().Printf(err.Error())
 		if container.Scope != nil {
 			container.Scope.AppendError(err)

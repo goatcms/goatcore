@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 	"sync"
@@ -96,7 +97,9 @@ func (manager *TaskManager) Create(pip pipservices.Pip) (result pipservices.Task
 	if _, ok = manager.tasks[taskname]; ok {
 		return nil, goaterr.Errorf("Task '%s' is already defined", taskname)
 	}
-	childScope = scope.NewChildScope(parentScope, scope.ChildParams{})
+	childScope = scope.NewChild(parentScope, scope.ChildParams{
+		Name: fmt.Sprintf("task:%s", taskname),
+	})
 	if err = manager.deps.NamespacesUnit.Define(childScope, childNamespaces); err != nil {
 		childScope.Close()
 		return nil, err

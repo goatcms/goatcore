@@ -1,4 +1,4 @@
-package scope
+package eventscope
 
 import (
 	"sync"
@@ -13,7 +13,7 @@ type EventScope struct {
 }
 
 // NewEventScope create new instance of event scope
-func NewEventScope() app.EventScope {
+func New() app.EventScope {
 	return app.EventScope(&EventScope{
 		eventsCallbacks: make(map[interface{}][]app.EventCallback),
 	})

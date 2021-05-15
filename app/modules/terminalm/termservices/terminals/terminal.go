@@ -7,7 +7,6 @@ import (
 	"github.com/goatcms/goatcore/app/modules/terminalm/termservices"
 	"github.com/goatcms/goatcore/app/terminal"
 	"github.com/goatcms/goatcore/app/terminal/termexec"
-	"github.com/goatcms/goatcore/dependency"
 )
 
 // IOTerminal is user communication interface
@@ -25,7 +24,7 @@ func NewIOTerminal(a app.App, commands app.TerminalCommands) termservices.Termin
 }
 
 // IOTerminalFactory create new IOTerminal instance
-func IOTerminalFactory(dp dependency.Provider) (in interface{}, err error) {
+func IOTerminalFactory(dp app.DependencyProvider) (in interface{}, err error) {
 	var deps struct {
 		App app.App `dependency:"App"`
 	}

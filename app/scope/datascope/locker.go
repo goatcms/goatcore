@@ -1,4 +1,4 @@
-package scope
+package datascope
 
 import (
 	"sync"

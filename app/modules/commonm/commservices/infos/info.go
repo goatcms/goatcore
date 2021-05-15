@@ -1,8 +1,8 @@
 package infos
 
 import (
+	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
-	"github.com/goatcms/goatcore/dependency"
 )
 
 type Params struct {
@@ -24,7 +24,7 @@ func NewInfo(params Params) commservices.Info {
 }
 
 // InfoFactory create an environment variables info instance
-func InfoFactory(dp dependency.Provider) (ins interface{}, error error) {
+func InfoFactory(dp app.DependencyProvider) (ins interface{}, error error) {
 	return commservices.Info(&Info{
 		params: Params{
 			License:   NewLicense(LicenseParams{}),

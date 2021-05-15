@@ -1,9 +1,9 @@
-package provider
+package dependency
 
 import (
 	"testing"
 
-	"github.com/goatcms/goatcore/dependency"
+	"github.com/goatcms/goatcore/app"
 )
 
 type TestInterface interface {
@@ -25,7 +25,7 @@ func NewOne() TestInterface {
 	return One{}
 }
 
-func OneFactory(dp dependency.Provider) (interface{}, error) {
+func OneFactory(dp app.DependencyProvider) (interface{}, error) {
 	return NewOne(), nil
 }
 
@@ -45,7 +45,7 @@ func NewTwo() TestInterface {
 	return &Two{}
 }
 
-func TwoFactory(dp dependency.Provider) (interface{}, error) {
+func TwoFactory(dp app.DependencyProvider) (interface{}, error) {
 	two := NewTwo()
 	if err := dp.InjectTo(two); err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func NewCircle() interface{} {
 	return &Circle{}
 }
 
-func CircleFactory(dp dependency.Provider) (interface{}, error) {
+func CircleFactory(dp app.DependencyProvider) (interface{}, error) {
 	ins := NewCircle()
 	if err := dp.InjectTo(ins); err != nil {
 		return nil, err
@@ -275,7 +275,7 @@ func TestAddInjectors(t *testing.T) {
 		Number     int    `test:"valueAndTagAreIgnoredByTestInjector"`
 	}
 	dp := NewProvider(TagName)
-	if err := dp.AddInjectors([]dependency.Injector{&TestInjector{}}); err != nil {
+	if err := dp.AddInjectors([]app.Injector{&TestInjector{}}); err != nil {
 		t.Error(err)
 		return
 	}
@@ -297,7 +297,7 @@ func TestStaticProviderAddInjectors(t *testing.T) {
 		TestString string `test:"valueAndTagAreIgnoredByTestInjector"`
 		Number     int    `test:"valueAndTagAreIgnoredByTestInjector"`
 	}
-	dp := NewStaticProvider(TagName, map[string]dependency.Factory{}, make(map[string]interface{}), []dependency.Injector{
+	dp := NewStaticProvider(TagName, map[string]app.Factory{}, make(map[string]interface{}), []app.Injector{
 		&TestInjector{},
 	})
 	if err := dp.InjectTo(&deps); err != nil {

@@ -1,4 +1,4 @@
-package scope
+package datascope
 
 import (
 	"testing"
@@ -9,20 +9,23 @@ import (
 func TestDataLocker(t *testing.T) {
 	var (
 		err    error
+		ivalue interface{}
 		value  string
 		scp    app.DataScope
 		locker app.DataScopeLocker
+		ok     bool
 	)
 	t.Parallel()
-	scp = NewDataScope(make(map[interface{}]interface{}))
+	scp = New(make(map[interface{}]interface{}))
 	locker = scp.LockData()
 	locker.SetValue("key", "value")
 	if err = locker.Commit(); err != nil {
 		t.Error(err)
 		return
 	}
-	if value, err = GetString(scp, "key"); err != nil {
-		t.Error(err)
+	ivalue = scp.Value("key")
+	if value, ok = ivalue.(string); !ok {
+		t.Errorf("Expected string and take: %v", ivalue)
 		return
 	}
 	if value != "value" {

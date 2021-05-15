@@ -1,8 +1,8 @@
 package ocmanager
 
 import (
+	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/ocm/ocservices"
-	"github.com/goatcms/goatcore/dependency"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -13,7 +13,7 @@ type Manager struct {
 }
 
 // ManagerFactory create an environment variables manager instance
-func ManagerFactory(dp dependency.Provider) (ins interface{}, error error) {
+func ManagerFactory(dp app.DependencyProvider) (ins interface{}, error error) {
 	return ocservices.Manager(&Manager{
 		engines: make(map[string]ocservices.Engine),
 	}), nil

@@ -3,8 +3,8 @@ package sandboxes
 import (
 	"sync"
 
+	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
-	"github.com/goatcms/goatcore/dependency"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -15,7 +15,7 @@ type Manager struct {
 }
 
 // ManagerFactory create a session manager instance
-func ManagerFactory(dp dependency.Provider) (ins interface{}, error error) {
+func ManagerFactory(dp app.DependencyProvider) (ins interface{}, error error) {
 	return pipservices.SandboxesManager(&Manager{}), nil
 }
 

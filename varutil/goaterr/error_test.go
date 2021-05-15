@@ -51,7 +51,7 @@ func TestWrapToJSON(t *testing.T) {
 		ok      bool
 	)
 	t.Parallel()
-	if err = Wrap(errors.New("Parent error"), "Child error"); err == nil {
+	if err = Wrap("Error wrapper", errors.New("Wraped error")); err == nil {
 		t.Errorf("Expected error (not nil)")
 	}
 	if errJSON, ok = err.(JSONError); !ok {
@@ -59,20 +59,20 @@ func TestWrapToJSON(t *testing.T) {
 		return
 	}
 	result := errJSON.ErrorJSON()
-	if !strings.Contains(result, "Parent error") {
+	if !strings.Contains(result, "Error wrapper") {
 		t.Errorf("Result should contains 'Parent error' and take %s", result)
 	}
-	if !strings.Contains(result, "Child error") {
-		t.Errorf("Result should contains 'Child error' and take %s", result)
+	if !strings.Contains(result, "Wraped error") {
+		t.Errorf("Result should contains 'Wraped error' and take %s", result)
 	}
 }
 func TestWrapMessage(t *testing.T) {
 	t.Parallel()
-	var err = Wrap(errors.New("Parent error"), "Child error")
+	var err = Wrap("Error wrapper", errors.New("Wraped error"))
 	if err == nil {
 		t.Errorf("Expected error (not nil)")
 	}
-	if err.Error() == "Parent error" {
-		t.Errorf("err.Error() should be equal to 'Parent error' and it is %s", err.Error())
+	if err.Error() == "Error wrapper" {
+		t.Errorf("err.Error() should be equal to 'Error wrapper' and it is %s", err.Error())
 	}
 }

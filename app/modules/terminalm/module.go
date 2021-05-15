@@ -8,6 +8,7 @@ import (
 	"github.com/goatcms/goatcore/app/modules/terminalm/termservices"
 	"github.com/goatcms/goatcore/app/modules/terminalm/termservices/terminals"
 	"github.com/goatcms/goatcore/app/scope"
+	"github.com/goatcms/goatcore/app/scope/contextscope"
 )
 
 // Module is command unit
@@ -68,32 +69,23 @@ func (m *Module) Run(a app.App) (err error) {
 
 func (m *Module) runLoop(parentCtx app.IOContext, terminal termservices.Terminal) (err error) {
 	var (
-		relatedScope app.Scope
-		relatedCtx   app.IOContext
-		parentScope  = parentCtx.Scope()
+		isolatedScope app.Scope
+		isolatedCtx   app.IOContext
+		parentScope   = parentCtx.Scope()
 	)
 	// Related scope is scope for terminal loop.
-	// It is not child scope (It contains separated app.ScopeSync).
+	// It is isolated child scope (It contains isolated app.ContextScope).
 	// Kill the scope doesn't kill application scope by default.
 	// The scope share data with application scope.
-	relatedScope = scope.NewScope(scope.Params{
-		DataScope: parentScope,
+	isolatedScope = scope.NewChild(parentScope, scope.ChildParams{
+		ContextScope: contextscope.NewIsolated(parentScope),
+		DataScope:    parentScope.BaseDataScope(),
 		//EventScope: parentScope, <- event scope is not shared to prevent memory leaks
 	})
-	relatedCtx = gio.NewIOContext(relatedScope, parentCtx.IO())
-	go func() {
-		select {
-		case <-parentCtx.Scope().Done():
-			// the gorutine kill related context if parent die.
-			relatedCtx.Scope().Stop()
-		case <-relatedCtx.Scope().Done():
-			// stop gorutine if related context die (prevent memory leaks)
-			return
-		}
-	}()
-	defer relatedCtx.Close()
-	if err = terminal.RunLoop(relatedCtx, ">"); err != nil {
+	isolatedCtx = gio.NewIOContext(isolatedScope, parentCtx.IO())
+	defer isolatedCtx.Close()
+	if err = terminal.RunLoop(isolatedCtx, ">"); err != nil {
 		return err
 	}
-	return relatedCtx.Scope().Wait()
+	return isolatedCtx.Scope().Wait()
 }

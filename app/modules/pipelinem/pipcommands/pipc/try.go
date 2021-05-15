@@ -81,7 +81,7 @@ func Try(a app.App, ctx app.IOContext) (err error) {
 		return err
 	}
 	// create independed scope for try body
-	separatedScope := scope.NewScope(scope.Params{
+	separatedScope := scope.New(scope.Params{
 		DataScope:  parentScope,
 		EventScope: parentScope,
 		Injector:   injector.NewMultiInjector([]app.Injector{parentScope}),

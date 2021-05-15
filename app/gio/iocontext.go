@@ -63,7 +63,7 @@ func NewChildIOContext(parent app.IOContext, params ChildIOContextParams) (ioc a
 		childIO = NewIO(params.IO)
 	}
 	return IOContext{
-		scope: scope.NewChildScope(parent.Scope(), params.Scope),
+		scope: scope.NewChild(parent.Scope(), params.Scope),
 		io:    childIO,
 	}
 }

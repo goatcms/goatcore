@@ -1,18 +1,18 @@
-package provider
+package dependency
 
 import (
 	"reflect"
 	"strings"
 
-	"github.com/goatcms/goatcore/dependency"
+	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
 // Provider is default dependency distributor
 type Provider struct {
-	injectors        []dependency.Injector
-	defaultFactories map[string]dependency.Factory
-	factories        map[string]dependency.Factory
+	injectors        []app.Injector
+	defaultFactories map[string]app.Factory
+	factories        map[string]app.Factory
 	defaultInstances map[string]interface{}
 	instances        map[string]interface{}
 	callstack        []string
@@ -23,11 +23,11 @@ type Provider struct {
 }
 
 // NewProvider create new instance of a depenedency provider
-func NewProvider(tagname string) dependency.Provider {
+func NewProvider(tagname string) app.DependencyProvider {
 	return &Provider{
-		injectors:        []dependency.Injector{},
-		defaultFactories: map[string]dependency.Factory{},
-		factories:        map[string]dependency.Factory{},
+		injectors:        []app.Injector{},
+		defaultFactories: map[string]app.Factory{},
+		factories:        map[string]app.Factory{},
 		defaultInstances: map[string]interface{}{},
 		instances:        map[string]interface{}{},
 		callstack:        []string{},
@@ -39,7 +39,7 @@ func NewProvider(tagname string) dependency.Provider {
 }
 
 // NewStaticProvider create a dependency provider from Factories map. It is static (mean that it is pre-defined and blocked for modifications)
-func NewStaticProvider(tagname string, factories map[string]dependency.Factory, instances map[string]interface{}, injectors []dependency.Injector) dependency.Provider {
+func NewStaticProvider(tagname string, factories map[string]app.Factory, instances map[string]interface{}, injectors []app.Injector) app.DependencyProvider {
 	keys := make([]string, len(factories))
 	i := 0
 	for key := range factories {
@@ -48,7 +48,7 @@ func NewStaticProvider(tagname string, factories map[string]dependency.Factory, 
 	}
 	return &Provider{
 		injectors:        injectors,
-		defaultFactories: map[string]dependency.Factory{},
+		defaultFactories: map[string]app.Factory{},
 		factories:        factories,
 		defaultInstances: map[string]interface{}{},
 		instances:        instances,
@@ -61,7 +61,7 @@ func NewStaticProvider(tagname string, factories map[string]dependency.Factory, 
 }
 
 // AddInjectors add new injector to dependency provider
-func (d *Provider) AddInjectors(injectors []dependency.Injector) error {
+func (d *Provider) AddInjectors(injectors []app.Injector) error {
 	if d.blocked {
 		return goaterr.Errorf("goatcore/dependency/provider.AddInjectors: can not add new injector after got dependency")
 	}
@@ -76,7 +76,7 @@ func (d *Provider) Keys() ([]string, error) {
 
 // Block prevent nev dependency definition
 func (d *Provider) Block() {
-	if d.blocked == true {
+	if d.blocked {
 		return
 	}
 	for key, defaultVal := range d.defaultInstances {
@@ -167,7 +167,7 @@ func (d *Provider) SetDefault(name string, instance interface{}) error {
 }
 
 // AddFactory define a factory for dependency
-func (d *Provider) AddFactory(name string, factory dependency.Factory) error {
+func (d *Provider) AddFactory(name string, factory app.Factory) error {
 	if d.blocked {
 		return goaterr.Errorf("goatcore/dependency/provider: can not add factory after first get dependency (for %s)", name)
 	}
@@ -181,7 +181,7 @@ func (d *Provider) AddFactory(name string, factory dependency.Factory) error {
 }
 
 // AddDefaultFactory define a default factory for dependency
-func (d *Provider) AddDefaultFactory(name string, factory dependency.Factory) error {
+func (d *Provider) AddDefaultFactory(name string, factory app.Factory) error {
 	if d.blocked {
 		return goaterr.Errorf("goatcore/dependency/provider: can not add factory after first get dependency (for %s)", name)
 	}
@@ -243,12 +243,8 @@ func (d *Provider) InjectTo(obj interface{}) error {
 
 func (d *Provider) clean(name string) {
 	if d.autoclean {
-		if _, exist := d.factories[name]; exist {
-			delete(d.factories, name)
-		}
-		if _, exist := d.defaultFactories[name]; exist {
-			delete(d.defaultFactories, name)
-		}
+		delete(d.factories, name)
+		delete(d.defaultFactories, name)
 	}
 }
 

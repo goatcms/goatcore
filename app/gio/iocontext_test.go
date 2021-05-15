@@ -13,7 +13,7 @@ import (
 func TestIOContext(t *testing.T) {
 	t.Parallel()
 	var (
-		ioScope = scope.NewScope(scope.Params{})
+		ioScope = scope.New(scope.Params{})
 		in      = NewInput(new(bytes.Buffer))
 		out     = NewOutput(new(bytes.Buffer))
 		eout    = NewOutput(new(bytes.Buffer))
@@ -57,7 +57,7 @@ func TestIOContextRequireIO(t *testing.T) {
 func TestIOContextRequireScope(t *testing.T) {
 	t.Parallel()
 	var (
-		ioScope = scope.NewScope(scope.Params{})
+		ioScope = scope.New(scope.Params{})
 	)
 	defer func() {
 		if r := recover(); r == nil {

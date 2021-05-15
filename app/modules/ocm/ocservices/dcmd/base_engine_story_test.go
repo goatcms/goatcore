@@ -105,7 +105,7 @@ func enginePortStory(t *testing.T, engine ocservices.Engine) {
 		io        app.IO
 		freePort  int
 		output    string
-		scp       = scope.NewScope(scope.Params{})
+		scp       = scope.New(scope.Params{})
 		outBuffer = bytes.NewBuffer(make([]byte, 10000))
 		errBuffer = bytes.NewBuffer(make([]byte, 10000))
 		cwd       filesystem.Filespace

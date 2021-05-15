@@ -3,7 +3,6 @@ package waits
 import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
-	"github.com/goatcms/goatcore/dependency"
 )
 
 // WaitManager is namespace storage for scope
@@ -15,7 +14,7 @@ func NewWaitManager() WaitManager {
 }
 
 // WaitManagerFactory create new WaitManager instance
-func WaitManagerFactory(dp dependency.Provider) (ri interface{}, err error) {
+func WaitManagerFactory(dp app.DependencyProvider) (ri interface{}, err error) {
 	return commservices.WaitManager(NewWaitManager()), nil
 }
 

@@ -7,7 +7,6 @@ import (
 	"github.com/goatcms/goatcore/app/gio"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
-	"github.com/goatcms/goatcore/dependency"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -31,7 +30,7 @@ func NewRunner(deps Deps) *Runner {
 }
 
 // Factory create a Runner instance
-func Factory(dp dependency.Provider) (ri interface{}, err error) {
+func Factory(dp app.DependencyProvider) (ri interface{}, err error) {
 	var deps Deps
 	if err = dp.InjectTo(&deps); err != nil {
 		return nil, err
@@ -106,7 +105,7 @@ func (runner *Runner) waitForTasks(task pipservices.TaskWriter, tasksManager pip
 			return err
 		}
 		if len(relatedTask.Errors()) != 0 {
-			return fmt.Errorf("Related task %s failed", relatedTask.Name())
+			return fmt.Errorf("related task %s failed", relatedTask.Name())
 		}
 	}
 	return nil

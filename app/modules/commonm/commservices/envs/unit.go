@@ -3,14 +3,13 @@ package envs
 import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
-	"github.com/goatcms/goatcore/dependency"
 )
 
 // Unit SandboxesUnit is a tool to menage sandboxes.
 type Unit struct{}
 
 // UnitFactory create an environment variables unit instance
-func UnitFactory(dp dependency.Provider) (ins interface{}, error error) {
+func UnitFactory(dp app.DependencyProvider) (ins interface{}, error error) {
 	return commservices.EnvironmentsUnit(&Unit{}), nil
 }
 

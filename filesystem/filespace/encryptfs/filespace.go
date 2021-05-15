@@ -28,11 +28,7 @@ func NewEncryptFS(baseFS filesystem.Filespace, settings Settings) (_ filesystem.
 	var hash []byte
 	hash = append(hash, settings.Secret...)
 	if settings.HostOnly {
-		var hostID string
-		if hostID, err = idutil.HostID(); err != nil {
-			return nil, err
-		}
-		hash = append(hash, hostID...)
+		hash = append(hash, idutil.HostID()...)
 	}
 	hash = append(hash, settings.Salt...)
 	return &EncryptFS{

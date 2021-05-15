@@ -7,15 +7,16 @@ import (
 	"time"
 
 	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/app/scope/datascope"
 )
 
 func TestParentScopeIsKillByChildWhenFail(t *testing.T) {
 	var (
-		parentScope = NewScope(Params{})
+		parentScope = New(Params{})
 		childScope  app.Scope
 	)
 	t.Parallel()
-	childScope = NewChildScope(parentScope, ChildParams{})
+	childScope = NewChild(parentScope, ChildParams{})
 	childScope.Kill()
 	childScope.Close()
 	if parentScope.IsDone() != true {
@@ -29,8 +30,8 @@ func TestChildScopeAppendError(t *testing.T) {
 		childScope  app.Scope
 	)
 	t.Parallel()
-	parentScope = NewScope(Params{})
-	childScope = NewChildScope(parentScope, ChildParams{
+	parentScope = New(Params{})
+	childScope = NewChild(parentScope, ChildParams{
 		EventScope: parentScope,
 		DataScope:  parentScope,
 	})
@@ -50,8 +51,8 @@ func TestChildScopeAppendErrors(t *testing.T) {
 		childScope  app.Scope
 	)
 	t.Parallel()
-	parentScope = NewScope(Params{})
-	childScope = NewChildScope(parentScope, ChildParams{
+	parentScope = New(Params{})
+	childScope = NewChild(parentScope, ChildParams{
 		EventScope: parentScope,
 		DataScope:  parentScope,
 	})
@@ -73,8 +74,8 @@ func TestChildScopeWait(t *testing.T) {
 		wg          = &sync.WaitGroup{}
 	)
 	t.Parallel()
-	parentScope = NewScope(Params{})
-	childScope = NewChildScope(parentScope, ChildParams{
+	parentScope = New(Params{})
+	childScope = NewChild(parentScope, ChildParams{
 		EventScope: parentScope,
 		DataScope:  parentScope,
 	})
@@ -107,8 +108,8 @@ func TestParentScopeWait(t *testing.T) {
 		err         error
 	)
 	t.Parallel()
-	parentScope = NewScope(Params{})
-	childScope = NewChildScope(parentScope, ChildParams{})
+	parentScope = New(Params{})
+	childScope = NewChild(parentScope, ChildParams{})
 	go (func() {
 		time.Sleep(1 * time.Millisecond)
 		childScope.Close()
@@ -129,14 +130,12 @@ func TestChildScopeInjector(t *testing.T) {
 		}
 	)
 	t.Parallel()
-	parentScope = NewScope(Params{})
-	ds := &DataScope{
-		Data: map[interface{}]interface{}{
-			"key": "value",
-		},
-	}
-	childScope = NewChildScope(parentScope, ChildParams{
-		Injector: NewScopeInjector("tagname", ds),
+	parentScope = New(Params{})
+	ds := datascope.New(map[interface{}]interface{}{
+		"key": "value",
+	})
+	childScope = NewChild(parentScope, ChildParams{
+		Injector: datascope.NewInjector("tagname", ds),
 	})
 	if err = childScope.InjectTo(&result); err != nil {
 		t.Error(err)

@@ -1,4 +1,4 @@
-package scope
+package eventscope
 
 import (
 	"testing"
@@ -11,7 +11,7 @@ func TestEventScopeDoneStory(t *testing.T) {
 	t.Parallel()
 	var called1 = false
 	var called2 = false
-	c := NewEventScope()
+	c := New()
 	c.On(app.KillEvent, func(interface{}) error {
 		called1 = true
 		return nil
@@ -31,7 +31,7 @@ func TestEventScopeDoneStory(t *testing.T) {
 
 func TestEventScopeErrorStory(t *testing.T) {
 	t.Parallel()
-	c := NewEventScope()
+	c := New()
 	c.On(app.KillEvent, func(interface{}) error {
 		return goaterr.Errorf("something is wrong")
 	})

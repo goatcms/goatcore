@@ -3,8 +3,6 @@ package app
 import (
 	"context"
 	"time"
-
-	"github.com/goatcms/goatcore/dependency"
 )
 
 // DataScope provide data provider
@@ -59,12 +57,6 @@ type ContextScope interface {
 	Kill()
 	// Stop stop the scope context without error
 	Stop()
-	// Wait until the scope context is done and return error
-	Wait() error
-	// AddTasks add a tasks and return an error if too many gorutines
-	AddTasks(delta int) (err error)
-	// DoneTask mark single task as done
-	DoneTask()
 }
 
 // Scope is global scope interface
@@ -72,10 +64,30 @@ type Scope interface {
 	DataScope
 	EventScope
 	ContextScope
-	dependency.Injector
+	Injector
 
-	// GoContext convert scope to a golang context (context.Context)
-	GoContext() context.Context
+	// CID return correlation id
+	CID() string
+	// SID return scope id
+	SID() string
+
+	// AddTasks add a tasks and return an error if too many gorutines
+	AddTasks(delta int) (err error)
 	// Close the scope. Wait to finish and mark scope as done.
 	Close() (err error)
+	// DoneTask mark single task as done
+	DoneTask()
+	// Wait until the scope context is done and return error
+	Wait() error
+
+	// BaseContextScope return unwrap ContextScope object (help better utilize/recycle objects)
+	BaseContextScope() ContextScope
+	// BaseDataScope return unwrap DataScope object (help better utilize/recycle objects)
+	BaseDataScope() DataScope
+	// BaseEventScope return unwrap EventScope object (help better utilize/recycle objects)
+	BaseEventScope() EventScope
+	// BaseInjector return unwrap dependency injector object (help better utilize/recycle objects)
+	BaseInjector() Injector
+	// GoContext convert scope to a golang context (context.Context)
+	GoContext() context.Context
 }

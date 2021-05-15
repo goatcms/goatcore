@@ -1,9 +1,9 @@
 package selfsb
 
 import (
+	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 	"github.com/goatcms/goatcore/app/modules/terminalm/termservices"
-	"github.com/goatcms/goatcore/dependency"
 )
 
 // SandboxBuilder create sandbox for current terminal
@@ -21,7 +21,7 @@ func NewSandboxBuilder(terminal termservices.Terminal) (ins *SandboxBuilder, err
 }
 
 // SandboxBuilderFactory create a SandboxBuilder instance
-func SandboxBuilderFactory(dp dependency.Provider) (ins interface{}, err error) {
+func SandboxBuilderFactory(dp app.DependencyProvider) (ins interface{}, err error) {
 	var deps struct {
 		Terminal termservices.Terminal `dependency:"TerminalService"`
 	}

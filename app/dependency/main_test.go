@@ -1,9 +1,9 @@
-package provider
+package dependency
 
 import (
 	"reflect"
 
-	"github.com/goatcms/goatcore/dependency"
+	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -42,11 +42,11 @@ type MyCircleDep struct {
 	instance MyCircleDepInterface
 }
 
-func MyDepFactory(dp dependency.Provider) (interface{}, error) {
+func MyDepFactory(dp app.DependencyProvider) (interface{}, error) {
 	return &MyDep{}, nil
 }
 
-func MyCircleDepFactory(dp dependency.Provider) (interface{}, error) {
+func MyCircleDepFactory(dp app.DependencyProvider) (interface{}, error) {
 	instance, err := dp.Get(MyCircleDepName)
 	if err != nil {
 		return nil, err

@@ -13,7 +13,6 @@ import (
 // ContainerSandbox is termal sandbox
 type ContainerSandbox struct {
 	imageName  string
-	cwd        string
 	entrypoint string
 	deps       deps
 }
@@ -46,7 +45,7 @@ func (sandbox *ContainerSandbox) Run(ctx app.IOContext) (err error) {
 		Entrypoint: sandbox.entrypoint,
 		Envs:       envs,
 		FSVolumes: map[string]ocservices.FSVolume{
-			"/cwd": ocservices.FSVolume{
+			"/cwd": {
 				Filespace: ctx.IO().CWD(),
 			},
 		},

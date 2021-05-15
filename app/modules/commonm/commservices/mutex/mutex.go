@@ -4,8 +4,8 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
-	"github.com/goatcms/goatcore/dependency"
 )
 
 // SharedMutex lock reseources
@@ -22,7 +22,7 @@ func NewSharedMutex() *SharedMutex {
 }
 
 // SharedMutexFactory create a SharedMutex instance
-func SharedMutexFactory(dp dependency.Provider) (ri interface{}, err error) {
+func SharedMutexFactory(dp app.DependencyProvider) (ri interface{}, err error) {
 	return commservices.SharedMutex(NewSharedMutex()), nil
 }
 

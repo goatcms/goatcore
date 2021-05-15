@@ -1,8 +1,8 @@
 package args
 
 import (
+	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
-	"github.com/goatcms/goatcore/dependency"
 	"github.com/goatcms/goatcore/varutil/varg"
 )
 
@@ -15,7 +15,7 @@ type ArgumentsProvider struct {
 }
 
 // ArgumentsFactory create new Arguments instance
-func ArgumentsFactory(dp dependency.Provider) (in interface{}, err error) {
+func ArgumentsFactory(dp app.DependencyProvider) (in interface{}, err error) {
 	instance := &ArgumentsProvider{}
 	if err = dp.InjectTo(&instance.deps); err != nil {
 		return nil, err

@@ -1,10 +1,11 @@
 package tasks
 
 import (
-	"github.com/goatcms/goatcore/app"
+	"testing"
+
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
 )
 
-func testTaskImplementTaskWriter(ctx app.IOContext, pip pipservices.Pip, broadcast app.Broadcast, closeCB func()) pipservices.TaskWriter {
-	return NewTask(ctx, pip, broadcast, closeCB)
+func TestTaskImplementTaskWriter(t *testing.T) {
+	var _ pipservices.TaskWriter = &Task{}
 }

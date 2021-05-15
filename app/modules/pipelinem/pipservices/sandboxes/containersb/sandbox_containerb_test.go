@@ -21,7 +21,7 @@ func TestDockerbSandbox(t *testing.T) {
 	var (
 		err  error
 		mapp app.App
-		scp  = scope.NewScope(scope.Params{})
+		scp  = scope.New(scope.Params{})
 		cwd  filesystem.Filespace
 	)
 	if _, err = testbase.LoadDockerTestConfig(); err != nil {

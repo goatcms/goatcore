@@ -1,4 +1,4 @@
-package scope
+package eventscope
 
 import (
 	"sync"
@@ -13,8 +13,8 @@ type ChildEventScope struct {
 	mu        sync.RWMutex
 }
 
-// NewChildEventScope create new instance of event scope
-func NewChildEventScope(parent app.EventScope) app.EventScope {
+// NewChild create new instance of event scope
+func NewChild(parent app.EventScope) app.EventScope {
 	return app.EventScope(&ChildEventScope{
 		parent:    parent,
 		callbacks: make(map[interface{}][]app.EventCallback),

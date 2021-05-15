@@ -1,8 +1,7 @@
-package scope
+package contextscope
 
 import (
 	"context"
-	"errors"
 	"sync"
 	"time"
 
@@ -10,22 +9,17 @@ import (
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
-// ErrDoned is the error returned by ContextScope.AddTasks when the context scope is done.
-var ErrDoned = errors.New("context scope is done")
-
-// ContextScope is default error scope
+// ContextScope is default context scope
 type ContextScope struct {
-	done      chan struct{}
-	errorsMU  sync.Mutex
-	errors    []error
-	waitGroup *sync.WaitGroup
+	errorsMU sync.Mutex
+	errors   []error
+	done     chan struct{}
 }
 
-// NewContextScope create new instance of error scope
-func NewContextScope() app.ContextScope {
+// New create new instance of context scope
+func New() app.ContextScope {
 	return &ContextScope{
-		done:      make(chan struct{}),
-		waitGroup: &sync.WaitGroup{},
+		done: make(chan struct{}),
 	}
 }
 
@@ -91,24 +85,4 @@ func (s *ContextScope) AppendError(errs ...error) {
 	if i != 0 {
 		s.Stop()
 	}
-}
-
-// Wait for finish of context execution
-func (s *ContextScope) Wait() error {
-	s.waitGroup.Wait()
-	return s.Err()
-}
-
-// AddTasks add task to wait group
-func (s *ContextScope) AddTasks(delta int) (err error) {
-	if s.IsDone() {
-		return ErrDoned
-	}
-	s.waitGroup.Add(delta)
-	return nil
-}
-
-// DoneTask mark single task as done
-func (s *ContextScope) DoneTask() {
-	s.waitGroup.Done()
 }

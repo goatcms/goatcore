@@ -3,11 +3,6 @@ package namespaces
 import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
-	"github.com/goatcms/goatcore/dependency"
-)
-
-const (
-	namespacePrefix = "namespaces"
 )
 
 // Unit is namespace storage for scope
@@ -19,14 +14,13 @@ func NewUnit() Unit {
 }
 
 // UnitFactory create new Unit instance
-func UnitFactory(dp dependency.Provider) (ri interface{}, err error) {
+func UnitFactory(dp app.DependencyProvider) (ri interface{}, err error) {
 	return pipservices.NamespacesUnit(NewUnit()), nil
 }
 
 // FromScope return scope namespaces
 func (unit Unit) FromScope(scp app.Scope, defaultNamespace pipservices.Namespaces) (namespace pipservices.Namespaces, err error) {
-	var ins interface{}
-	ins = scp.Value(scopeKey)
+	ins := scp.Value(scopeKey)
 	if ins == nil {
 		return defaultNamespace, nil
 	}

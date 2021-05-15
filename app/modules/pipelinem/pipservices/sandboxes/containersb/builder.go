@@ -3,10 +3,10 @@ package containersb
 import (
 	"strings"
 
+	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/commonm/commservices"
 	"github.com/goatcms/goatcore/app/modules/ocm/ocservices"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
-	"github.com/goatcms/goatcore/dependency"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -26,7 +26,7 @@ func NewContainerSandboxBuilder(envUnit commservices.EnvironmentsUnit, ocManager
 }
 
 // ContainerSandboxBuilderFactory create ContainerSandboxBuilder
-func ContainerSandboxBuilderFactory(dp dependency.Provider) (ins interface{}, err error) {
+func ContainerSandboxBuilderFactory(dp app.DependencyProvider) (ins interface{}, err error) {
 	builder := &ContainerSandboxBuilder{}
 	if err = dp.InjectTo(&builder.deps); err != nil {
 		return nil, err

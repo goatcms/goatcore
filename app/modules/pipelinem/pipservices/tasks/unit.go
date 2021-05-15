@@ -3,7 +3,6 @@ package tasks
 import (
 	"github.com/goatcms/goatcore/app"
 	"github.com/goatcms/goatcore/app/modules/pipelinem/pipservices"
-	"github.com/goatcms/goatcore/dependency"
 )
 
 // UnitDeps contains dependencies required by Unit
@@ -24,7 +23,7 @@ func NewUnit(deps UnitDeps) *Unit {
 }
 
 // UnitFactory create a Unit instance
-func UnitFactory(dp dependency.Provider) (ri interface{}, err error) {
+func UnitFactory(dp app.DependencyProvider) (ri interface{}, err error) {
 	unit := &Unit{}
 	if err = dp.InjectTo(&unit.deps); err != nil {
 		return nil, err

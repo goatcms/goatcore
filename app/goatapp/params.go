@@ -2,7 +2,6 @@ package goatapp
 
 import (
 	"github.com/goatcms/goatcore/app"
-	"github.com/goatcms/goatcore/dependency"
 	"github.com/goatcms/goatcore/filesystem"
 )
 
@@ -69,7 +68,7 @@ type IO struct {
 // Params define new app
 type Params struct {
 	Arguments      []string
-	DP             dependency.Provider
+	DP             app.DependencyProvider
 	Env            string
 	Filespaces     Filespaces
 	HealthCheckers app.AppHealthCheckers

@@ -12,15 +12,6 @@ type Error struct {
 	wraps []error
 }
 
-// newGoatError return goat error object with title and stacktrace
-func newGoatError(msg string, wraps []error) *Error {
-	return &Error{
-		msg:   msg,
-		stack: string(debug.Stack()),
-		wraps: wraps,
-	}
-}
-
 // NewError formats according to a format specifier and returns the string
 // as a value that satisfies error.
 func NewError(msg string) error {
@@ -32,11 +23,11 @@ func NewError(msg string) error {
 
 // Wrap function returns a new error that adds context to the original error by
 // recording a stack trace at the point Wrap is called, together with the supplied message.
-func Wrap(err error, msg string) error {
+func Wrap(msg string, errs ...error) error {
 	return &Error{
 		msg:   msg,
 		stack: string(debug.Stack()),
-		wraps: []error{err},
+		wraps: errs,
 	}
 }
 
