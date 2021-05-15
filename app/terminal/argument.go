@@ -22,9 +22,6 @@ func NewArgument(params ArgumentParams) app.TerminalArgument {
 	if params.Name == "" {
 		panic(ErrArgumentNameIsRequired)
 	}
-	if params.Type == 0 {
-		panic(ErrArgumentTypeIsIncorrect)
-	}
 	if params.Commands == nil {
 		params.Commands = emptyCommands
 	}

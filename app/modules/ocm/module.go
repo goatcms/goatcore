@@ -5,6 +5,7 @@ import (
 	"github.com/goatcms/goatcore/app/modules/ocm/ocservices"
 	"github.com/goatcms/goatcore/app/modules/ocm/ocservices/dcmd"
 	"github.com/goatcms/goatcore/app/modules/ocm/ocservices/ocmanager"
+	"github.com/goatcms/goatcore/app/terminal"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
 
@@ -19,6 +20,13 @@ func NewModule() app.Module {
 // RegisterDependencies is init callback to register module dependencies
 func (m *Module) RegisterDependencies(a app.App) error {
 	dp := a.DependencyProvider()
+	a.Terminal().SetArgument(
+		terminal.NewArgument(terminal.ArgumentParams{
+			Help: `Set container engine. Use "docker" or "podman"`,
+			Name: "oc.engine",
+			Type: app.TerminalTextArgument,
+		}),
+	)
 	return goaterr.ToError(goaterr.AppendError(nil,
 		dp.AddDefaultFactory(ocservices.OCManagerService, ocmanager.ManagerFactory),
 		a.SetHealthChecker("container", ContainerHealthChecker),
@@ -30,7 +38,7 @@ func (m *Module) InitDependencies(a app.App) (err error) {
 	var (
 		deps struct {
 			Manager       ocservices.Manager `dependency:"OCManager"`
-			DefaultEngine string             `argument:"?oc.engime"`
+			DefaultEngine string             `argument:"?oc.engine"`
 		}
 		dockerEngine ocservices.Engine
 		podmanEngine ocservices.Engine

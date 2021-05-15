@@ -49,13 +49,14 @@ func (arguments *Arguments) Argument(name string) (argument app.TerminalArgument
 }
 
 // SetArgument define new argument
-func (arguments *Arguments) SetArgument(argument app.TerminalArgument) {
+func (arguments *Arguments) SetArgument(args ...app.TerminalArgument) {
 	arguments.mu.Lock()
 	defer arguments.mu.Unlock()
-	name := argument.Name()
-	if _, ok := arguments.data[name]; ok {
-		panic(fmt.Sprintf("Argument %s is defined twice", name))
+	for _, argument := range args {
+		name := argument.Name()
+		if _, ok := arguments.data[name]; ok {
+			panic(fmt.Sprintf("Argument %s is defined twice", name))
+		}
+		arguments.data[name] = argument
 	}
-	arguments.data[name] = argument
-	return
 }

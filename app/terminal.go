@@ -2,14 +2,16 @@ package app
 
 const (
 	TerminalUndefinedArgument = 0
-	TerminalIntArgument       = 1
-	TerminalFloatArgument     = iota
-	TerminalTextArgument      = iota
-	TerminalBoolArgument      = iota
-	TerminalPIPArgument       = iota
-	TerminalOtherArgument     = iota
-	TerminalURLArgument       = iota
-	TerminalEmailrgument      = iota
+
+	TerminalBoolArgument  = 1
+	TerminalEmailArgument = iota
+	TerminalFloatArgument = iota
+	TerminalIntArgument   = iota
+	TerminalOtherArgument = iota
+	TerminalPathArgument  = iota
+	TerminalPIPArgument   = iota
+	TerminalTextArgument  = iota
+	TerminalURLArgument   = iota
 )
 
 func NilCommandCallback(App, IOContext) (err error) {
@@ -58,6 +60,6 @@ type Terminal interface {
 // TerminalManager is interface represent terminal definition
 type TerminalManager interface {
 	Terminal
-	SetArgument(arg TerminalArgument)
+	SetArgument(arg ...TerminalArgument)
 	SetCommand(command ...TerminalCommand)
 }

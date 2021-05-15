@@ -94,8 +94,8 @@ func TestJustifyABC8(t *testing.T) {
 
 func TestJustifyABCD9(t *testing.T) {
 	result := Justify([]string{"a", "b", "c", "d"}, 9)
-	if result != "a  b  c d" {
-		t.Errorf("Expected 'a  b  c d' and take: %v (%d length)", result, len(result))
+	if result != "a b  c  d" {
+		t.Errorf("Expected 'a b  c  d' and take: %v (%d length)", result, len(result))
 		return
 	}
 	if len(result) != 9 {
@@ -133,5 +133,18 @@ func TestJustifyAB4(t *testing.T) {
 	}
 	if len(result) != 4 {
 		t.Errorf("Expected 4 character length line and take: %v (%d length)", result, len(result))
+	}
+}
+
+func TestJustifyStorySentence(t *testing.T) {
+	lineWidth := 71
+	result := Justify([]string{"The", "argument", "set", "path", "to", "current", "working", "directory.", "The", "CWD", "word", "is"}, lineWidth)
+	expected := `The argument set  path to current  working directory. The  CWD word  is`
+	if result != expected {
+		t.Errorf("Expected '%s' and take: %v (%d length)", expected, result, len(result))
+		return
+	}
+	if len(result) != lineWidth {
+		t.Errorf("Expected %d character length line and take: %v (%d length)", lineWidth, result, len(result))
 	}
 }

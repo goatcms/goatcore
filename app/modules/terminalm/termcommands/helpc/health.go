@@ -1,9 +1,10 @@
-package termc
+package helpc
 
 import (
 	"sort"
 
 	"github.com/goatcms/goatcore/app"
+	"github.com/goatcms/goatcore/app/modules/terminalm/termcommands"
 	"github.com/goatcms/goatcore/app/terminal/termformatter"
 	"github.com/goatcms/goatcore/varutil/goaterr"
 )
@@ -11,10 +12,11 @@ import (
 // RunHealth run health command. It show application helthy status.
 func RunHealth(a app.App, ctx app.IOContext) (err error) {
 	var (
-		errs  []error
-		io    = ctx.IO()
-		msg   string
-		names []string
+		errs      []error
+		io        = ctx.IO()
+		msg       string
+		names     []string
+		lineWidth = termcommands.LineWidth
 	)
 	names = a.HealthCheckerNames()
 	sort.Strings(names)

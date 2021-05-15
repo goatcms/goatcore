@@ -2,6 +2,7 @@ package termformatter
 
 import (
 	"fmt"
+	"math"
 	"strings"
 )
 
@@ -63,23 +64,25 @@ func Justify(words []string, lineMax int) (result string) {
 		length += len(word)
 	}
 	spacesAreas := len(words) - 1
-	spacesCounter := lineMax - length
-	if spacesAreas > spacesCounter {
+	spacesCounter := lineMax - length - spacesAreas
+	if spacesCounter < 0 {
 		panic("Not enought spaces")
 	}
+	//spacesCounter -= 1 // prevent skip space at the end
+	//words[len(words)-1] = " " + words[len(words)-1]
 	spaceLength := spacesCounter / spacesAreas
 	extraSpace := spacesCounter % spacesAreas
 	if extraSpace != 0 {
-		extraSpacePer = spacesAreas / extraSpace
+		extraSpacePer = int(math.Ceil(float64(spacesAreas) / float64(extraSpace)))
 	}
 	result = words[0]
 	lestWord := words[len(words)-1]
 	for i, word := range words[1 : len(words)-1] {
 		var wordSpaces = 0
 		if extraSpacePer != 0 && (i+1)%extraSpacePer == 0 {
-			wordSpaces = spaceLength + 1
+			wordSpaces = spaceLength + 2
 		} else {
-			wordSpaces = spaceLength
+			wordSpaces = spaceLength + 1
 		}
 		result += emptyLine[:wordSpaces] + word
 	}

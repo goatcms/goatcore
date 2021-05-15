@@ -2,6 +2,7 @@ package termformatter
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/goatcms/goatcore/app"
 )
@@ -44,7 +45,7 @@ func NewBlockFormatter(io app.Output, width int, blocks ...BlockDef) BlockFormat
 		sum += block.width
 	}
 	if sum != width {
-		panic(fmt.Errorf("expected blocks width equals to %d", width))
+		panic(fmt.Errorf("expected blocks width equals to %d and take %d", width, sum))
 	}
 	return BlockFormatter{
 		io:     io,
@@ -90,6 +91,9 @@ func (formatter BlockFormatter) PrintBlocks(contents ...string) {
 				lineFormatter = def.lineFormatter
 			}
 			content := lineFormatter(line, def.width)
+			if i == len(contentBlocks)-1 {
+				content = strings.TrimRight(content, " ")
+			}
 			formatter.io.Printf(content)
 		}
 		formatter.io.Printf("\n")

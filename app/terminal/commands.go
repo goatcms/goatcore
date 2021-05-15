@@ -60,5 +60,4 @@ func (commands *Commands) SetCommand(cmds ...app.TerminalCommand) {
 		}
 		commands.data[name] = command
 	}
-	return
 }

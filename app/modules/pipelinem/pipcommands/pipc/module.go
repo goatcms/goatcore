@@ -31,9 +31,10 @@ func RunCommand() app.TerminalCommand {
 				Type: app.TerminalTextArgument,
 			}),
 			terminal.NewArgument(terminal.ArgumentParams{
-				Help: "contains commands/content to run",
-				Name: "body",
-				Type: app.TerminalPIPArgument,
+				Help:     "contains commands/content to run",
+				Name:     "body",
+				Required: true,
+				Type:     app.TerminalPIPArgument,
 			}),
 			terminal.NewArgument(terminal.ArgumentParams{
 				Help: "contains list of execution block names to wait for (names are separate with comma ',')",
@@ -67,9 +68,10 @@ func TryCommand() app.TerminalCommand {
 				Type:     app.TerminalTextArgument,
 			}),
 			terminal.NewArgument(terminal.ArgumentParams{
-				Help: "main pipeline to run",
-				Name: "body",
-				Type: app.TerminalPIPArgument,
+				Help:     "main pipeline to run",
+				Name:     "body",
+				Required: true,
+				Type:     app.TerminalPIPArgument,
 			}),
 			terminal.NewArgument(terminal.ArgumentParams{
 				Help: "run pipeline when body status is success (use self sandbox)",

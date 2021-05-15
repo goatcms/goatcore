@@ -13,6 +13,6 @@ var (
 	ErrCommandNameIsRequired      = errors.New("Command name is required")
 	ErrCommandCallbackIsRequired  = errors.New("Command callback is required")
 	ErrCommandDuplicated          = errors.New("Command is duplicated")
-	ErrArgumentDuplicated         = errors.New("Arguement is duplicated")
+	ErrArgumentDuplicated         = errors.New("arguement is duplicated")
 	ErrHealtDuplicated            = errors.New("HealthCheckerCallback is duplicated")
 )

@@ -26,6 +26,12 @@ func NewCommand(params CommandParams) (command app.TerminalCommand) {
 	if params.Callback == nil {
 		panic(ErrCommandCallbackIsRequired)
 	}
+	if params.MainArguments == nil {
+		params.MainArguments = []string{}
+	}
+	if params.Arguments == nil {
+		params.Arguments = NewArguments()
+	}
 	return &Command{
 		params:            params,
 		TerminalArguments: params.Arguments,

@@ -32,12 +32,12 @@ func TestBlockFormatterStory(t *testing.T) {
 	if len(resultLines[0]) != 15 {
 		t.Errorf("Expected first line 15 chars length")
 	}
-	expected = `     78        `
+	expected = `     78`
 	if resultLines[1] != expected {
-		t.Errorf("Expected second line as `     78        ` and take:\n`%s`", buf.String())
+		t.Errorf("Expected second line as `%s` and take:\n`%s`", expected, resultLines[1])
 	}
-	if len(resultLines[1]) != 15 {
-		t.Errorf("Expected second line 15 chars length")
+	if len(resultLines[1]) != 7 {
+		t.Errorf("Expected second line 7 chars length")
 	}
 	if resultLines[2] != "" {
 		t.Errorf("Last line must be empty")

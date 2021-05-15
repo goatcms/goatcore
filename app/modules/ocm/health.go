@@ -13,10 +13,10 @@ func ContainerHealthChecker(a app.App, ctxScope app.Scope) (msg string, err erro
 		return err.Error(), err
 	}
 	if hasDocker && !hasPodman {
-		return "Docker is available. (Warning: podman is unavailable for oc.engime=podman)", nil
+		return "Docker is available. (Warning: podman is unavailable for oc.engine=podman)", nil
 	}
 	if !hasDocker && hasPodman {
-		return "Podman is available. (Warning: docker is unavailable for oc.engime=docker)", nil
+		return "Podman is available. (Warning: docker is unavailable for oc.engine=docker)", nil
 	}
 	return "Docker and podman are available. You can set container system by oc.engine=docker|podman attribute). Default container system is podman (as more secure).", nil
 }
