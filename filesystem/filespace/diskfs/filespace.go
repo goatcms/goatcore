@@ -106,10 +106,14 @@ func (fs *Filespace) MkdirAll(path string, filemode os.FileMode) (err error) {
 
 // Writer return a file node writer
 func (fs *Filespace) Writer(path string) (w filesystem.Writer, err error) {
+	var file *os.File
 	if path, err = varutil.ReduceAbsPath(path); err != nil {
 		return nil, err
 	}
-	return os.OpenFile(fs.path+path, os.O_WRONLY|os.O_CREATE, filesystem.DefaultUnixFileMode)
+	if file, err = os.OpenFile(fs.path+path, os.O_WRONLY|os.O_CREATE, filesystem.DefaultUnixFileMode); err != nil {
+		return nil, err
+	}
+	return NewFileHandler(file), nil
 }
 
 // Reader return a file node reader
